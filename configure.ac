@@ -11,7 +11,7 @@ dnl -----------------------------------------------
 dnl Package name and version number (user defined)
 dnl -----------------------------------------------
 define([THE_PACKAGE_NAME],    [landsepi])
-define([THE_PACKAGE_VERSION], [0.0.2])
+define([THE_PACKAGE_VERSION], [0.0.3])
 define([THE_PACKAGE_MAINTAINER],  [jean-francois.rey@inra.fr])
 
 dnl --------------------------------
@@ -31,9 +31,11 @@ fi
 AC_MSG_NOTICE([${R_HOME}])
 CXX1X=`"${R_HOME}/bin/R" CMD config CXX1X`
 CXX1XSTD=`"${R_HOME}/bin/R" CMD config CXX1XSTD`
-CXX="${CXX1X} ${CXX1XSTD}"
+#CXX="${CXX1X} ${CXX1XSTD}"
+CXX=`"${R_HOME}/bin/R" CMD config CXX`
 CPP=`"${R_HOME}/bin/R" CMD config CPP`
-CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX1XFLAGS`
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
+CXX1XFLAGS=`"${R_HOME}/bin/R" CMD config CXX1XFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
 LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`
 
@@ -108,7 +110,7 @@ else
   CXXFLAGS="${CXXFLAGS} ${GDAL_CFLAGS}"
 fi
 
-LDFLAGS="${LDFLAGS} ${GDAL_LIBS}"
+LDFLAGS="${LDFLAGS} ${GDAL_LIBS} ${GDAL_DEP_LIBS}"
 
 CXXFLAGS="${CXXFLAGS}"
 
@@ -117,7 +119,9 @@ dnl Generates Makefile's, configuration files and scripts
 dnl -----------------------------------------------
 # R mode
 AC_SUBST(CXX)
+AC_SUBST(CXX11)
 AC_SUBST(CXXFLAGS)
+AC_SUBST(CXX1XFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
 

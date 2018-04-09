@@ -1,4 +1,4 @@
-e1c4a538be04773607a01409f6a7250c *DESCRIPTION
+a6fcd45b2b01dcf0cff869add3fcc00f *DESCRIPTION
 b234ee4d69f5fce4486a80fdaf4a4263 *LICENSE
 1c14dd11058c0854487d967753fdfce4 *NAMESPACE
 fadf4f3a59890e60ff3a6a4283909568 *R/AgriLand.R
@@ -7,14 +7,14 @@ af6c6284866737ecafd701a113d4d75c *R/HLIRdynamics.R
 bae36654d961435a6d0d7c999cf36a9f *R/demo_landsepi.R
 6015f4691827dcc93d12f7b2d92e3fcd *R/graphLand.R
 4c864a49dd5f754fefd6225086e849ad *R/invlogit.R
-d7e51d811633936a283ad0165db8e200 *R/landsepi.R
+891f1542c93a95958a1fdf9dd7e7cd12 *R/landsepi.R
 5d7ab00675d08a79d849ef7305a827e4 *R/logit.R
 383afc4f7f84d48b1e17735ad2db3abd *R/multiN.R
 3df0a17c027397d4cfb2cf12638cf763 *R/periodic_cov.R
 139d5f2e448016bcbf712bb67dae6565 *R/plotevolQR.R
 82229364a4d0090b12aed5a6245905dd *R/simul_landsepi.R
-86b26ea8299c0dc399841849849a67f6 *configure
-fbc425db891ef836477d195d7f4ac1f8 *configure.ac
+4dc23a0d30db199c8b88051d1fca0d3f *configure
+ac041cf983d5810a0a6ae828be1eb0c6 *configure.ac
 c713291a2f0108922594617ae7ebcbcf *data/dispH.rda
 d2afd0419a7c584bad383c69fabcca38 *data/dispP_a40_b7.rda
 dca10e3b1824b7bfd08d5035fabdc876 *data/landscapesTEST.rda
@@ -43,7 +43,7 @@ bc367cf8781864e79011b372c9bb6d75 *man/logit.Rd
 6b6cd9f975f4d8e6afce7b3ff5e13f96 *man/plotevolQR.Rd
 d882d1842c402816478ff6217848c50a *man/plotland.Rd
 5741b24cef5e30169cf9daae76c33765 *man/simul_landsepi.Rd
-05fc0f63105086c208c66c90e97f6e35 *src/Makevars.in
+19e6dec09c01edc75d2cc9644f68c225 *src/Makevars.in
 346dd8ae77c970d15d77fbd6637b5ada *src/Makevars.win
 d33a53e71d04c2869737f1a53b2a8571 *src/RcppExports.cpp
 55e0f0e4804be2c6b6116dd5269abf05 *src/functions.cpp
