@@ -2,8 +2,8 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 0.0.3
-Date: 2018-03-19
+Version: 0.0.4
+Date: 2018-04-10
 Authors@R: c(person("Loup", "Rimbaud", role = "aut", email = "loup.rimbaud@csiro.au"),
         person("Julien", "Papaix", role = "aut", email = "julien.papaix@inra.fr"),
         person("Jean-Francois", "Rey", role = "cre", email = "jean-francois.rey@inra.fr"))
@@ -34,6 +34,6 @@ Collate: 'invlogit.R' 'logit.R' 'RcppExports.R' 'graphLand.R'
         'simul_landsepi.R'
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1
-Packaged: 2018-04-09 11:45:26 UTC; jfrey
+Packaged: 2018-04-10 09:31:33 UTC; jeff
 Repository: CRAN
-Date/Publication: 2018-04-09 12:48:17 UTC
+Date/Publication: 2018-04-10 13:35:31 UTC

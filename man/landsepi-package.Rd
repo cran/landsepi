@@ -17,8 +17,8 @@ architecture to simulate plant response to disease.
 \tabular{ll}{
          Package: \tab lansepi\cr
          Type: \tab Package\cr
-         Version: \tab 0.0.2\cr
-         Date: \tab 2018-03-02\cr
+         Version: \tab 0.0.4\cr
+         Date: \tab 2018-04-09\cr
          License: \tab GPL (>=2)\cr
          }
 

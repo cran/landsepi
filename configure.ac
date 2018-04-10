@@ -11,7 +11,7 @@ dnl -----------------------------------------------
 dnl Package name and version number (user defined)
 dnl -----------------------------------------------
 define([THE_PACKAGE_NAME],    [landsepi])
-define([THE_PACKAGE_VERSION], [0.0.3])
+define([THE_PACKAGE_VERSION], [0.0.4])
 define([THE_PACKAGE_MAINTAINER],  [jean-francois.rey@inra.fr])
 
 dnl --------------------------------
@@ -110,7 +110,56 @@ else
   CXXFLAGS="${CXXFLAGS} ${GDAL_CFLAGS}"
 fi
 
-LDFLAGS="${LDFLAGS} ${GDAL_LIBS} ${GDAL_DEP_LIBS}"
+# test if need dep libs ( script from rgdal)
+[cat > gdal_test.cc <<_EOCONF
+#include <gdal.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+int main() {
+GDALAllRegister();
+}
+#ifdef __cplusplus
+}
+#endif
+_EOCONF]
+
+LIBS="${LDFLAGS} ${GDAL_LIBS}"
+AC_MSG_CHECKING(gdal: linking with --libs only)
+${CXX} ${CPPFLAGS} ${CXXFLAGS} -o gdal_test gdal_test.cc ${LIBS} 2> errors.txt
+if test `echo $?` -ne 0 ; then
+  gdalok=no
+  AC_MSG_RESULT(no)
+else
+  AC_MSG_RESULT(yes)
+fi
+
+if test "${gdalok}" = no; then
+  AC_MSG_CHECKING(gdal: linking with --libs and --dep-libs)
+  LIBS="${LIBS} ${GDAL_DEP_LIBS}"
+  gdalok=yes
+  ${CXX} ${CPPFLAGS} ${CXXFLAGS} -o gdal_test gdal_test.cc ${LIBS} 2>> errors.txt
+  if test `echo $?` -ne 0 ; then
+    gdalok=no
+  fi
+  if test "${gdalok}" = yes; then
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+fi
+
+if test "${gdalok}" = no; then
+  cat errors.txt
+  AC_MSG_NOTICE([Install failure: compilation and/or linkage problems.])
+  AC_MSG_ERROR([GDALAllRegister not found in libgdal.])
+fi
+
+rm -f gdal_test errors.txt gdal_test.cc
+
+## /end rgdal script
+
+LDFLAGS="${LIBS}"
 
 CXXFLAGS="${CXXFLAGS}"
 
