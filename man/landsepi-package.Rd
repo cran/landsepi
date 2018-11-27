@@ -17,8 +17,8 @@ architecture to simulate plant response to disease.
 \tabular{ll}{
          Package: \tab lansepi\cr
          Type: \tab Package\cr
-         Version: \tab 0.0.4\cr
-         Date: \tab 2018-04-09\cr
+         Version: \tab 0.0.5\cr
+         Date: \tab 2018-04-24\cr
          License: \tab GPL (>=2)\cr
          }
 
@@ -48,20 +48,62 @@ Epidemiological outcomes are evaluated using: \itemize{
 \item (e1) the Green Leaf Area (GLA) as a proxy for yield, and 
 \item (e2) the area under the disease progress curve (AUDPC) to measure disease severity.}
 
-The package includes five examples of landscape structures. The demonstration function is parameterise to roughly represent biotrophic foliar fungi of cereal crops, as
- typified by rusts of wheat (genus \emph{Puccinia}).
+The package includes five examples of landscape structures and a default parameterisation to represent plant pathogens as typified by rusts of cereal crops 
+(genus \emph{Puccinia}, e.g. stripe rust, stem rust and leaf rust of wheat and barley). The main function of the package is \code{simul_landsepi()}. 
+It can be parameterised to simulate various resistance deployment strategies using the provided landscapes and parameters for cereal rusts.
+
+\strong{Future versions:}
+
+Future versions of the package will include in particular:\itemize{
+\item A more flexible parameterisation of pathogen life-history traits, in order to simulate other plant pathogens.
+\item Sexual reproduction of the pathogen.
+\item The allocation of more than 3 different cultivars in the landscape.
+}
+\strong{Dependencies:}
+
+The package for compiling needs:\itemize{
+\item g++ 
+\item libgsl2 
+\item libgsl-dev 
+\item gdal-bin 
+\item libgdal-dev}
+and the following R packages:\itemize{  
+\item Rcpp 
+\item rgdal
+\item sp
+\item stats
+\item Matrix
+\item MASS
+\item rgeos
+\item maptools
+\item fields
+\item splancs
+\item sf}
 }
 \examples{
 \dontrun{
 library("landsepi")
-## Run a demonstration
+
+## Run a demonstration (a 30-year simulation of a mosaic deployment strategy of two 
+## resistant cultivars in balanced proportions and high level of spatial aggregation)
 demo_landsepi() 
-## Run a simulation
+
+## Run a simulation with data included in the package (default parameterisation: 
+## 5-year simulation of a mosaic deployment strategy of two resistant cultivars 
+## in balanced proportions and high level of spatial aggregation)
 simul_landsepi()
+
+## (see ?simul_landsepi to help parameterise the function and simulate other scenarios)
 }
 }
 \references{
-Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (in press). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology}.
+## When referencing the simulation model, please cite the following article:
+
+Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
+
+## When referencing the R package, please cite the following package:
+
+Rimbaud L., Papaïx J. and Rey J.-F. (2018). landsepi: Landscape Epidemiology and Evolution. \emph{R package}, url: https://cran.r-project.org/package=landsepi.
 }
 \author{
 Loup Rimbaud \email{loup.rimbaud@csiro.au}

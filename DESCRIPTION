@@ -2,8 +2,8 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 0.0.4
-Date: 2018-04-10
+Version: 0.0.5
+Date: 2018-11-27
 Authors@R: c(person("Loup", "Rimbaud", role = "aut", email = "loup.rimbaud@csiro.au"),
         person("Julien", "Papaix", role = "aut", email = "julien.papaix@inra.fr"),
         person("Jean-Francois", "Rey", role = "cre", email = "jean-francois.rey@inra.fr"))
@@ -17,7 +17,9 @@ Description: A spatio-temporal stochastic model to assess resistance deployment 
     pathogen, and a SEIR (Susceptible-Exposed-Infectious-Removed) architecture to simulate 
     plant response to disease.
     Loup Rimbaud, Julien Papaïx, Jean-François Rey, Luke G Barrett, 
-    Peter H Thrall (2018) <doi:10.1101/260836>.
+    Peter H Thrall (2018) <doi:10.1371/journal.pcbi.1006067>.
+URL: https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi
+BugReports: https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi/issues
 License: GPL (>= 2) | file LICENSE
 LazyData: true
 BuildVignettes: true
@@ -34,6 +36,6 @@ Collate: 'invlogit.R' 'logit.R' 'RcppExports.R' 'graphLand.R'
         'simul_landsepi.R'
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1
-Packaged: 2018-04-10 09:31:33 UTC; jeff
+Packaged: 2018-11-27 10:07:35 UTC; jfrey
 Repository: CRAN
-Date/Publication: 2018-04-10 13:35:31 UTC
+Date/Publication: 2018-11-27 10:40:02 UTC

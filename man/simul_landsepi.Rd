@@ -145,7 +145,8 @@ The GLA and AUDPC of every cultivar as well as the whole landscape are averaged 
 }
 \examples{
 \donttest{
-## Default parameterisation
+## Default parameterisation (5-year simulation of a mosaic deployment strategy of 
+## two resistant cultivars in balanced proportions and high level of spatial aggregation)
 simul_landsepi()
 
 ## Mosaic of two major genes
@@ -174,5 +175,5 @@ simul_landsepi(seed=1, idLan=1, propSR=0.8, isolSR=1, strat="PY", nHost=2
 }
 }
 \references{
-Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (in press). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology}.
+Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 }

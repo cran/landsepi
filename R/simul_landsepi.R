@@ -126,9 +126,10 @@
 #' Each file indicates for every time-step the number of individuals in each field, and when appropriate for each cultivar and pathotype)
 #' These binary files are used to generate a set of text files containing all outputs of the simulations (see details).
 #' A set of graphics and epidemic maps can also be generated.
-#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (in press). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology}.
+#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @examples \donttest{
-#' ## Default parameterisation
+#' ## Default parameterisation (5-year simulation of a mosaic deployment strategy of 
+#' ## two resistant cultivars in balanced proportions and high level of spatial aggregation)
 #' simul_landsepi()
 #' 
 #' ## Mosaic of two major genes

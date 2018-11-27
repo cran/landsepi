@@ -87,7 +87,7 @@
 #'  }
 #' @return A set of text files containing all outputs of the simulations (see details). 
 #' A set of graphics and epidemic maps can also be generated.
-#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (in press). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology}.
+#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @examples \donttest{
 #' demo_landsepi()
 #' }

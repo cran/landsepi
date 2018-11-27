@@ -23,7 +23,7 @@
 #' @name demo_landsepi
 #' @description Run a demonstration of the package.
 #' @param seed an integer used as seed value (for random number generator)
-#' @details Run a simulated example of mosaic deployment strategy of two resistant cultivars in balanced proportions and 
+#' @details Run a 30-year simulated example of mosaic deployment strategy of two resistant cultivars in balanced proportions and 
 #' high level of spatial aggregation. The generated model outputs are graphics and text files.
 #' @include RcppExports.R AgriLand.R graphLand.R  multiN.R  periodic_cov.R 
 #' @importFrom utils data

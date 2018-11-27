@@ -62,7 +62,7 @@
 #' @importFrom sf st_write
 #' @importFrom grDevices dev.off graphics.off png tiff
 #' @include multiN.R periodic_cov.R graphLand.R 
-#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (in press). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology}.
+#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @examples 
 #' ## Generate a landscape consisting in a mosaic of fields cultivated with a susceptible cultivar
 #' ## and two resistant cultivars in balanced proportions and high level of spatial aggregation
@@ -80,7 +80,7 @@ isol <- c(isolSR, isolRR)
 
 ## Parameters of cultivar allocation
 nAlloc <- (Nhote>1)    ## basic number of allocations to perform
-if (strat=="MO" & Nhote>2){nAlloc <- 2}
+if (strat=="MO" & Nhote>2){nAlloc <- Nhote - 1}
 
 ## Isolation/aggregation parameter
 aggreg <- c(-180, 200, -2000, 0)

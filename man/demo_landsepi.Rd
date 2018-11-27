@@ -15,6 +15,6 @@ Run a demonstration of the package.
 \details{
 Run demo landsepi
 
-Run a simulated example of mosaic deployment strategy of two resistant cultivars in balanced proportions and 
+Run a 30-year simulated example of mosaic deployment strategy of two resistant cultivars in balanced proportions and 
 high level of spatial aggregation. The generated model outputs are graphics and text files.
 }

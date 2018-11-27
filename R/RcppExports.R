@@ -52,7 +52,7 @@
 #' \item S: propagules.
 #' } 
 #' Each file indicates for every time-step the number of individuals in each field, and when appropriate for each cultivar and pathotype)
-#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (in press). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology}.
+#' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @export
 modelLandsEPI <- function(times, landscape, dispersal, inits, val_seed, hostP, epiP, evolP) {
     invisible(.Call('_landsepi_modelLandsEPI', PACKAGE = 'landsepi', times, landscape, dispersal, inits, val_seed, hostP, epiP, evolP))

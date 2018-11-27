@@ -74,5 +74,5 @@ propRR=1/2,isolRR=3,strat="MO",Nhote=3,nYears=30,Cmax0=2,Cmax1=2,seed=12345,grap
 }
 }
 \references{
-Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (in press). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology}.
+Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 }

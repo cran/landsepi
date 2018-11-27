@@ -19,7 +19,7 @@
 #
 
 
-#' @title Ploting pathotype frequencies
+#' @title Plotting pathotype frequencies
 #' @name plotevolQR
 #' @description Plot the dynamic of pathotype frequencies in a tiff file. 
 #' @param pathRES the path of the repository where the graphic will be generated

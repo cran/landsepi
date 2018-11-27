@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotevolQR.R
 \name{plotevolQR}
 \alias{plotevolQR}
-\title{Ploting pathotype frequencies}
+\title{Plotting pathotype frequencies}
 \usage{
 plotevolQR(pathRES, nIncr, trait, I_aggrProp, D, nTS, nYears, nTSpY)
 }
