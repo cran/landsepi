@@ -4,14 +4,23 @@
 \alias{simul_landsepi}
 \title{Simulation with provided data}
 \usage{
-simul_landsepi(seed = 12345, idLan = 1, propSR = 2/3, isolSR = 3,
-  propRR = 1/2, isolRR = 3, strat = "MO", nHost = 3, nYears = 5,
-  pI0 = 5e-04, resistance1 = c(1, 0, 0, 0, 0, 0, 0, 0), resistance2 = c(1,
-  1, 0, 0, 0, 0, 0, 0), costInfect = 0.75, costAggr = 0.5, taumut = 1e-07,
-  MGeff = 1, QReff = 0.5, beta = 1, nAggr = 6, graphOn = 1)
+simul_landsepi(seed = 12345, nYears = 5, nTSpY = 120, idLan = 1,
+  propSR = 2/3, isolSR = 1, propRR = 1/2, isolRR = 1,
+  strat = "MO", Nhost = 3, pI0 = 5e-04, resistance1 = c(1, 0, 0, 0,
+  0, 0, 0, 0), resistance2 = c(0, 1, 0, 0, 0, 0, 0, 0),
+  costInfect = 0.75, costAggr = 0.75, taumut = 1e-07, probSex = 0,
+  MGeff = 1, QReff = 0.5, beta = 1, Naggr = 6, timeToQR_exp = 0,
+  timeToQR_var = 0, C0 = rep(0.1, Nhost), Cmax = rep(2, Nhost),
+  yield = cbind(H = rep(1/(120 * 1000), Nhost), L = rep(0, Nhost), I =
+  rep(0, Nhost), R = rep(0, Nhost)), purchPrice = rep(0.001, Nhost),
+  sellPrice = rep(0.2, Nhost), graphic = TRUE, video = FALSE)
 }
 \arguments{
 \item{seed}{an integer used as seed value (for random number generator).}
+
+\item{nYears}{an integer giving the number of simulated years.}
+
+\item{nTSpY}{an integer giving the number of time steps per year.}
 
 \item{idLan}{an integer giving the index of landscape structure (1 to 5).}
 
@@ -26,9 +35,7 @@ temporal (for rotations: 1=every year, 2=every two years, 3=every three years) a
 
 \item{strat}{a character string specifying the deployment strategy ("MO"=mosaic, "MI"=mixture, "RO"=rotations, "PY"=pyramiding).}
 
-\item{nHost}{an integer giving the number of cultivars (1, 2 or 3).}
-
-\item{nYears}{an integer giving the number of simulated years.}
+\item{Nhost}{an integer giving the number of cultivars (1, 2 or 3).}
 
 \item{pI0}{initial probability of infection of the susceptible cultivar. Must be between 0 and 1.}
 
@@ -43,6 +50,8 @@ temporal (for rotations: 1=every year, 2=every two years, 3=every three years) a
 \item{taumut}{mutation probability: probability for a propagule to change its infectivity or its aggressiveness on a resistant cultivar 
 carrying a major gene or a quantitative resistance trait. Must be above 0. If equal to 0, then the pathogen cannot evolve.}
 
+\item{probSex}{probability for an infection that its reproduction is sexual rather than clonal.}
+
 \item{MGeff}{efficiency of major-gene resistance on the infection rate of non-adapted pathogens. Must be between 0 and 1.}
 
 \item{QReff}{efficiency of quantitative resistance on the target aggressiveness trait (infection rate, latent period duration, 
@@ -50,9 +59,25 @@ sporulation rate, or sporulation duration) of non-adapted pathogens. Must be bet
 
 \item{beta}{trade-off strength for pathogen adaptation to quantitative resistance (<1 for weak, =1 for linear, >1 for strong). Must be above 0.}
 
-\item{nAggr}{an integer specifying the number of increments to completely adapt to quantitative resistance. Must be greater or equal 2.}
+\item{Naggr}{an integer specifying the number of increments to completely adapt to quantitative resistance. Must be greater or equal 2.}
 
-\item{graphOn}{a logical indicating if graphics must be generated (1) or not (0).}
+\item{timeToQR_exp}{average time to expression of quantitative resistance (to simulate Adult Plant Resistance).}
+
+\item{timeToQR_var}{variance of the time to expression of quantitative resistance (to simulate Adult Plant Resistance).}
+
+\item{C0}{planting density of the different cultivars (in number of hosts per meter square).}
+
+\item{Cmax}{carrying capacity of the different cultivars (in number of hosts per meter square).}
+
+\item{yield}{a matrix of yield (weight units of product/individual/time-step) for each cultivar (rows) and each sanitary state (columns: H, L, I, R).}
+
+\item{purchPrice}{price of crop planting (in monetary units/planted individual)}
+
+\item{sellPrice}{selling price (in monetary unit/weight units of production)}
+
+\item{graphic}{a logical indicating if graphics must be generated (TRUE) or not (FALSE).}
+
+\item{video}{a logical indicating if a video must be generated (TRUE) or not (FALSE). Works only if graphic is TRUE as well.}
 }
 \value{
 A set of binary files is generated for every year of simulation and every compartment: \itemize{
@@ -65,10 +90,10 @@ A set of binary files is generated for every year of simulation and every compar
 } 
 Each file indicates for every time-step the number of individuals in each field, and when appropriate for each cultivar and pathotype)
 These binary files are used to generate a set of text files containing all outputs of the simulations (see details).
-A set of graphics and epidemic maps can also be generated.
+A set of graphics and a video showing epidemic maps can also be generated.
 }
 \description{
-Simulation of the deployment of plant resistance, using landscape structures provided with the package
+Simulation of plant resistance deployment, using landscape structures provided with the package
 and a parameterisation of the model to represent pathogens as typified by rusts of cereals (e.g. stripe rust, stem rust
 , and leaf rust of wheat and barley). All parameters are optional. See details for explanations.
 }
@@ -146,32 +171,32 @@ The GLA and AUDPC of every cultivar as well as the whole landscape are averaged 
 \examples{
 \donttest{
 ## Default parameterisation (5-year simulation of a mosaic deployment strategy of 
-## two resistant cultivars in balanced proportions and high level of spatial aggregation)
+## two resistant cultivars in balanced proportions and low level of spatial aggregation)
 simul_landsepi()
 
 ## Mosaic of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, isolRR=3, strat="MO", nHost=3
+simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, isolRR=3, strat="MO", Nhost=3
 , nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
 , costInfect=0.5, taumut=1e-7)
 
 ## Mixture of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, strat="MI", nHost=3
+simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, strat="MI", Nhost=3
 , nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
 , costInfect=0.5, taumut=1e-7)
 
 ## Rotations of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, isolRR=1, strat="RO", nHost=3
+simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, isolRR=1, strat="RO", Nhost=3
 , nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
 , costInfect=0.5, taumut=1e-7)
 
 ## Pyramiding of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, strat="PY", nHost=2
+simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, strat="PY", Nhost=2
 , nYears=50, resistance1=c(1,1,0,0,0,0,0,0), costInfect=0.5, taumut=1e-7)
 
 ## Combination of a major gene with a quantitative resistance against the latent period    
-simul_landsepi(seed=1, idLan=1, propSR=0.8, isolSR=1, strat="PY", nHost=2
+simul_landsepi(seed=1, idLan=1, propSR=0.8, isolSR=1, strat="PY", Nhost=2
 , nYears=50, resistance1=c(1,0,0,0,0,1,0,0)
-, costInfect=0.5, costAggr=0.5, taumut=1e-7, MGeff=1.0, QReff=0.5, beta=1.0, nAggr=6)
+, costInfect=0.5, costAggr=0.5, taumut=1e-7, MGeff=1.0, QReff=0.5, beta=1.0, Naggr=6)
 }
 }
 \references{

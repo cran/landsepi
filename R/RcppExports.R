@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @title Model Landscape Epidemiology & Evolution
-#' @name modelLandsEPI
+#' @name model_landsepi
 #' @description Stochastic, spatially-explicit, demo-genetic model simulating the spread and evolution of a pathogen in a heterogeneous landscape.
-#' @param times list of simulation parameters (number of years, number of time-steps per year)
+#' @param timeP list of simulation parameters (number of years, number of time-steps per year)
 #' @param landscape landscape generated through AgriLand
 #' @param dispersal list of dispersal parameters (vectorised dispersal matrix of the pathogen, vectorised dispersal matrix of the host)
-#' @param inits list initial conditions (host planting density, initial probability of infection by the pathogen)
+#' @param inits list initial conditions (initial probability of infection by the pathogen)
 #' @param val_seed seed (for random number generation)
-#' @param hostP list of host parameters (number of cultivars, growth rate of the susceptible cultivar, reproduction rate of the susceptible cultivar, 
-#' growth rate of resistant cultivars, reproduction rate of resistant cultivars, death rate, resistance formula, 
+#' @param hostP list of host parameters (number of cultivars, initial planting density, maximal carrying capacity, growth rate, reproduction rate, death rate, resistance formula, 
 #' parameters of the sigmoid invasion function: kappa, sigma and s)
-#' @param epiP list of pathogen parameters (probability to survive the off-season, infection rate
-#' , reproduction rate, average latent period duration, variance of the latent period, average infectious period duration
+#' @param pathoP list of pathogen parameters (probability to survive the off-season, probability to reproduce via sex rather than via cloning, 
+#' infection rate, reproduction rate, average latent period duration, variance of the latent period, average infectious period duration
 #' , variance of the infectious period duration, parameters of the sigmoid contamination function: kappa, sigma, s)
 #' @param evolP list of evolution parameters (cost of infectivity, cost of aggressiveness, mutation rate, efficiency of major 
 #' resistance genes, efficiency of quantitative resistance, trade-off strength, number of increments of quantitative 
-#' resistance erosion, adaptation formula)
+#' resistance erosion, average time to expression of quantitative resistance, Variance of the time to expression of quantitative resistance,
+#' adaptation formula)
 #' @details \itemize{
 #' \item The model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR 
 #' (‘susceptible-exposed-infectious-removed’) structure with a discrete time step. It simulates the spread and evolution 
@@ -26,7 +26,8 @@
 #' \item A wide array of deployment strategies can be simulated: mosaics, mixtures, rotations and pyramiding of multiple
 #'  major resistance genes which affect pathogen infectivity, and up to four quantitative resistance traits. 
 #'  These traits target different aggressiveness components of the pathogen, i.e. the infection rate, the duration of the latent 
-#'  period and the infectious period, and the propagule production rate. 
+#'  period and the infectious period, and the propagule production rate. Quantitative resistance may be expressed from the time of planting, 
+#'  or later in the cropping season (Adult Plant Resistance or Mature Plant Resistance). 
 #'  \item The genotype of cultivated plant cultivars is specified using 
 #'  the "resistance formulas", i.e. a vector of size 8. the four first elements indicate whether the cultivar carries major resistance 
 #'  genes #1, #2, #3 and #4, respectively. The following four elements indicate whether the cultivar carried a quantitative resistance 
@@ -36,7 +37,7 @@
 #'  \item Initially, the pathogen is not adapted to any source of 
 #'  resistance, and is only present on susceptible hosts. However, through mutation, it can evolve and may acquire infectivity 
 #'  genes (which leads to breakdown of major resistance genes) or increase aggressiveness (which leads to the erosion of the 
-#'  relevant quantitative resistance traits). 
+#'  relevant quantitative resistance traits). These genes may also be reassorted via sexual reproduction.
 #'  \item Evolution of a pathogen toward infectivity or increased aggressiveness on 
 #'  a resistant host is often penalised by a fitness cost on susceptible hosts. Consequently, in the present model, pathogens 
 #'  carrying infectivity genes may have reduced infection rate (cost of infectivity) on susceptible hosts relative 
@@ -54,7 +55,7 @@
 #' Each file indicates for every time-step the number of individuals in each field, and when appropriate for each cultivar and pathotype)
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @export
-modelLandsEPI <- function(times, landscape, dispersal, inits, val_seed, hostP, epiP, evolP) {
-    invisible(.Call('_landsepi_modelLandsEPI', PACKAGE = 'landsepi', times, landscape, dispersal, inits, val_seed, hostP, epiP, evolP))
+model_landsepi <- function(timeP, landscape, dispersal, inits, val_seed, hostP, pathoP, evolP) {
+    invisible(.Call('_landsepi_model_landsepi', PACKAGE = 'landsepi', timeP, landscape, dispersal, inits, val_seed, hostP, pathoP, evolP))
 }
 

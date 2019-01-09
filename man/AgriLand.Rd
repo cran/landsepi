@@ -5,7 +5,7 @@
 \title{Landscape generation}
 \usage{
 AgriLand(landscape, filename = "landscapeTEST1", propSR, isolSR, propRR,
-  isolRR, strat, Nhote, nYears, Cmax0, Cmax1, seed, graphOn)
+  isolRR, strat, Nhost, nYears, seed, graphic = FALSE)
 }
 \arguments{
 \item{landscape}{a spatialpolygon object containing field coordinates.}
@@ -23,20 +23,16 @@ cultivated with the second resistant cultivar (1=highly fragmented, 2=balanced, 
 
 \item{strat}{a character string specifying the deployment strategy ("MO"=mosaic, "MI"=mixture, "RO"=rotations, "PY"=pyramiding).}
 
-\item{Nhote}{an integer giving the number of cultivars (1, 2 or 3).}
+\item{Nhost}{an integer giving the number of cultivars (1, 2 or 3).}
 
 \item{nYears}{an integer giving the number of simulated years.}
 
-\item{Cmax0}{carrying capacity of the susceptible cultivar in number of hosts per meter square.}
-
-\item{Cmax1}{carrying capacity of the resistant cultivars in number of hosts per meter square.}
-
 \item{seed}{an integer giving the seed value (for random number generator).}
 
-\item{graphOn}{a logical indicating if a graph of the landscape must be generated (1) or not (0).}
+\item{graphic}{a logical indicating if a graph of the landscape must be generated (TRUE) or not (FALSE).}
 }
 \value{
-a shapefile containing the landscape structure (i.e. coordinates of field boundaries) and composition (i.e. cultivars).
+a shapefile containing the landscape structure (i.e. coordinates of field boundaries) and composition (i.e. cultivars) in time (i.e. each year) and space (i.e. each field).
 }
 \description{
 Generate a landscape composed of fields where a susceptible (SC) and one (RC) or two (RC1 and RC2) resistant cultivars 
@@ -70,7 +66,7 @@ seasons over which a given cultivar is grown before being rotated;
 \dontrun{ 
 landscapeTEST1
 AgriLand(landscapeTEST1,filename="landscapeTEST1",propSR=2/3,isolSR=3,
-propRR=1/2,isolRR=3,strat="MO",Nhote=3,nYears=30,Cmax0=2,Cmax1=2,seed=12345,graphOn=1)
+propRR=1/2,isolRR=3,strat="MO",Nhost=3,nYears=30,seed=12345,graphic=TRUE)
 }
 }
 \references{

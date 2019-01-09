@@ -15,10 +15,10 @@ architecture to simulate plant response to disease.
 }
 \details{
 \tabular{ll}{
-         Package: \tab lansepi\cr
+         Package: \tab landsepi\cr
          Type: \tab Package\cr
-         Version: \tab 0.0.5\cr
-         Date: \tab 2018-04-24\cr
+         Version: \tab 0.0.6\cr
+         Date: \tab 2019-01-09\cr
          License: \tab GPL (>=2)\cr
          }
 
@@ -26,7 +26,7 @@ The landsepi package implements a spatially explicit stochastic model able to as
 to deploy plant resistance to pathogens. These strategies include the combination of several resistance sources across time (crop rotations) or space.
 The spatial scale of deployment can vary from multiple resistance sources occurring in a single cultivar (pyramiding), 
 in different cultivars within the same field (cultivar mixtures) or in different fields (mosaics). The simulated sources of resistance can 
-consist of qualitative resistance (i.e. major genes) or quantitative resistance traits against several components of pathogen aggressiveness: 
+consist of qualitative resistance (i.e. major genes) or quantitative resistance traits (including Adult Plant Resistant genes) against several components of pathogen aggressiveness: 
 infection rate, latent period duration, propagule production rate, and infectious period duration. This model provides a useful tool to assess 
 the performance of a wide range of deployment options, and helps investigate the effect of landscape, epidemiological and evolutionary parameters 
 on the performance of a given strategy. 
@@ -34,7 +34,7 @@ on the performance of a given strategy.
 The simulation model is based on a SEIR (Susceptible-Exposed-Infectious-Removed) architecture to describe host response to disease. The lansdcape is 
 represented by a set of polygons where the pathogen can disperse. Initially, the pathogen is not adapted to any source of resistance, and is only 
 present on susceptible hosts. However, through mutation, it can evolve and may acquire infectivity genes (which leads to breakdown of major resistance genes) 
-or increase aggressiveness (which leads to the erosion of the relevant quantitative resistance traits). 
+or increase aggressiveness (which leads to the erosion of the relevant quantitative resistance traits). Furthermore, loci may be re-assorted via sexual reproduction. 
 However, evolution of a pathogen toward infectivity or increased aggressiveness on a resistant host may be penalised 
 by a fitness cost on susceptible hosts. Consequently, pathogens carrying infectivity genes may have reduced infection rate (cost of infectivity) on susceptible 
 hosts relative to pathogens that do not carry these genes. Similarly, a gain in pathogen aggressiveness on quantitatively resistant hosts is penalised by a 
@@ -52,12 +52,14 @@ The package includes five examples of landscape structures and a default paramet
 (genus \emph{Puccinia}, e.g. stripe rust, stem rust and leaf rust of wheat and barley). The main function of the package is \code{simul_landsepi()}. 
 It can be parameterised to simulate various resistance deployment strategies using the provided landscapes and parameters for cereal rusts.
 
+A set of graphics and a video showing epidemic maps can also be generated.
+
 \strong{Future versions:}
 
 Future versions of the package will include in particular:\itemize{
 \item A more flexible parameterisation of pathogen life-history traits, in order to simulate other plant pathogens.
-\item Sexual reproduction of the pathogen.
-\item The allocation of more than 3 different cultivars in the landscape.
+\item A more flexible parameterisation of deployment strategies, in order to simulate complex strategies combining several options (e.g. mosaic
+of pyramids) as well as the allocation of more than 3 different cultivars in the landscape.
 }
 \strong{Dependencies:}
 
@@ -79,6 +81,7 @@ and the following R packages:\itemize{
 \item fields
 \item splancs
 \item sf}
+In addition, to generate videos the package will need ffmpeg.
 }
 \examples{
 \dontrun{
@@ -105,8 +108,16 @@ Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assess
 
 Rimbaud L., Papaïx J. and Rey J.-F. (2018). landsepi: Landscape Epidemiology and Evolution. \emph{R package}, url: https://cran.r-project.org/package=landsepi.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi}
+  \item Report bugs at \url{https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi/issues}
+}
+
+}
 \author{
-Loup Rimbaud \email{loup.rimbaud@csiro.au}
+Loup Rimbaud \email{loup.rimbaud@inra.fr}
 
 Julien Papaix \email{julien.papaix@inra.fr}
 

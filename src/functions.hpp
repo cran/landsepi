@@ -1,7 +1,7 @@
 /* 
  * Part of the landsepi R package.
- * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
- *                    Julien Papaix <julien.papaix@csiro.au>
+ * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+ *                    Julien Papaix <julien.papaix@inra.fr>
  *                    Jean-Frnaçois Rey <jean-francois.rey@inra.fr>
  *
  * This program is free software; you can redistribute it and/or
@@ -29,6 +29,8 @@
 #include <gdal.h>
 //#include <gdal/org_api.h>
 #include <ogrsf_frmts.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 using namespace std;
 
@@ -43,6 +45,9 @@ using namespace std;
 /*                         functions.c                          */
 /****************************************************************/
 /* Useful functions to manipulate C objects */
+
+/* Convert an integer to its binary equivalent using a recursive procedure */
+int as_binary(int num);
 
 /* Perform the sum of a table of integer from pointer type in 3 dimensions on its 1st dimension */
 void sum1_i3(int z, int l, int c, int ***t,int **tsum1);
@@ -78,6 +83,15 @@ void sigmoid(double s, double k, double sig, double x, double *y);
 /*--------------------------*/
 /* Trade-off function on aggressiveness traits (cf Debarre et al. JEB 2010) */
 void tradeoff(int n, double *x, double *y, double beta);
+
+/*--------------------------*/
+/*     Sample functions     */
+/*--------------------------*/
+/* Single random draw using a vector of probabilities   */
+int sample_multinomial_once(const gsl_rng *gen, double *cumProb);
+/* Samples an integer array without replacement until entire array has been sampled once */
+void sample(const gsl_rng *gen, int *inArray, int inLength, int *outArray, int outLength);
+
 
 void addField(OGRLayer * poLayer, const char * fieldname, const double * values);
 

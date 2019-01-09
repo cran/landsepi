@@ -4,38 +4,37 @@
 \alias{HLIRdynamics}
 \title{Generation of model outputs}
 \usage{
-HLIRdynamics(pathRES, graphOn, times, landscape, hostP, epiP, evolP,
-  th_break = 50000, nMapPY = 0)
+HLIRdynamics(pathRES, timeP, landscape, hostP, evolP, ecoP, graphic,
+  video = FALSE, nMapPY = 5, th_break = 50000)
 }
 \arguments{
 \item{pathRES}{a character string indicating the path of the repository where outputs will be generated.}
 
-\item{graphOn}{a logical indicating if graphics of the outputs must be generated (1) or not (0).}
-
-\item{times}{a list of simulation parameters (number of years, number of time-steps per year).}
+\item{timeP}{a list of simulation parameters (number of years, number of time-steps per year).}
 
 \item{landscape}{a shapefile containing the agricultural landscape (can be generated through function AgriLand).}
 
-\item{hostP}{a list of host parameters (number of cultivars, growth rate of the susceptible cultivar, reproduction rate of the susceptible cultivar, 
-growth rate of resistant cultivars, reproduction rate of resistant cultivars, death rate, number of possible resistance sources (8)
-, resistance formula, parameters of the sigmoid invasion function: kappa, sigma and s).}
-
-\item{epiP}{a list of pathogen parameters (probability to survive the off-season, infection rate
-, reproduction rate, average latent period duration, variance of the latent period, average infectious period duration
-, variance of the infectious period duration, parameters of the sigmoid contamination function: kappa, sigma, s).}
+\item{hostP}{a list of host parameters (number of cultivars, initial planting density, maximal carrying capacity, growth rate, reproduction rate, 
+death rate, number of possible resistance sources (8), resistance formula, parameters of the sigmoid invasion function: kappa, sigma and s).}
 
 \item{evolP}{a list of evolution parameters (cost of infectivity, cost of aggressiveness, mutation rate, efficiency of major 
 resistance genes, efficiency of quantitative resistance, trade-off strength, number of increments of quantitative 
 resistance erosion, adaptation formula).}
 
+\item{ecoP}{a list of economic parameters (yield, purchase price, selling price).}
+
+\item{graphic}{a logical indicating if graphics of the outputs must be generated (TRUE) or not (FALSE).}
+
+\item{video}{a logical indicating if a video must be generated (TRUE) or not (FALSE). Works only if graphic is TRUE as well. Note that ffmpeg is required to generate videos.}
+
+\item{nMapPY}{an integer specifying the number of epidemic maps per year in the video (video must be TRUE).}
+
 \item{th_break}{an integer giving the threshold (number of infections) above which mutant pathogen are unlikely to go extinct, used to 
 characterise resistance breakdown.}
-
-\item{nMapPY}{an integer specifying the number of epidemic maps per year to generate.}
 }
 \value{
 A set of text files containing all outputs of the simulations (see details). 
-A set of graphics and epidemic maps can also be generated.
+A set of graphics and a video with epidemic maps can also be generated.
 }
 \description{
 Generate epidemiological and evolutionary outputs from model simulations.

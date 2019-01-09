@@ -1,7 +1,7 @@
 /* 
  * Part of the landsepi R package.
- * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
- *                    Julien Papaix <julien.papaix@csiro.au>
+ * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+ *                    Julien Papaix <julien.papaix@inra.fr>
  *                    Jean-Frnaçois Rey <jean-francois.rey@inra.fr>
  *
  * This program is free software; you can redistribute it and/or
@@ -143,20 +143,29 @@ void init_infectAggr(int Naggr, double MGeff, double QReff, double costInfect, d
   free(gain);
 }
  
+ 
+ /* Initialisation of S at 0 */
+void init_S(int Npoly, int Npatho, int **S) {
+ int poly, patho;
+ for (poly=0; poly<Npoly; poly++) {
+      for (patho=0; patho<Npatho; patho++)
+           S[poly][patho] = 0;
+ } /* for poly */
+}
 
 /* Initialisation of H, L, I and R at 0 */
-void init_HHjuvSLIR(int Npoly, int Nhote, int Npatho, int **H, int **Hjuv, int **S, int ***L, int ***I, int ***R) {
-  int poly,hote,patho;
+void init_HHjuvSLIR(int Npoly, int Nhost, int Npatho, int **H, int **Hjuv, int **S, int ***L, int ***I, int ***R) {
+  int poly,host,patho;
   for (poly=0; poly<Npoly; poly++) {
-   	for (hote=0; hote<Nhote; hote++) {
-  		H[poly][hote] = 0; 
-   	     Hjuv[poly][hote] = 0;
+   	for (host=0; host<Nhost; host++) {
+  		H[poly][host] = 0; 
+   	     Hjuv[poly][host] = 0;
 		for (patho=0; patho<Npatho; patho++) {
-  			L[poly][patho][hote] = 0;
-  			I[poly][patho][hote] = 0;
-  			R[poly][patho][hote] = 0;
+  			L[poly][patho][host] = 0;
+  			I[poly][patho][host] = 0;
+  			R[poly][patho][host] = 0;
   		} /* for patho */
-   	} /* for hote */
+   	} /* for host */
      for (patho=0; patho<Npatho; patho++)
           S[poly][patho] = 0;
   } /* for poly */
@@ -164,16 +173,16 @@ void init_HHjuvSLIR(int Npoly, int Nhote, int Npatho, int **H, int **Hjuv, int *
 
 
 /* Initialise L2I and I2R with 0 */
-void init_L2I2R(int Npoly, int Npatho, int Nhote, int nTSpY, int ****L2I, int ****I2R){
-     int poly, patho, hote, t;
+void init_L2I2R(int Npoly, int Npatho, int Nhost, int nTSpY, int ****L2I, int ****I2R){
+     int poly, patho, host, t;
      for (poly=0; poly<Npoly; poly++) {
           for (patho=0; patho<Npatho; patho++) {
-               for (hote=0; hote<Nhote; hote++) {
+               for (host=0; host<Nhost; host++) {
                     for (t=0; t<nTSpY; t++) {
-                         L2I[poly][patho][hote][t] = 0;
-                         I2R[poly][patho][hote][t] = 0;
+                         L2I[poly][patho][host][t] = 0;
+                         I2R[poly][patho][host][t] = 0;
                     } /* for t */
-               } /* for hote */
+               } /* for host */
           } /* for patho */
      } /* for poly */
 }
@@ -190,20 +199,20 @@ void init_SpathoMut(int Npatho, int **SpathoMut) {
 
 
 /* Plantation of H in the beginning of a season */
-void intro_H(int Npoly, int Nhote, int **H, int *area, int **habitat, double *C0, char *strat, int id_rotation) {
-     int poly,hote,patho;
+void intro_H(int Npoly, int Nhost, int **H, int *area, int **habitat, double *C0, char *strat, int id_rotation) {
+     int poly,host,patho;
      for (poly=0; poly<Npoly; poly++) {
-          for (hote=0; hote<Nhote; hote++) {
-               H[poly][hote] = area[poly] * C0[0] * (habitat[id_rotation][poly] == hote);
-               if (strcmp(strat,"MI") == 0)
-                    H[poly][hote] += area[poly] * C0[1] * (habitat[1][poly] == hote);
-          } /* for hote */
+          for (host=0; host<Nhost; host++) {
+               H[poly][host] = area[poly] * C0[host] * (habitat[id_rotation][poly] == host);
+               if (strcmp(strat,"MI") == 0 && host>0)
+                    H[poly][host] += area[poly] * C0[host] * (habitat[1][poly] == host);
+          } /* for host */
      } /* for poly */
 }
 
 
 /* Pathogen introduction : infectious sites from pathotype 0 in cultivar 0 */
-void intro_I(const gsl_rng *gen, int nTSpY, int Npoly, int Nhote, int Npatho, int **H, int ***I, int ****I2R, double pI0, double *Tspo, int **resistance, double **infect, double **aggr, int ID_E, int ID_S) {
+void intro_I(const gsl_rng *gen, int nTSpY, int Npoly, int Nhost, int Npatho, int **H, int ***I, int ****I2R, double pI0, double *Tspo, int **resistance, double **infect, double **aggr, int ID_E, int ID_S) {
   int poly, i;
   int id_MG, ig, ag_E, ag_S, mg, qr_E, qr_S;
   double eff_exp, Tspo_exp;
@@ -241,3 +250,20 @@ void intro_I(const gsl_rng *gen, int nTSpY, int Npoly, int Nhote, int Npatho, in
   } /* for poly */
 }
 
+
+/* activeQR: matrix indicating for each year and field, at which time step QR starts to be active */
+void init_activeQR(const gsl_rng *gen, int nYears, int Npoly, double *timeToQR, double *timeToQR_alpha, int **activeQR){
+     int year, poly;
+     if (timeToQR[0]>0 && timeToQR[1]>0){
+          find_paramGamma(timeToQR[0], timeToQR[1], timeToQR_alpha);
+          for (year=0; year<(nYears+1); year++){   /* nYears + 1 to allow last time step of the simulation */
+               for (poly=0; poly<Npoly; poly++)
+                    activeQR[year][poly] = (int) gsl_ran_gamma(gen, timeToQR_alpha[0], timeToQR_alpha[1]);
+          }
+      }else{
+          for (year=0; year<(nYears+1); year++){
+               for (poly=0; poly<Npoly; poly++)
+                    activeQR[year][poly] = 0;
+          }
+     }
+}

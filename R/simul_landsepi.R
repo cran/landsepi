@@ -1,6 +1,6 @@
 # Part of the landsepi R package.
-# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
-#                    Julien Papaix <julien.papaix@csiro.au>
+# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+#                    Julien Papaix <julien.papaix@inra.fr>
 #                    Jean-François Rey <jean-francois.rey@inra.fr>
 #
 # This program is free software; you can redistribute it and/or
@@ -20,10 +20,12 @@
 
 #' @title Simulation with provided data
 #' @name simul_landsepi
-#' @description Simulation of the deployment of plant resistance, using landscape structures provided with the package
+#' @description Simulation of plant resistance deployment, using landscape structures provided with the package
 #' and a parameterisation of the model to represent pathogens as typified by rusts of cereals (e.g. stripe rust, stem rust
 #' , and leaf rust of wheat and barley). All parameters are optional. See details for explanations.
 #' @param seed an integer used as seed value (for random number generator).
+#' @param nYears an integer giving the number of simulated years.
+#' @param nTSpY an integer giving the number of time steps per year.
 #' @param idLan an integer giving the index of landscape structure (1 to 5).
 #' @param propSR proportion of fields where resistance is deployed: (RC)/(SC+RC) or (RC1+RC2)/(SC+RC1+RC2). Must be between 0 and 1.
 #' @param isolSR an integer giving the spatial aggregation of fields where resistance is deployed (1=highly fragmented, 2=balanced, 3=highly aggregated).
@@ -31,8 +33,7 @@
 #' @param isolRR when applicable, an integer specifying the spatial (for mosaics: 1=highly fragmented, 2=balanced, 3=highly aggregated) or 
 #' temporal (for rotations: 1=every year, 2=every two years, 3=every three years) aggregation of fields cultivated with the second resistant cultivar.
 #' @param strat a character string specifying the deployment strategy ("MO"=mosaic, "MI"=mixture, "RO"=rotations, "PY"=pyramiding).
-#' @param nHost an integer giving the number of cultivars (1, 2 or 3).
-#' @param nYears an integer giving the number of simulated years.
+#' @param Nhost an integer giving the number of cultivars (1, 2 or 3).
 #' @param pI0 initial probability of infection of the susceptible cultivar. Must be between 0 and 1.
 #' @param resistance1 a logical vector of size 8 giving the resistance formula of the 2nd cultivar (see details)
 #' @param resistance2 when applicable, a logical vector of size 8 giving the resistance formula of the 3rd cultivar (see details)
@@ -40,12 +41,21 @@
 #' @param costAggr cost of aggressiveness paid by fully adapted pathogens (relative to plant cultivars carrying a quantitative resistance trait) on fully susceptible hosts. Must be between 0 and 1.
 #' @param taumut mutation probability: probability for a propagule to change its infectivity or its aggressiveness on a resistant cultivar 
 #' carrying a major gene or a quantitative resistance trait. Must be above 0. If equal to 0, then the pathogen cannot evolve.
+#' @param probSex probability for an infection that its reproduction is sexual rather than clonal.
 #' @param MGeff efficiency of major-gene resistance on the infection rate of non-adapted pathogens. Must be between 0 and 1.
 #' @param QReff efficiency of quantitative resistance on the target aggressiveness trait (infection rate, latent period duration, 
 #' sporulation rate, or sporulation duration) of non-adapted pathogens. Must be between 0 and 1.
 #' @param beta trade-off strength for pathogen adaptation to quantitative resistance (<1 for weak, =1 for linear, >1 for strong). Must be above 0.
-#' @param nAggr an integer specifying the number of increments to completely adapt to quantitative resistance. Must be greater or equal 2.
-#' @param graphOn a logical indicating if graphics must be generated (1) or not (0).
+#' @param Naggr an integer specifying the number of increments to completely adapt to quantitative resistance. Must be greater or equal 2.
+#' @param timeToQR_exp average time to expression of quantitative resistance (to simulate Adult Plant Resistance).
+#' @param timeToQR_var variance of the time to expression of quantitative resistance (to simulate Adult Plant Resistance).
+#' @param C0 planting density of the different cultivars (in number of hosts per meter square).
+#' @param Cmax carrying capacity of the different cultivars (in number of hosts per meter square).
+#' @param yield a matrix of yield (weight units of product/individual/time-step) for each cultivar (rows) and each sanitary state (columns: H, L, I, R).
+#' @param purchPrice price of crop planting (in monetary units/planted individual)
+#' @param sellPrice selling price (in monetary unit/weight units of production)
+#' @param graphic a logical indicating if graphics must be generated (TRUE) or not (FALSE).
+#' @param video a logical indicating if a video must be generated (TRUE) or not (FALSE). Works only if graphic is TRUE as well.
 #' @details   \describe{
 #' 
 #' \item{Landscape structure}{The landscape structure is the physical structure of the area, defined as the spatial arrangement of fields.}
@@ -125,50 +135,71 @@
 #' } 
 #' Each file indicates for every time-step the number of individuals in each field, and when appropriate for each cultivar and pathotype)
 #' These binary files are used to generate a set of text files containing all outputs of the simulations (see details).
-#' A set of graphics and epidemic maps can also be generated.
+#' A set of graphics and a video showing epidemic maps can also be generated.
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @examples \donttest{
 #' ## Default parameterisation (5-year simulation of a mosaic deployment strategy of 
-#' ## two resistant cultivars in balanced proportions and high level of spatial aggregation)
+#' ## two resistant cultivars in balanced proportions and low level of spatial aggregation)
 #' simul_landsepi()
 #' 
 #' ## Mosaic of two major genes
-#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, isolRR=3, strat="MO", nHost=3
+#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, isolRR=3, strat="MO", Nhost=3
 #' , nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
 #' , costInfect=0.5, taumut=1e-7)
 #' 
 #' ## Mixture of two major genes
-#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, strat="MI", nHost=3
+#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, strat="MI", Nhost=3
 #' , nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
 #' , costInfect=0.5, taumut=1e-7)
 #' 
 #' ## Rotations of two major genes
-#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, isolRR=1, strat="RO", nHost=3
+#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, isolRR=1, strat="RO", Nhost=3
 #' , nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
 #' , costInfect=0.5, taumut=1e-7)
 #' 
 #' ## Pyramiding of two major genes
-#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, strat="PY", nHost=2
+#' simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, strat="PY", Nhost=2
 #' , nYears=50, resistance1=c(1,1,0,0,0,0,0,0), costInfect=0.5, taumut=1e-7)
 #' 
 #' ## Combination of a major gene with a quantitative resistance against the latent period    
-#' simul_landsepi(seed=1, idLan=1, propSR=0.8, isolSR=1, strat="PY", nHost=2
+#' simul_landsepi(seed=1, idLan=1, propSR=0.8, isolSR=1, strat="PY", Nhost=2
 #' , nYears=50, resistance1=c(1,0,0,0,0,1,0,0)
-#' , costInfect=0.5, costAggr=0.5, taumut=1e-7, MGeff=1.0, QReff=0.5, beta=1.0, nAggr=6)
+#' , costInfect=0.5, costAggr=0.5, taumut=1e-7, MGeff=1.0, QReff=0.5, beta=1.0, Naggr=6)
 #' }
 #' @include RcppExports.R AgriLand.R graphLand.R  multiN.R  periodic_cov.R 
 #' @importFrom utils data
 #' @export
-simul_landsepi <- function(seed=12345, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, isolRR=3, strat="MO", nHost=3, nYears=5, pI0=5e-4
-                          , resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(1,1,0,0,0,0,0,0)
-                          , costInfect=0.75, costAggr=0.5, taumut=1e-7, MGeff=1.0, QReff=0.5, beta=1.0, nAggr=6
-                          , graphOn=1){
+simul_landsepi <- function(seed=12345, nYears=5, nTSpY=120
+                           , idLan=1, propSR=2/3, isolSR=1, propRR=1/2, isolRR=1, strat="MO", Nhost=3, pI0=5e-4
+                          , resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
+                          , costInfect=0.75, costAggr=0.75, taumut=1e-7, probSex=0, MGeff=1.0, QReff=0.5, beta=1.0, Naggr=6
+                          , timeToQR_exp=0, timeToQR_var=0
+                          , C0=rep(0.1, Nhost), Cmax=rep(2, Nhost)
+                          , yield=cbind(H=rep(1/(120*1000), Nhost), L=rep(0, Nhost), I=rep(0, Nhost), R=rep(0, Nhost))     
+                          , purchPrice=rep(1E-3, Nhost), sellPrice=rep(2E-1,Nhost) 
+                          , graphic=TRUE, video=FALSE){
 
+    ## For debugging
+    # seed=12345 ; nYears=5 ; nTSpY=120 ; idLan=1
+    # propSR=2/3 ; isolSR=1 ; propRR=1/2 ; isolRR=1 ; strat="MO" ; Nhost=3 ; pI0=5e-4
+    # resistance1=c(1,0,0,0,0,0,0,0); resistance2=c(0,1,0,0,0,0,0,0)
+    # costInfect=0.75 ; costAggr=0.75 ; taumut=1e-7 ; probSex=0 ; MGeff=1.0 ; QReff=0.5 ; beta=1.0 ; Naggr=6
+    # timeToQR_exp=0 ; timeToQR_var=0 ; C0=rep(0.1, Nhost) ; Cmax=rep(2, Nhost)
+    # yield=cbind(H=rep(1/(120*1000), Nhost), L=rep(0, Nhost), I=rep(0, Nhost), R=rep(0, Nhost))
+    # purchPrice=rep(1E-3, Nhost) ; sellPrice=rep(1/4,Nhost)
+    # graphic=TRUE ; video=FALSE
+    
+    ## Creation of repository for results
+    pathRES_init <- getwd()
+    timeSimul <- paste(strsplit(as.character(Sys.time()), " ")[[1]], collapse="_")
+    nameDir <- paste("simul_landsepi_", timeSimul, sep="")
+    dir.create(nameDir)
+    setwd(nameDir)
     pathRES <- getwd()
-
-    ## Time parameters
-    nTSpY <- 120
-    paramT <- list(nYears=nYears,nTSpY=nTSpY)
+    
+    ## Temporal parameters
+    strategies <- c("MO", "MI", "RO", "PY")
+    timeP <- list(nYears=nYears,nTSpY=nTSpY, strat_tmp=match(strat, strategies))
     
     ## Landscape and dispersal 
     dispH <- get("dispH")    # Hack for cran check 
@@ -203,19 +234,22 @@ simul_landsepi <- function(seed=12345, idLan=1, propSR=2/3, isolSR=3, propRR=1/2
 
 
     ## Host parameters
-    C_0 <- 0.1
-    Cmax0 <- 2
-    Cmax1 <- 2
-    croisH0 <- 0.10
-    reproH0 <- 0.0
-    croisH1 <- 0.10
-    reproH1 <- 0.0
-    deathH <- 0.0
+    growthH <- rep(0.10, Nhost)
+    reproH <- rep(0.0, Nhost)
+    deathH <- rep(0.0, Nhost)
+    
+    if (strat=="MI" & Nhost==3) {    ## Adjustment of C0 and Cmax for mixtures
+        C0[2]   = C0[2] * (1-propRR);
+        C0[3]   = C0[3] * propRR;
+        Cmax[2] = Cmax[2] * (1-propRR);
+        Cmax[3] = Cmax[3] * propRR;
+    }
+    
     resistance0 <- c(0,0,0,0,0,0,0,0)
     resistanceMatrix <- cbind(resistance0,resistance1,resistance2)
     resistance <- as.vector(resistanceMatrix)
-    if (nHost>1){
-        adaptation <- apply(resistanceMatrix[,1:nHost],1,sum)
+    if (Nhost>1){
+        adaptation <- apply(resistanceMatrix[,1:Nhost],1,sum)
     }else{
         adaptation <- resistance0
     }
@@ -223,38 +257,38 @@ simul_landsepi <- function(seed=12345, idLan=1, propSR=2/3, isolSR=3, propRR=1/2
     khost <- 0.002
     sighost <- 1.001
     shost <- 1.0
-    paramH <- list(Nhote=nHost,croisH0=croisH0,reproH0=reproH0,croisH1=croisH1,reproH1=reproH1,deathH=deathH,resistance=as.integer(resistance),khost=khost,sighost=sighost,shost=shost)
+    hostP <- list(Nhost=Nhost, C0=C0, Cmax=Cmax, growthH=growthH,reproH=reproH,deathH=deathH,resistance=as.integer(resistance),khost=khost,sighost=sighost,shost=shost)
 
     ## Pathogen parameters
-    PSURV <- 1e-4
-    EFF <- 0.4
-    REPROP <- 3.125
-    TLATEXP <- 10
-    TLATVAR <- 9
-    TSPOEXP <- 24
-    TSPOVAR <- 105
+    pSurv <- 1e-4
+    eff <- 0.4
+    repro <- 3.125
+    TlatEXP <- 10
+    TlatVAR <- 9
+    TspoEXP <- 24
+    TspoVAR <- 105
     kpatho <- 5.333
     sigpatho <- 3
     spatho <- 1
-    paramepi <- list(psurv=PSURV,eff=EFF,reproP=REPROP,TlatEXP=TLATEXP,TlatVAR=TLATVAR,TspoEXP=TSPOEXP,TspoVAR=TSPOVAR,kpatho=kpatho,sigpatho=sigpatho,spatho=spatho)
+    pathoP <- list(pSurv=pSurv, probSex=probSex, eff=eff, repro=repro, TlatEXP=TlatEXP, TlatVAR=TlatVAR, TspoEXP=TspoEXP, TspoVAR=TspoVAR
+                   , kpatho=kpatho, sigpatho=sigpatho, spatho=spatho)
     
     ## Evolution parameters
-    paramevol <- list(costinfect=costInfect,costaggr=costAggr,taumut=taumut,MGeff=MGeff,QReff=QReff,beta=beta,Naggr=nAggr,adaptation=as.integer(adaptation))
+    evolP <- list(costinfect=costInfect, costaggr=costAggr, taumut=taumut, MGeff=MGeff, QReff=QReff,beta=beta,Naggr=Naggr
+                  , timeToQR_exp=timeToQR_exp, timeToQR_var=timeToQR_var, adaptation=as.integer(adaptation))
     
-    ## Landscape
+    ## Economic parameters
+    ecoP <- list(yield=yield, purchPrice=purchPrice, sellPrice=sellPrice)  
+    
+    ## Generate the landscape
     # hack for cran check 
-    landscape <- AgriLand(landscape,filename="landscape",propSR,isolSR,propRR,isolRR,strat,nHost,nYears,Cmax0,Cmax1,seed,graphOn)
+    landscape <- AgriLand(landscape,filename="landscape",propSR,isolSR,propRR,isolRR,strat,Nhost,nYears,seed,graphic)
     
-    #run the model!
-    modelLandsEPI(paramT,
-                   landscape,
-                   dispersal=list(dispP=dispP,dispH=dispH),
-                   inits=list(C_0=C_0, PI0=pI0),
-                   val_seed=seed,
-                   hostP=paramH,
-                   epiP=paramepi,
-                   evolP=paramevol)
-
-    ## generate the output
-    HLIRdynamics(pathRES, graphOn, paramT, landscape, paramH, epiP=paramepi, evolP=paramevol,nMapPY=0)
+    ## Run the model
+    model_landsepi(timeP, landscape, dispersal=list(dispP=dispP,dispH=dispH), inits=list(pI0=pI0), val_seed=seed,hostP, pathoP, evolP)
+    
+    ## Generate the output
+    HLIRdynamics(pathRES, timeP, landscape, hostP, evolP, ecoP, graphic, video)
+    
+    setwd(pathRES_init)  ## to come back to initial repository
 }

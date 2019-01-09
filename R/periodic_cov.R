@@ -1,6 +1,6 @@
 # Part of the landsepi R package.
-# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
-#                    Julien Papaix <julien.papaix@csiro.au>
+# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+#                    Julien Papaix <julien.papaix@inra.fr>
 #                    Jean-François Rey <jean-francois.rey@inra.fr>
 #
 # This program is free software; you can redistribute it and/or

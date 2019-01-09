@@ -8,8 +8,8 @@ plotland(landscape, COL = rep(0, length(landscape)), DENS = rep(0,
   length(landscape)), ANGLE = rep(30, length(landscape)),
   COL.LEG = unique(COL), DENS.LEG = unique(DENS),
   ANGLE.LEG = unique(ANGLE), TITLE = "", SUBTITLE = "",
-  LEGEND1 = rep("", length(COL.LEG)), LEGEND2 = rep("", length(COL.LEG)),
-  TITLE.LEG2 = "", XMAX = 2000, YMAX = 2000)
+  LEGEND1 = rep("", length(COL.LEG)), LEGEND2 = rep("",
+  length(COL.LEG)), TITLE.LEG2 = "", XMAX = 2000, YMAX = 2000)
 }
 \arguments{
 \item{landscape}{a spatialpolygon object containing field coordinates}
@@ -41,7 +41,7 @@ plotland(landscape, COL = rep(0, length(landscape)), DENS = rep(0,
 \item{YMAX}{maximal coordinate on vertical axis}
 }
 \description{
-Plot a landscape with colors or hatched lines on fields
+Plot a landscape with colors or hatched lines to represent different types of fields
 }
 \examples{
 \dontrun{

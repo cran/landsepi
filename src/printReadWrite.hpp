@@ -1,7 +1,7 @@
 /* 
  * Part of the landsepi R package.
- * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
- *                    Julien Papaix <julien.papaix@csiro.au>
+ * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+ *                    Julien Papaix <julien.papaix@inra.fr>
  *                    Jean-Frnaçois Rey <jean-francois.rey@inra.fr>
  *
  * This program is free software; you can redistribute it and/or
@@ -22,6 +22,8 @@
 
 #ifndef __PRINT_READ_WRITE__
 #define __PRINT_READ_WRITE__
+
+#define NLOCI 8          /* number of resistance/adaptation loci */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,12 +59,9 @@ void print_i2sum2(FILE *f, int l, int c, int **t, char *title);
 /* Print the sum of the 1st dimension a table of float of dimension 3 */
 void print_d2sum2(FILE *f, int l, int c, double **t, char *title); 
 /* Print the parameters in the console (f=stdout) or in an output .txt file */
-void  print_param(FILE *f, int seed, char *nomfile_disppatho, char *nomfile_disphote, char *nomfile_habitat1, char *nomfile_habitat2, int nYears, int nTSpY, double pSurv, double eff, double *Tlat, double repro, double *Tspo, int Npoly, int NpolyTot, int Nhote, int Npatho, int Naggr, double *C0, double pI0, double *Cmax, double *delta, double *reproH, int *area, int **habitat, int *rotation, double **mort, char *strat, double propRR, int **resistance, int *adaptation, double MGeff, double QReff, double taumut, double costInfect, double costAggr, double beta);
-
-/*   Function to read tables from .txt   */
-//int lire(int MAX_LINE, int N_elements, char *nomfile, char *pdelim, double *y);
+void print_param(FILE *f, unsigned long int seed, int nYears, int nTSpY, int Npoly, int Nhost, char *strat, double *C0, double *Cmax, double *growthH, double *reproH, double pI0, double pSurv, double kpatho, double spatho, double sigpatho, double eff, double repro, double *Tlat, double *Tspo, int Npatho, int Naggr, int **resistance, int *adaptation, double MGeff, double QReff, double *timeToQR, double taumut, double probSex, double costInfect, double costAggr, double beta);
 /* Write model output in .txt files and print output on screen */
-void write_HHjuvSLIR(int Npoly, int Npatho, int Nhote, int t, int **H, int **Hjuv, int **S, int ***L, int ***I, int ***R, FILE *fH, FILE *fHjuv, FILE *fS, FILE *fL, FILE *fI, FILE *fR, int printOn);
+void write_HHjuvSLIR(int Npoly, int Npatho, int Nhost, int t, int **H, int **Hjuv, int **S, int ***L, int ***I, int ***R, FILE *fH, FILE *fHjuv, FILE *fS, FILE *fL, FILE *fI, FILE *fR/*, int printOn*/);
 
 #endif
 

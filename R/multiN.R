@@ -1,6 +1,6 @@
 # Part of the landsepi R package.
-# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
-#                    Julien Papaix <julien.papaix@csiro.au>
+# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+#                    Julien Papaix <julien.papaix@inra.fr>
 #                    Jean-François Rey <jean-francois.rey@inra.fr>
 #
 # This program is free software; you can redistribute it and/or
@@ -21,46 +21,46 @@
 
 #' @title Allocation of cultivars
 #' @name multiN
-#' @description Algorithm based on latent Gaussian fields to allocate two different crop cultivars across the simulated landscapes. 
+#' @description Algorithm based on latent Gaussian fields to allocate two different types of crops across the simulated landscapes. 
 #' @param d a matrix of the pairwise distances between the centroids of the fields of the landscape.
 #' @param area vector containing the areas of the fields.
-#' @param aggreg level of spatial aggregation (<0 for fragmented landscapes, >0 for aggregated landscapes, =0 for random allocation of cultivars).
-#' @param prop relative proportion of the second crop. 
-#' @details This algorithm allows the control of the proportions of each cultivar in terms of surface coverage, and their level of spatial aggregation. 
+#' @param range range of spatial autocorrelation between fields (<0 for fragmented landscapes, >0 for aggregated landscapes, =0 for random allocation).
+#' @param prop relative proportion of the second type of crop. 
+#' @details This algorithm allows the control of the proportions of each type of crop in terms of surface coverage, and their level of spatial aggregation. 
 #' A random vector of values is drawn from a multivariate normal distribution with expectation 0 and a variance-covariance matrix 
 #' which depends on the pairwise distances between the centroids of the fields. The variance-covariance matrix is computed from a periodic function for highly 
-#' fragmented or highly aggregated landscapes, an exponential function for moderately aggregated landscapes, and from a normal distribution for a random allocation of 
-#' cultivars. Next, the crop cultivars are allocated to different fields depending on whether the each value drawn from the multivariate normal distribution 
-#' is above or below a threshold. The proportion of each cultivar in the landscape is controlled by the value of this threshold (parameter prop). 
-#' @return A dataframe containing the index of each field (column 1) and the index (0 or 1) of the cultivar grown on these fields (column 2).
+#' fragmented or highly aggregated types of crops, an exponential function for moderately aggregated types of crops, and from a normal distribution for a random allocation of 
+#' the types of crops. Next, the two types of crops are allocated to different fields depending on whether the each value drawn from the multivariate normal distribution 
+#' is above or below a threshold. The proportion of each type of crop in the landscape is controlled by the value of this threshold (parameter prop). 
+#' @return A dataframe containing the index of each field (column 1) and the index (0 or 1) of the type of crop grown on these fields (column 2).
 #' @examples
 #' \dontrun{
 #' d <- matrix(rpois(100,100), nrow=10)
 #' area <- data.frame(num=1:10, area=10)
 #' ## Fragmented landscape
-#' multiN(d, area, aggreg=-2, prop=0.5)
+#' multiN(d, area, range=-2, prop=0.5)
 #' }
 #' @export
-multiN <- function(d, area, aggreg, prop) {
+multiN <- function(d, area, range, prop) {
      nPoly <- nrow(area)
 
      ## Multivariate normal distribution
-     if (aggreg != 0) { 
-          if (aggreg > 0)  ## aggregation
-               covMat <- Exponential(d, aggreg)  ## function from 'fields' package
-          if (aggreg < 0) {           ## repulsion
-               covMat_tmp <- periodic_cov(d, aggreg)
+     if (range != 0) { 
+          if (range > 0)  ## aggregation
+               covMat <- Exponential(d, range)  ## function from 'fields' package
+          if (range < 0) {           ## repulsion
+               covMat_tmp <- periodic_cov(d, range)
                covMatPD <- nearPD(covMat_tmp, keepDiag=TRUE, ensureSymmetry=TRUE, maxit=1000)    ## conversion in a positive-definite matrix
                if (covMatPD$converge==TRUE) {
                     print("OK: Periodic covariance could be converted in a positive-definite matrix")
                     covMat <- covMatPD$mat
                } else {
-                    print(paste("WARNING: covariance cannot be converted in a positive-definite matrix -- Aggreg =", aggreg))
+                    print(paste("WARNING: covariance cannot be converted in a positive-definite matrix -- range =", range))
                     print("Exponential kernel used instead")
-                    aggreg2 <- 1*(aggreg > -200) + 2000*(aggreg < -200)
-                    covMat <- Exponential(d, abs(aggreg2))
+                    range2 <- 1*(range > -200) + 2000*(range < -200)
+                    covMat <- Exponential(d, abs(range2))
                }
-          }  ## if aggreg < 0
+          }  ## if range < 0
 
           s <- mvrnorm(1,mu=rep(0,nPoly),Sigma=covMat)  ## function from 'MASS' package  
 
@@ -74,7 +74,7 @@ multiN <- function(d, area, aggreg, prop) {
      area.ord_S <- area[ord_S,]
      area.ord_S$cumsum <- cumsum(area.ord_S$area)
      
-     ## Threshold for allocation of the R cultivar
+     ## Threshold for allocation of the second type of crop
      prop.areaTot <- prop * area.ord_S$cumsum[nPoly]   
      area.ord_S$dif <- abs(area.ord_S$cumsum - prop.areaTot)
      th_index <- which.min(area.ord_S$dif)

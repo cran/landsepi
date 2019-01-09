@@ -1,7 +1,7 @@
 /* 
  * Part of the landsepi R package.
- * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
- *                    Julien Papaix <julien.papaix@csiro.au>
+ * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+ *                    Julien Papaix <julien.papaix@inra.fr>
  *                    Jean-Frnaçois Rey <jean-francois.rey@inra.fr>
  *
  * This program is free software; you can redistribute it and/or
@@ -25,6 +25,15 @@
 /*                         functions.c                          */
 /****************************************************************/
 /* Useful functions to manipulate C objects */
+
+/* Convert an integer to its binary equivalent using a recursive procedure */
+int as_binary(int num){
+     if (num == 0){
+          return 0;
+     } else {
+          return (num % 2) + 10 * as_binary(num / 2);
+     }
+}
 
 /* Perform the sum of a table of integer from pointer type in 3 dimensions on its 1st dimension */
 void sum1_i3(int z, int l, int c, int ***t,int **tsum1) {
@@ -163,6 +172,52 @@ void tradeoff(int n, double *x, double *y, double beta){
           y[i] = 1 - pow(1-pow(x[i],1/beta),beta);
 }
 
+/*--------------------------*/
+/*     Sample functions     */
+/*--------------------------*/
+
+/* Single random draw using a vector of probabilities   */
+/* cumProb must be ordered with last element equal to 1 */
+int sample_multinomial_once(const gsl_rng *gen, double *cumProb){
+     int j=0;
+     double randNum;           
+     randNum = gsl_rng_uniform(gen);
+     while(randNum > cumProb[j])	
+          j++;
+     return j;
+}
+
+/* Samples an integer array without replacement until entire array has been sampled once */
+/* then continues by sampling with replacement */
+/* The output sequence is also randomised (thus can be used to randomise a vector) */
+void sample(const gsl_rng *gen, int *inArray, int inLength, int *outArray, int outLength){
+     int i, j, k, l;
+     double inIndicesLength = (double) inLength;    /* Temporary length of indices array */
+     double outIndicesLength = (double) outLength;  /* Temporary length of indices array */
+     int inArrayCopy[inLength];                     /* To store copy of inArray */
+     int outIndices[outLength];                     /* Array of indices for empty slots in outArray */
+     for (i=0; i < inLength; i++) inArrayCopy[i] = inArray[i];
+     for (i=0; i < outLength; i++) outIndices[i] = i;
+     for (i=0; i < outLength; i++) {
+          //    l = (int) runif(0.0, outIndicesLength--);
+          l = (int) (outIndicesLength--) * gsl_rng_uniform(gen);		/* NOTE: (--) is done AFTER affectation */
+          j = outIndices[l];                                          /* Choose an Index for output */
+          outIndices[l] = outIndices[(int) outIndicesLength];         /* Replace index value with final index in array */  
+          if (i < inLength) { 
+               //      k = (int) runif(0.0, inIndicesLength--);             /* Choose an Index for input */
+               k = (int) (inIndicesLength--) * gsl_rng_uniform(gen);
+               outArray[j] = inArrayCopy[k];                            /* Copy input value to output */
+               inArrayCopy[k] = inArrayCopy[(int) inIndicesLength];     /* Replace index value with final index in array */
+          } else {
+               //      k = (int) runif(0.0, inLength);                     /* Choose an Index for input */
+               k = (int) (inLength) * gsl_rng_uniform(gen);
+               outArray[j] = inArray[k];                                /* Copy input value to output */
+          }
+          //     printf("l=%d  j=%d  k=%d\n", l,j,k);
+     }
+     /* printf("\n#############\n"); */
+     /* for (i=0; i < outLength; i++) printf("%d \n", outArray[i]); */
+}
 
 
 

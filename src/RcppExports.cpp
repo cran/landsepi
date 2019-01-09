@@ -5,26 +5,26 @@
 
 using namespace Rcpp;
 
-// modelLandsEPI
-void modelLandsEPI(Rcpp::List times, Rcpp::List landscape, Rcpp::List dispersal, Rcpp::List inits, int val_seed, Rcpp::List hostP, Rcpp::List epiP, Rcpp::List evolP);
-RcppExport SEXP _landsepi_modelLandsEPI(SEXP timesSEXP, SEXP landscapeSEXP, SEXP dispersalSEXP, SEXP initsSEXP, SEXP val_seedSEXP, SEXP hostPSEXP, SEXP epiPSEXP, SEXP evolPSEXP) {
+// model_landsepi
+void model_landsepi(Rcpp::List timeP, Rcpp::List landscape, Rcpp::List dispersal, Rcpp::List inits, int val_seed, Rcpp::List hostP, Rcpp::List pathoP, Rcpp::List evolP);
+RcppExport SEXP _landsepi_model_landsepi(SEXP timePSEXP, SEXP landscapeSEXP, SEXP dispersalSEXP, SEXP initsSEXP, SEXP val_seedSEXP, SEXP hostPSEXP, SEXP pathoPSEXP, SEXP evolPSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type times(timesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type timeP(timePSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type landscape(landscapeSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type dispersal(dispersalSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type inits(initsSEXP);
     Rcpp::traits::input_parameter< int >::type val_seed(val_seedSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type hostP(hostPSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type epiP(epiPSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type pathoP(pathoPSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type evolP(evolPSEXP);
-    modelLandsEPI(times, landscape, dispersal, inits, val_seed, hostP, epiP, evolP);
+    model_landsepi(timeP, landscape, dispersal, inits, val_seed, hostP, pathoP, evolP);
     return R_NilValue;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_landsepi_modelLandsEPI", (DL_FUNC) &_landsepi_modelLandsEPI, 8},
+    {"_landsepi_model_landsepi", (DL_FUNC) &_landsepi_model_landsepi, 8},
     {NULL, NULL, 0}
 };
 

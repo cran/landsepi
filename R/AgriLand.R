@@ -1,6 +1,6 @@
 # Part of the landsepi R package.
-# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
-#                    Julien Papaix <julien.papaix@csiro.au>
+# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+#                    Julien Papaix <julien.papaix@inra.fr>
 #                    Jean-François Rey <jean-francois.rey@inra.fr>
 #
 # This program is free software; you can redistribute it and/or
@@ -31,12 +31,10 @@
 #' @param isolRR when applicable, an integer giving the spatial (for mosaics) or temporal (for rotations) aggregation of fields 
 #' cultivated with the second resistant cultivar (1=highly fragmented, 2=balanced, 3=highly aggregated).
 #' @param strat a character string specifying the deployment strategy ("MO"=mosaic, "MI"=mixture, "RO"=rotations, "PY"=pyramiding).
-#' @param Nhote an integer giving the number of cultivars (1, 2 or 3).
+#' @param Nhost an integer giving the number of cultivars (1, 2 or 3).
 #' @param nYears an integer giving the number of simulated years.
-#' @param Cmax0 carrying capacity of the susceptible cultivar in number of hosts per meter square.
-#' @param Cmax1 carrying capacity of the resistant cultivars in number of hosts per meter square.
 #' @param seed an integer giving the seed value (for random number generator).
-#' @param graphOn a logical indicating if a graph of the landscape must be generated (1) or not (0).
+#' @param graphic a logical indicating if a graph of the landscape must be generated (TRUE) or not (FALSE).
 #' @details An algorithm based on latent Gaussian fields is used to allocate two different crop cultivars across the simulated landscapes 
 #' (e.g. a susceptible and a resistant cultivar, denoted as SC and RC, respectively). This algorithm allows the control of the proportions 
 #' of each cultivar in terms of surface coverage, and their level of spatial aggregation. A random vector of values is drawn from a 
@@ -57,7 +55,7 @@
 #' \item Pyramiding: all candidate fields are cultivated with RC12, a resistant cultivar carrying both resistance sources.
 #' }
 #' }
-#' @return a shapefile containing the landscape structure (i.e. coordinates of field boundaries) and composition (i.e. cultivars).
+#' @return a shapefile containing the landscape structure (i.e. coordinates of field boundaries) and composition (i.e. cultivars) in time (i.e. each year) and space (i.e. each field).
 #' @importFrom sf st_as_sf
 #' @importFrom sf st_write
 #' @importFrom grDevices dev.off graphics.off png tiff
@@ -69,100 +67,112 @@
 #' \dontrun{ 
 #' landscapeTEST1
 #' AgriLand(landscapeTEST1,filename="landscapeTEST1",propSR=2/3,isolSR=3,
-#' propRR=1/2,isolRR=3,strat="MO",Nhote=3,nYears=30,Cmax0=2,Cmax1=2,seed=12345,graphOn=1)
+#' propRR=1/2,isolRR=3,strat="MO",Nhost=3,nYears=30,seed=12345,graphic=TRUE)
 #' }
 #' @export
-AgriLand <- function(landscape,filename="landscapeTEST1",propSR,isolSR,propRR,isolRR,strat,Nhote,nYears,Cmax0,Cmax1,seed,graphOn){
-    set.seed(seed)
-nPoly.tmp <- length(landscape)
-prop <- c(propSR, propRR)
-isol <- c(isolSR, isolRR)
 
-## Parameters of cultivar allocation
-nAlloc <- (Nhote>1)    ## basic number of allocations to perform
-if (strat=="MO" & Nhote>2){nAlloc <- Nhote - 1}
-
-## Isolation/aggregation parameter
-aggreg <- c(-180, 200, -2000, 0)
-## selection of the appropriate aggregation parameter with isol
-## isol = 1 --> low
-## isol = 2 --> moderate
-## isol = 3 --> high
-## isol = 4 --> random
-
-## Centroid of the paddocks
-centroid <- NULL
-area <- NULL
-for (i in 1:nPoly.tmp){
-    for (j in 1:length(landscape@polygons[[i]])){
-        centroid <- rbind(centroid,apply(landscape@polygons[[i]]@Polygons[[j]]@coords,2,mean))
-        area <- c(area,landscape@polygons[[i]]@Polygons[[j]]@area)
-    }
-}
-nPoly <- nrow(centroid)
-d <- as.matrix(dist(centroid))   ## 2-by-2 distance between centroid of each paddock
-neigh <- (d <= 399)               ## matrix of neighborood
-
-## Multivariate distribution
-area.df <- data.frame(num=1:nPoly, area)
-habitat <- data.frame(num=1:nPoly, cultivar=rep(0,nPoly))
-i=0
-num_index=1
-
-while( sum(num_index)>0 & i<nAlloc ) {
-     ## update area, d, qnd i for allocation of the cultivar
-     area.tmp <- area.df[habitat$cultivar==i,]
-     d.tmp <- d[habitat$cultivar==i, habitat$cultivar==i]
-     i <- i+1
-     ## Compute the multivariate normal distribution
-     habitat.tmp <- multiN(d.tmp, area.tmp, aggreg[isol[i]], prop[i])
-     ## update habitat by allocating cultivar i
-     num_index <- habitat.tmp$cultivar==1
-     habitat[habitat.tmp$num[num_index],"cultivar"] <- i
-}
-
-habitat1 <- habitat$cultivar
-habitat2 <- habitat1
-
-if (strat=="RO" | strat=="TO"| strat=="MI"){habitat2[habitat2==1] <- 2}
-
-## Crop rotations & Turn-over: calculation of time series
-rotation <- data.frame(y=1:(nYears+1), habitat=rep(0,nYears+1))  ## need to have nYears+1 because of C algorithm for host plantation
-if (strat=="RO" | strat=="TO") {
-    ## isolRR gives the number of years for each habitat
-    rotation$habitat <- rep(c(1,0), each=isol[2], length=nYears+1)
-}
-
-#shape file for the landscape
-landscapeINIT <- SpatialPolygonsDataFrame(landscape, data.frame(habitat1=habitat1,habitat2=habitat2,area=area), match.ID=T)
-habitat <- st_as_sf(landscapeINIT)
-results <- st_as_sf(landscape)
-st_write(habitat, paste0(filename,".gpkg"), "habitat",layer_options="OVERWRITE=yes")
-st_write(results, paste0(filename,".gpkg"), "results", update = TRUE,layer_options="OVERWRITE=yes")
-  
-## Graphic representing the landscape
-if (graphOn) {
-    title.hab <- "Simulated landscape"
-    isol.name <- c("low", "medium", "high", "random")
-    alloc.name <- c("R/(S+R)","R2/(R1+R2)")
-    subtitle.hab <- paste("Cropping ratio",alloc.name,"=",round(prop,2), "   Aggregation",alloc.name,"=",isol.name[isol])
-    if (strat!="MO" | Nhote==2)
-        subtitle.hab <- subtitle.hab[1]
-    col.hab <- c("white", "gray80","gray45")  ## habitat 0 = S ; habitat 1 = R1 ; habitat 2 = R2
-    dens.hab <- c(0,0,0)
-    angle.hab <- c(0,0,0)
-    legend.hab <- c("Susceptible","Resistant")
-    if ((strat=="MO" | strat=="RO" | strat=="TO") & Nhote>2)
-        legend.hab <- c("Susceptible","Resistant 1","Resistant 2")
-    if (strat=="MI")
-        legend.hab <- c("Susceptible","Resistant 1 + Resistant 2")
-    if (strat=="PY")
-        legend.hab <- c("Susceptible","Resistant 1+2")
-    png(filename="landscape.png",width=1000,height=1000)
-    plotland(landscape, col.hab[habitat1+1], dens.hab[habitat1+1], angle.hab[habitat1+1], col.hab, dens.hab, angle.hab, title.hab, subtitle.hab, legend.hab)
-    dev.off()
-}
-return(list(shapefilename=paste0(filename,".gpkg"),layername_hab="habitat",layername_res="results",rotation=as.integer(rotation$habitat),Cmax0=Cmax0,Cmax1=Cmax1,propRR=propRR,strat=strat))
+AgriLand <- function(landscape,filename="landscapeTEST1",propSR,isolSR,propRR,isolRR,strat,Nhost,nYears,seed,graphic=FALSE){
+     set.seed(seed)
+     nPoly.tmp <- length(landscape)
+     prop <- c(propSR, propRR)
+     aggreg <- c(isolSR, isolRR)
+     
+     ## Parameters of cultivar allocation
+     nAlloc <- (Nhost>1)    ## basic number of allocations to perform
+     if (strat=="MO" & Nhost>2){nAlloc <- Nhost - 1}
+     
+     ## aggregation parameter related to the range of the covariance matrix
+     range <- c(-180, 200, -2000, 0)
+     ## selection of the appropriate range parameter with aggreg
+     ## aggreg = 1 --> low
+     ## aggreg = 2 --> moderate
+     ## aggreg = 3 --> high
+     ## aggreg = 4 --> random
+     
+     ## Centroid of the paddocks
+     centroid <- NULL
+     area <- NULL
+     for (i in 1:nPoly.tmp){
+          for (j in 1:length(landscape@polygons[[i]])){
+               centroid <- rbind(centroid,apply(landscape@polygons[[i]]@Polygons[[j]]@coords,2,mean))
+               area <- c(area,landscape@polygons[[i]]@Polygons[[j]]@area)
+          }
+     }
+     nPoly <- nrow(centroid)
+     d <- as.matrix(dist(centroid))   ## 2-by-2 distance between centroid of each paddock
+     neigh <- (d <= 399)               ## matrix of neighborood
+     
+     ## Multivariate distribution
+     area.df <- data.frame(num=1:nPoly, area)
+     habitat <- data.frame(num=1:nPoly, cultivar=rep(0,nPoly))
+     i=0
+     num_index=1
+     
+     while( sum(num_index)>0 & i<nAlloc ) {
+          ## update area, d, and i for allocation of the cultivar
+          area.tmp <- area.df[habitat$cultivar==i,]
+          d.tmp <- d[habitat$cultivar==i, habitat$cultivar==i]
+          i <- i+1
+          ## Compute the multivariate normal distribution
+          habitat.tmp <- multiN(d.tmp, area.tmp, range[aggreg[i]], prop[i])
+          ## update habitat by allocating cultivar i
+          num_index <- habitat.tmp$cultivar==1
+          habitat[habitat.tmp$num[num_index],"cultivar"] <- i
+     }
+     
+     ## Writing the habitat files for C function
+     habitat0 <- habitat$cultivar
+     habitat1 <- habitat0
+     if (strat=="MI" | strat=="RO") { habitat1[habitat1==1] <- 2 }
+     
+     ## Crop rotations: calculation of time series
+     rotation <- data.frame(y=1:(nYears+1), habitat=rep(0,nYears+1))  ## need to have nYears+1 because of C algorithm for host plantation
+     if (strat=="RO") {
+          ## aggreg[2] gives the number of years for each habitat
+          rotation$habitat <- rep(sample(c(1,0)), each=aggreg[2], length=nYears+1)
+     }
+     
+     ## shape file for the landscape
+     landscapeINIT <- SpatialPolygonsDataFrame(landscape, data.frame(habitat0=habitat0,habitat1=habitat1,area=area), match.ID=T)
+     habitat <- st_as_sf(landscapeINIT)
+     results <- st_as_sf(landscape)
+     st_write(habitat, paste0(filename,".gpkg"), "habitat",layer_options="OVERWRITE=yes", driver= "GPKG")
+     st_write(results, paste0(filename,".gpkg"), "results", update = TRUE,layer_options="OVERWRITE=yes",driver= "GPKG")
+     
+     ## Graphic representing the landscape
+     if (graphic) {
+          title.hab <- "Simulated landscape"
+          aggreg.name <- c("low", "medium", "high", "random")
+          # alloc.name <- c("R/(S+R)","R2/(R1+R2)")
+          # subtitle.hab <- paste("Cropping ratio",alloc.name,"=",round(prop,2), "   Aggregation",alloc.name,"=",aggreg.name[aggreg])
+          subtitle.hab <- paste("Cropping ratios = (", paste(round(prop[1:nAlloc],2),collapse="; "), ")"
+                                , "   Aggregations = (", paste(aggreg.name[aggreg[1:nAlloc]],collapse="; "), ")", sep="")
+          
+          # if (strat!="MO" | Nhost==2)
+          #      subtitle.hab <- subtitle.hab[1]
+          # col.hab <- c("white", "gray80","gray45")  ## habitat 0 = S ; habitat 1 = R1 ; habitat 2 = R2
+          # dens.hab <- c(0,0,0)
+          # angle.hab <- c(0,0,0)
+          colfunc <- colorRampPalette(c("white", "gray30"))
+          col.hab <- colfunc(nAlloc+1+as.numeric(strat=="RO"))
+          dens.hab <- rep(0,nAlloc+1+as.numeric(strat=="RO"))
+          angle.hab <- rep(0,nAlloc+1+as.numeric(strat=="RO"))
+          legend.hab <- c("Susceptible","Resistant")
+          if ((strat=="MO" | strat=="RO") & Nhost>2){
+               # legend.hab <- c("Susceptible","Resistant 1","Resistant 2")
+               legend.hab <- "Susceptible"
+               for (i in 1:(nAlloc+as.numeric(strat=="RO")))
+                    legend.hab <- c(legend.hab, paste("Resistant",i))
+          }
+          if (strat=="MI")
+               legend.hab <- c("Susceptible","Resistant 1 + Resistant 2")
+          if (strat=="PY")
+               legend.hab <- c("Susceptible","Resistant 1+2")
+          png(filename="landscape.png", width=1000, height=1000)
+          plotland(landscape, col.hab[habitat0+1], dens.hab[habitat0+1], angle.hab[habitat0+1], col.hab, dens.hab, angle.hab, title.hab, subtitle.hab, legend.hab)
+          dev.off()
+     }
+     return(list(shapefilename=paste0(filename,".gpkg"),layername_hab="habitat",layername_res="results",rotation=as.integer(rotation$habitat),propRR=propRR,strat=strat))
 }
 
 

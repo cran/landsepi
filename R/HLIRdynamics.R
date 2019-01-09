@@ -1,6 +1,6 @@
 # Part of the landsepi R package.
-# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
-#                    Julien Papaix <julien.papaix@csiro.au>
+# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+#                    Julien Papaix <julien.papaix@inra.fr>
 #                    Jean-François Rey <jean-francois.rey@inra.fr>
 #
 # This program is free software; you can redistribute it and/or
@@ -23,21 +23,19 @@
 #' @name HLIRdynamics
 #' @description Generate epidemiological and evolutionary outputs from model simulations.
 #' @param pathRES a character string indicating the path of the repository where outputs will be generated.
-#' @param graphOn a logical indicating if graphics of the outputs must be generated (1) or not (0).
-#' @param times a list of simulation parameters (number of years, number of time-steps per year).
+#' @param timeP a list of simulation parameters (number of years, number of time-steps per year).
 #' @param landscape a shapefile containing the agricultural landscape (can be generated through function AgriLand).
-#' @param hostP a list of host parameters (number of cultivars, growth rate of the susceptible cultivar, reproduction rate of the susceptible cultivar, 
-#' growth rate of resistant cultivars, reproduction rate of resistant cultivars, death rate, number of possible resistance sources (8)
-#' , resistance formula, parameters of the sigmoid invasion function: kappa, sigma and s).
-#' @param epiP a list of pathogen parameters (probability to survive the off-season, infection rate
-#' , reproduction rate, average latent period duration, variance of the latent period, average infectious period duration
-#' , variance of the infectious period duration, parameters of the sigmoid contamination function: kappa, sigma, s).
+#' @param hostP a list of host parameters (number of cultivars, initial planting density, maximal carrying capacity, growth rate, reproduction rate, 
+#' death rate, number of possible resistance sources (8), resistance formula, parameters of the sigmoid invasion function: kappa, sigma and s).
 #' @param evolP a list of evolution parameters (cost of infectivity, cost of aggressiveness, mutation rate, efficiency of major 
 #' resistance genes, efficiency of quantitative resistance, trade-off strength, number of increments of quantitative 
 #' resistance erosion, adaptation formula).
+#' @param ecoP a list of economic parameters (yield, purchase price, selling price).
+#' @param graphic a logical indicating if graphics of the outputs must be generated (TRUE) or not (FALSE).
+#' @param video a logical indicating if a video must be generated (TRUE) or not (FALSE). Works only if graphic is TRUE as well. Note that ffmpeg is required to generate videos.
 #' @param th_break an integer giving the threshold (number of infections) above which mutant pathogen are unlikely to go extinct, used to 
 #' characterise resistance breakdown.
-#' @param nMapPY an integer specifying the number of epidemic maps per year to generate.
+#' @param nMapPY an integer specifying the number of epidemic maps per year in the video (video must be TRUE).
 #' @details \describe{
 #' \item{\strong{Evolutionary outputs.}}{ \describe{
 #' \item{\emph{Durability of qualitative resistance:}}{
@@ -86,7 +84,7 @@
 #'  }
 #'  }
 #' @return A set of text files containing all outputs of the simulations (see details). 
-#' A set of graphics and epidemic maps can also be generated.
+#' A set of graphics and a video with epidemic maps can also be generated.
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @examples \donttest{
 #' demo_landsepi()
@@ -96,33 +94,37 @@
 #' @importFrom grDevices colorRampPalette dev.off graphics.off gray png tiff
 #' @importFrom utils write.table
 #' @export
-HLIRdynamics <- function(pathRES, graphOn, times, landscape, hostP, epiP, evolP,th_break=50000, nMapPY=0){
-    nYears <- times$nYears
-    nTSpY <- times$nTSpY
+HLIRdynamics <- function(pathRES, timeP, landscape, hostP, evolP, ecoP, graphic, video=FALSE, nMapPY=5, th_break=50000){
+
+    nYears <- timeP$nYears
+    nTSpY <- timeP$nTSpY
     
-    Nhote <- hostP$Nhote
+    Nhost <- hostP$Nhost
     resistance <- matrix(hostP$resistance,ncol=3)
     
-    paysage <- st_read(landscape$shapefilename,layer=landscape$layername_hab)
-    Cmax0 <- landscape$Cmax0
-    Cmax1 <- landscape$Cmax1
+    landscape_tmp <- st_read(landscape$shapefilename,layer=landscape$layername_hab)
     propRR <- landscape$propRR
     strat <- landscape$strat
     
     Naggr <- evolP$Naggr    
-    adaptation <- evolP$adaptation    
+    adaptation <- evolP$adaptation  
+    
+    C0 <- hostP$C0
+    Cmax <- hostP$Cmax
+    yield <- ecoP$yield
+    sellPrice <- ecoP$sellPrice
+    purchPrice <- ecoP$purchPrice
 
 #### LANDSCAPE ####
 
-    area <- paysage$area
-    hab1 <- paysage$habitat1
-    hab2 <- paysage$habitat2
+    area <- landscape_tmp$area
+    hab1 <- landscape_tmp$habitat0
+    hab2 <- landscape_tmp$habitat1
     habitat <- cbind(hab1, hab2)+1  ## +1 due to 0 as first index in C
     rotation <- landscape$rotation+1
-    nPoly <- length(area)
-    Cmax <- c(Cmax0,rep(Cmax1,Nhote-1))
+    Npoly <- length(area)
 
-    trans.landscape_tmp <- as(paysage,"Spatial")
+    trans.landscape_tmp <- as(landscape_tmp,"Spatial")
 #    trans.landscape <- list()
 #    ipoly <- 1
 #    for (i in 1:length(trans.landscape_tmp)){
@@ -135,14 +137,8 @@ HLIRdynamics <- function(pathRES, graphOn, times, landscape, hostP, epiP, evolP,
 #    }
 #    class(trans.landscape) <- "listpoly"
     
-
-if (strat=="MI") {    ## Adjustment of C0 and Cmax for mixtures
-          Cmax[2] = Cmax1 * (1-propRR);
-          Cmax[3] = Cmax1 * propRR;
-}
-
-K <- matrix(nrow=nPoly, ncol=Nhote)
-for (host in 1:Nhote)
+K <- matrix(nrow=Npoly, ncol=Nhost)
+for (host in 1:Nhost)
      K[,host] <- floor(area * Cmax[host])   ## Carrying capacity of each host in each paddock
  
 
@@ -158,7 +154,7 @@ adapt_vect <- adaptation
 Npatho <- 2^sum(adapt_vect[1:4]) * Naggr^sum(adapt_vect[5:8])
 res_vect <- t(resistance)
 Rhosts <- (1:nrow(res_vect))[apply(res_vect,1,sum)>0]
-Rhosts <- Rhosts[Rhosts<=Nhote]
+Rhosts <- Rhosts[Rhosts<=Nhost]
 
 H <- as.list(1:nTS)
 # Hjuv <- as.list(1:nTS)
@@ -168,28 +164,29 @@ I <- as.list(1:nTS)
 R <- as.list(1:nTS)
 index <- 0
 
+print("Reading binary files to compute model outputs")
 for (year in 1:nYears) {
      print(paste("year", year, "/", nYears))
      binfileH <- file(paste(pathRES,sprintf("/H-%02d", year), ".bin",sep=""), "rb")
-      H.tmp <- readBin(con=binfileH, what="int", n=nPoly*Nhote*nTS, size = 4, signed=T, endian="little")
+      H.tmp <- readBin(con=binfileH, what="int", n=Npoly*Nhost*nTSpY, size = 4, signed=T, endian="little")
      # binfileHjuv = file(paste(pathRES, sprintf("/Hjuv-%02d", year), ".bin",sep=""), "rb")
-     #  Hjuv.tmp <- readBin(con=binfileHjuv, what="int", n=nPoly*Nhote*nTS, size = 4, signed=T,endian="little")
+     #  Hjuv.tmp <- readBin(con=binfileHjuv, what="int", n=Npoly*Nhost*nTSpY, size = 4, signed=T,endian="little")
      binfileS = file(paste(pathRES, sprintf("/S-%02d", year), ".bin",sep=""), "rb")
-      S.tmp <- readBin(con=binfileS, what="int", n=nPoly*Npatho*nTS, size = 4, signed=T,endian="little")
+      S.tmp <- readBin(con=binfileS, what="int", n=Npoly*Npatho*nTSpY, size = 4, signed=T,endian="little")
      binfileI = file(paste(pathRES, sprintf("/I-%02d", year), ".bin",sep=""), "rb")
-      I.tmp <- readBin(con=binfileI, what="int", n=nPoly*Npatho*Nhote*nTS, size = 4, signed=T,endian="little")
+      I.tmp <- readBin(con=binfileI, what="int", n=Npoly*Npatho*Nhost*nTSpY, size = 4, signed=T,endian="little")
      binfileL = file(paste(pathRES, sprintf("/L-%02d", year), ".bin",sep=""), "rb")
-      L.tmp <- readBin(con=binfileL, what="int", n=nPoly*Npatho*Nhote*nTS, size = 4, signed=T,endian="little")
+      L.tmp <- readBin(con=binfileL, what="int", n=Npoly*Npatho*Nhost*nTSpY, size = 4, signed=T,endian="little")
      binfileR = file(paste(pathRES, sprintf("/R-%02d", year), ".bin",sep=""), "rb")
-      R.tmp <- readBin(con=binfileR, what="int", n=nPoly*Npatho*Nhote*nTS, size = 4, signed=T,endian="little")
+      R.tmp <- readBin(con=binfileR, what="int", n=Npoly*Npatho*Nhost*nTSpY, size = 4, signed=T,endian="little")
      
      for (t in 1:nTSpY) {
-          H[[t + index]] <- matrix(H.tmp[((Nhote*nPoly)*(t-1)+1):(t*(Nhote*nPoly))],ncol=Nhote,byrow=T)
-          # Hjuv[[t + index]] <- matrix(Hjuv.tmp[((Nhote*nPoly)*(t-1)+1):(t*(Nhote*nPoly))],ncol=Nhote,byrow=T)
-          S[[t + index]] <- matrix(S.tmp[((Npatho*nPoly)*(t-1)+1):(t*(Npatho*nPoly))],ncol=Npatho,byrow=T)
-          L[[t + index]] <- array(data=L.tmp[((Npatho*nPoly*Nhote)*(t-1)+1):(t*(Npatho*nPoly*Nhote))],dim=c(Nhote,Npatho,nPoly))
-          I[[t + index]] <- array(data=I.tmp[((Npatho*nPoly*Nhote)*(t-1)+1):(t*(Npatho*nPoly*Nhote))],dim=c(Nhote,Npatho,nPoly))
-          R[[t + index]] <- array(data=R.tmp[((Npatho*nPoly*Nhote)*(t-1)+1):(t*(Npatho*nPoly*Nhote))],dim=c(Nhote,Npatho,nPoly))
+          H[[t + index]] <- matrix(H.tmp[((Nhost*Npoly)*(t-1)+1):(t*(Nhost*Npoly))],ncol=Nhost,byrow=T)
+          # Hjuv[[t + index]] <- matrix(Hjuv.tmp[((Nhost*Npoly)*(t-1)+1):(t*(Nhost*Npoly))],ncol=Nhost,byrow=T)
+          S[[t + index]] <- matrix(S.tmp[((Npatho*Npoly)*(t-1)+1):(t*(Npatho*Npoly))],ncol=Npatho,byrow=T)
+          L[[t + index]] <- array(data=L.tmp[((Npatho*Npoly*Nhost)*(t-1)+1):(t*(Npatho*Npoly*Nhost))],dim=c(Nhost,Npatho,Npoly))
+          I[[t + index]] <- array(data=I.tmp[((Npatho*Npoly*Nhost)*(t-1)+1):(t*(Npatho*Npoly*Nhost))],dim=c(Nhost,Npatho,Npoly))
+          R[[t + index]] <- array(data=R.tmp[((Npatho*Npoly*Nhost)*(t-1)+1):(t*(Npatho*Npoly*Nhost))],dim=c(Nhost,Npatho,Npoly))
      }
      index <- index + nTSpY
      close(binfileH)
@@ -233,15 +230,19 @@ for (p in 1:Npatho){
 }
 
 
-## Calculation of the carrying capacity
-K_host <- matrix(nrow=Nhote, ncol=nTS)
+## Calculation of the carrying capacity and planting quantity
+K_host <- matrix(nrow=Nhost, ncol=nTS)
+C_host <- matrix(nrow=Nhost, ncol=nYears)
 for (y in 1:nYears){
      hab <- habitat[,rotation[y]]
      ts_year <- ((y-1)*nTSpY+1) : (y*nTSpY)
-     for (host in 1:Nhote) {
+     for (host in 1:Nhost) {
+         C_host[host, y] <- C0[host] * sum(area*(hab==host))
           K_host[host,ts_year] <- sum(K[,host]*(hab==host)) 
-          if (strat=="MI" & host>1)
+          if (strat=="MI" & host>1){
+              C_host[host, y] <- C_host[host, y] + C0[host] * sum(area*(habitat[,2]==host))
                K_host[host,ts_year] <- K_host[host,ts_year] + sum(K[,host]*(habitat[,2]==host))
+          } ## if strat=="MI"
      } ## for host
 }  ## for y
 
@@ -257,7 +258,7 @@ for (y in 1:nYears){
 #############################################
 
 #### Extinction of the pathogen if not present any more at the last time-step (L=I=0)
-#### No overcoming of the resistance if not present on the R compartment (I=0)
+#### No breakdown of resistance if no mutant is present at the last time-step
 EXT <- c(ext=NA, noMut=NA)
 EXT["ext"] <- as.numeric(sum(L_host[,nTS], I_host[,nTS]) == 0)
 if (Npatho>1)
@@ -269,23 +270,27 @@ EXT
 
 ## _I=only infectious sites
 ## _IR=infectious + removed sites
-audpc_IR <- matrix(NA, nrow=Nhote, ncol=nYears)  ## Average proportion of diseased host relative to carrying capacity (per cultivar, per year)
+audpc_IR <- matrix(NA, nrow=Nhost, ncol=nYears)  ## Average proportion of diseased host relative to carrying capacity (per cultivar, per year)
 audpc_year <- matrix(NA, ncol=nYears, nrow=1)   ## --- for whole landscape (per year)
-# audpc_I <- matrix(NA, nrow=Nhote, ncol=nYears)
-# peak_I <- matrix(NA, nrow=Nhote, ncol=nYears)   ## elevation of the peak
-# peak_IR <- matrix(NA, nrow=Nhote, ncol=nYears)
-# timeToPeak_I <- matrix(NA, nrow=Nhote, ncol=nYears)   ## time to peak
-# timeToPeak_IR <- matrix(NA, nrow=Nhote, ncol=nYears)
+# audpc_I <- matrix(NA, nrow=Nhost, ncol=nYears)
+# peak_I <- matrix(NA, nrow=Nhost, ncol=nYears)   ## elevation of the peak
+# peak_IR <- matrix(NA, nrow=Nhost, ncol=nYears)
+# timeToPeak_I <- matrix(NA, nrow=Nhost, ncol=nYears)   ## time to peak
+# timeToPeak_IR <- matrix(NA, nrow=Nhost, ncol=nYears)
 
-GLAabs <- matrix(NA, ncol=nYears, nrow=Nhote)  ## Average absolute number of healthy host per timestep and square meter (per cultivar, per year)
-GLArel <- matrix(NA, ncol=nYears, nrow=Nhote)  ## Average proportion of healthy hosts relative to the number of hosts (H+L+I+R) (per cultivar, per year)
+GLAabs <- matrix(NA, ncol=nYears, nrow=Nhost)  ## Average absolute number of healthy host per timestep and square meter (per cultivar, per year)
+GLArel <- matrix(NA, ncol=nYears, nrow=Nhost)  ## Average proportion of healthy hosts relative to the number of hosts (H+L+I+R) (per cultivar, per year)
 
-for (host in 1:Nhote){
+product <- matrix(NA, ncol=nYears, nrow=Nhost)    ## Crop production (weight unit of fruits/grains/etc per host and per year)
+
+for (host in 1:Nhost){
      for (y in 1:nYears){
           ts_year <- ((y-1)*nTSpY+1):(y*nTSpY)
           GLAabs[host,y] <- sum(as.numeric(H_host[host,ts_year])) / (nTSpY * sum(area))
           audpc_year[,y] <- sum(as.numeric(I_host[,ts_year]),as.numeric(R_host[,ts_year])) / sum(as.numeric(K_host[,ts_year]))
 
+          product[host,y] <- sum(yield[host,"H"] * as.numeric(H_host[host,ts_year]), yield[host,"L"] * as.numeric(L_host[host,ts_year]), yield[host,"I"] * as.numeric(I_host[host,ts_year]), yield[host,"R"] * as.numeric(R_host[host,ts_year]))
+          
           if (sum(as.numeric(K_host[host,ts_year])) > 0){   ## to avoid pb with rotations
                # propI <- I_host[host,ts_year] / K_host[host,ts_year]
                # propIR <- (I_host[host,ts_year]+R_host[host,ts_year]) / K_host[host,ts_year]
@@ -304,8 +309,9 @@ for (host in 1:Nhote){
 
 audpc <- audpc_IR
 audpc_host <- c(S=NA, R1=NA, R2=NA)
-audpc_host[1:Nhote] <- apply(audpc, 1, mean, na.rm=TRUE)  ## Average AUDPC for whole simulation (per cultivar)
+audpc_host[1:Nhost] <- apply(audpc, 1, mean, na.rm=TRUE)  ## Average AUDPC for whole simulation (per cultivar)
 audpc_host
+product
 
 ## Write AUDPC & GLA
 # write.table(GLAabs,file=paste(pathRES,"/GLAabs_detail.txt",sep=""),sep=",", append=TRUE, row.names=FALSE, col.names=FALSE)
@@ -406,7 +412,7 @@ GLA <- rep(NA,4)
 names(GLA) <- c("glaST","glaTP","glaLT","glaTOT")
 AUDPC <- rep(NA,4)
 names(AUDPC) <- c("audpcST","audpcTP","audpcLT","audpcTOT")
-indexHost <- list(1,1,1:Nhote,1:Nhote)
+indexHost <- list(1,1,1:Nhost,1:Nhost)
 ## Criterion to define the bounds
 # durab <- D_esta[nLevErosion,1:8]
 bounds <- range(D_esta[,1:8], na.rm=TRUE)   ## time to start breakdown/erosion -- time to complete breakdown/erosion
@@ -430,6 +436,14 @@ AUDPC
 GLA
 
 
+
+####       D) Economic performance       ####
+benefit <- sellPrice  %*% product     ## yearly benefit from product sales
+cost    <- purchPrice %*% C_host   ## yearly cost from crop planting
+balance <- benefit - cost   ## yearly economic balance
+
+
+
 ####  Writing the output  ####
 write.table(matrix(EXT,nrow=1),file=paste(pathRES,"/extinction.txt",sep=""),sep=",", append=TRUE, row.names=FALSE, col.names=FALSE)
 write.table(matrix(D_1mut,nrow=1),file=paste(pathRES,"/dur_1mut.txt",sep=""),sep=",", append=TRUE, row.names=FALSE, col.names=FALSE)
@@ -437,30 +451,46 @@ write.table(matrix(D_1inf,nrow=1),file=paste(pathRES,"/dur_1inf.txt",sep=""),sep
 write.table(matrix(D_esta,nrow=1),file=paste(pathRES,"/dur_esta.txt",sep=""),sep=",", append=TRUE, row.names=FALSE, col.names=FALSE)
 write.table(matrix(GLA,nrow=1),file=paste(pathRES,"/GLA.txt",sep=""),sep=",", append=TRUE, row.names=FALSE, col.names=FALSE)
 write.table(matrix(AUDPC,nrow=1),file=paste(pathRES,"/AUDPC.txt",sep=""),sep=",", append=TRUE, row.names=FALSE, col.names=FALSE)
+write.table(matrix(balance,nrow=1),file=paste(pathRES,"/grossMargin.txt",sep=""),sep=",", append=TRUE, row.names=FALSE, col.names=FALSE)
 
 
 #############################################
 #####               GRAPHICS             ####
 #############################################
-if (graphOn==1) {
+if (graphic) {
     graphics.off()
-    nCol <- 20
+    nCol <- 21
     grad_red <- colorRampPalette(c("white","#FF5555"))
     RED <- grad_red(nCol)
     grad_blue <- colorRampPalette(c("white","#4F94CD"))
     BLUE <- grad_blue(nCol)
     grad_green <- colorRampPalette(c("white","darkolivegreen4"))
     GREEN <- grad_green(nCol)
+    grad_grey <- colorRampPalette(c("white", "gray30"))
+    GRAY <- grad_grey(Nhost)
+    GRAY[1] <- "black"
+    
+    grad_whiteYellowRed <- colorRampPalette(c("white","#FFFF99","#990000"))
+    grad_greenYellowRed <- colorRampPalette(c("#CCFF99","#FFFF99","#990000"))
+    COL1 <- grad_whiteYellowRed(nCol)
+    COL2 <- grad_greenYellowRed(nCol)
+    
     
     legend.hab <- c("Susceptible","Resistant")
-    if ((strat=="MO" | strat=="RO" | strat=="TO") & Nhote>2)
-        legend.hab <- c("Susceptible","Resistant 1","Resistant 2")
+    if ((strat=="MO" | strat=="RO") & Nhost>2){
+        # legend.hab <- c("Susceptible","Resistant 1","Resistant 2")
+        legend.hab <- "Susceptible"
+        for (i in 1:length(Rhosts))
+            legend.hab <- c(legend.hab, paste("Resistant",i))
+    }
     if (strat=="MI")
-        legend.hab <- c("Susceptible","Resistant 1 + Resistant 2")
+        # legend.hab <- c("Susceptible","Resistant 1 + Resistant 2")
+        legend.hab <- c("Susceptible","Resistant 1","Resistant 2")
     if (strat=="PY")
         legend.hab <- c("Susceptible","Resistant 1+2")
-    if (Nhote==1)
+    if (Nhost==1)
         legend.hab <- c("Susceptible")
+    
     
      ####
      #### A) Host - Pathogen dynamic
@@ -478,16 +508,13 @@ if (graphOn==1) {
      COL.periods <- c(GREEN[nCol], "gray50", RED[nCol])
      COL.periods2 <- c(GREEN[nCol%/%3], "gray80", RED[nCol%/%3])
      
-     if (strat=="MI")   ## re-ajust legend for mixtures
-          legend.hab <- c("Susceptible","Resistant 1","Resistant 2")
-
      if (nYears==1) {
          ## Dynamic of the host (H, L, I, R)
          tiff(filename=paste(pathRES,"/DYNhost.tiff",sep=""),width=180,height=110,units='mm',compression='lzw',res=300)
          par(xpd=NA, mar=c(4,4,0,9))
          plot(0,0, type="n", xaxt="n", yaxt="n", bty="n", xlim=c(1,nTS), ylim=c(0,1), ylab="", xlab="")
           hab <- habitat[,rotation[1]]
-          for (host in 1:Nhote){
+          for (host in 1:Nhost){
                lines(1:nTS, H_host[host,]/K_host[host,], col=GREEN[nCol], lty=host)
                lines(1:nTS, L_host[host,]/K_host[host,], col=BLUE[nCol], lty=host)
                lines(1:nTS, I_host[host,]/K_host[host,], col=RED[nCol], lty=host)
@@ -496,7 +523,7 @@ if (graphOn==1) {
           axis(1, at=round(seq(1,nTS,length.out=8)))
           title(xlab="Time (days)", ylab="Proportion of hosts relative to carrying capacity")
           legend(nTS*1.05, .8, bty="n", title="Status:", legend=c("H","L","I","R"), border=NA, fill=c(GREEN[nCol],BLUE[nCol],RED[nCol],"black"))
-          legend(nTS*1.05, .3, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.hab, lty=1:Nhote, lwd=2, col="black")
+          legend(nTS*1.05, .3, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.hab, lty=1:Nhost, lwd=2, col="black")
           axis(2, at=seq(0,1,.2), las=1)
           dev.off()
      } else {
@@ -508,15 +535,15 @@ if (graphOn==1) {
          #     if (indexYears$y0[i] <= indexYears$yf[i])
          #         polygon(rep(c((indexYears$y0[i]-1)*nTSpY,indexYears$yf[i]*nTSpY),each=2),par("usr")[c(3,4,4,3)],col=COL.periods2[i], border=NA)
          # }
-          for (host in 1:Nhote)
-               lines(1:nTS, H_host[host,]/K_host[host,], col="black", lty=host)
+          for (host in 1:Nhost)
+               lines(1:nTS, H_host[host,]/K_host[host,], col=GRAY[host], lty=host)
          for (trait in 1:nrow(keyDates)) {
              abline(v=keyDates$start[trait], col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
              abline(v=keyDates$full[trait], col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
           }
           axis(1, at=seq(1,nTS+1,nTSpY*((nYears-1)%/%8+1)), labels=seq(0,nYears,((nYears-1)%/%8+1)))
           title(xlab="Time (years)", ylab="Proportion of healthy hosts: H/K")
-          legend(nTS*1.05, .5, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.hab, lty=1:Nhote, lwd=2, col="black")
+          legend(nTS*1.05, .5, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.hab, lty=1:Nhost, lwd=2, col=GRAY)
           axis(2, at=seq(0,1,.2), las=1)
           for (i in 1:3){
               if (indexYears$y0[i] <= indexYears$yf[i])
@@ -532,8 +559,8 @@ if (graphOn==1) {
           #     if (indexYears$y0[i] <= indexYears$yf[i])
           #         polygon(rep(c((indexYears$y0[i]-1)*nTSpY,indexYears$yf[i]*nTSpY),each=2),par("usr")[c(3,4,4,3)],col=COL.periods2[i], border=NA)
           # }
-          for (host in 1:Nhote)
-              lines(1:nTS, (I_host[host,]+R_host[host,])/K_host[host,], col="black", lty=host)
+          for (host in 1:Nhost)
+              lines(1:nTS, (I_host[host,]+R_host[host,])/K_host[host,], col=GRAY[host], lty=host)
           for (trait in 1:nrow(keyDates)) {
               abline(v=keyDates$start[trait], col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
               abline(v=keyDates$full[trait], col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
@@ -544,7 +571,7 @@ if (graphOn==1) {
               if (indexYears$y0[i] <= indexYears$yf[i])
                   segments((indexYears$y0[i]-1)*nTSpY, par("usr")[3], indexYears$yf[i]*nTSpY, par("usr")[3], col=COL.periods[i], lwd=12, xpd=FALSE)
           }
-          legend(nTS*1.05, .5, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.hab, lty=1:Nhote, lwd=2, col="black")
+          legend(nTS*1.05, .5, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.hab, lty=1:Nhost, lwd=2, col=GRAY)
           axis(2, at=seq(0,1,.2), las=1)
           dev.off()
      }
@@ -567,7 +594,7 @@ if (graphOn==1) {
                }
           }
           D_freq[trait] <- which(I_aggrProp[[trait]][1,]<0.95)[1] - 1   ## last time-step the 1st pathogen is above 0.95
-          if (graphOn==1)
+          if (graphic)
                plotevolQR(pathRES,nIncr,trait,I_aggrProp[[trait]],D_freq[trait],nTS,nYears,nTSpY)   
      }
      D_freq[9] <- which(I_pathoProp[Npatho,]>0.05)[1] - 1   ## durability relative to the superpathogen
@@ -612,12 +639,13 @@ if (graphOn==1) {
      GLAabs_year <- apply(GLAabs, 2, sum)    ## Total GLA of the landscape (per year)
      GLAabs_host <- apply(GLAabs, 1, mean)   ## Average GLA of the simulation (per cultivar)
      
-     PCH <- c(15,16,17,18)
-     if (strat=="MI")
-          legend.hab <- c("Susceptible","Resistant 1","Resistant 2")
-     if (Nhote==1)
-         legend.hab <- c("Susceptible")
+     PCH <- 15:(15+Nhost-1)
+     PCH.tot <- 0
+     LTY.tot <- 1
+     COL.tot <- RED[nCol] #"gray50"
      legend.GLA <- c(legend.hab,"Whole landscape")
+     if (strat=="MI")  ## re-adjust legend of maps for mixtures
+         legend.hab <- c("Susceptible","Resistant 1 + Resistant 2")
      
      if (nYears>1) {
          ## GLA
@@ -631,14 +659,14 @@ if (graphOn==1) {
               , xlab="Years", ylab="Nb of healthy hosts / day / m^2") 
          axis(1, at=seq(1,nYears,by=(nYears-1)%/%8+1))
          axis(2, at=round(seq(0, GLAnoDis,length.out=5),2), las=1)
-         for (host in 1:Nhote) {
-             lines(1:nYears, GLAabs[host,], lwd=2, lty=host)
-             points(1:nYears, GLAabs[host,], lwd=1, pch=PCH[host])  ## need to add the points for rotations
-             points(par("usr")[1], GLAabs_host[host], pch=PCH[host], xpd=TRUE)
+         for (host in 1:Nhost) {
+             lines(1:nYears, GLAabs[host,], lwd=2, lty=host, col=GRAY[host])
+             points(1:nYears, GLAabs[host,], lwd=1, pch=PCH[host], col=GRAY[host])  ## need to add the points for rotations
+             points(par("usr")[1], GLAabs_host[host], pch=PCH[host], col=GRAY[host], xpd=TRUE)
          }
-         lines(1:nYears, GLAabs_year, lwd=2, lty=4, col=COL.tot)
-         points(1:nYears, GLAabs_year, lwd=1, pch=PCH[4], col=COL.tot)
-         points(par("usr")[1], GLA["glaTOT"], pch=PCH[4], col=COL.tot, cex=1.5, xpd=TRUE)
+         lines(1:nYears, GLAabs_year, lwd=2, lty=LTY.tot, col=COL.tot)
+         points(1:nYears, GLAabs_year, lwd=1, pch=PCH.tot, col=COL.tot)
+         points(par("usr")[1], GLA["glaTOT"], pch=PCH.tot, col=COL.tot, cex=1, xpd=TRUE)
          for (trait in 1:nrow(keyDates)) {
              abline(v=ceiling(keyDates$start[trait]/nTSpY), col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
              abline(v=ceiling(keyDates$full[trait]/nTSpY), col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
@@ -649,12 +677,12 @@ if (graphOn==1) {
          }
           # legend(nYears*.5,max(GLAabs)*.9, title.adj=0.1, bty="n", title="Cultivar:", legend=c("Resistant","Susceptible"), lty=1:2, lwd=2, col="black")
          legend(nYears*1.05, .5*GLAnoDis, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.GLA, cex=0.9
-                , lty=c(1:Nhote,4), lwd=2, pch=PCH[c(1:Nhote,4)], pt.cex=c(rep(1,Nhote),1.5), col=c(rep("black",Nhote), COL.tot), seg.len=2.5)
+                , lty=c(1:Nhost,LTY.tot), lwd=2, pch=c(PCH,PCH.tot), pt.cex=c(rep(1,Nhost),1), col=c(GRAY, COL.tot), seg.len=2.5)
          
          # par(xpd=NA, mar=c(0,0,0,0))
          # plot(0,0, type="n", axes=F) 
          # legend("top", bty="n", title="Cultivar:", legend=legend.GLA
-         #        , lty=c(1:Nhote,4), lwd=2, pch=PCH[c(1:Nhote,4)], pt.cex=c(rep(1,Nhote),1.5), col=c(rep("black",Nhote), COL.tot), seg.len=2.5)
+         #        , lty=c(1:Nhost,4), lwd=2, pch=PCH[c(1:Nhost,4)], pt.cex=c(rep(1,Nhost),1.5), col=c(rep("black",Nhost), COL.tot), seg.len=2.5)
          # 
          dev.off()
 
@@ -663,9 +691,9 @@ if (graphOn==1) {
          plot(0, 0, type="l", bty="n", lwd=2, xlim=c(1,nYears), ylim=c(0,1), xaxt="n", yaxt="n"
               # , main="Relative green leaf area (GLAr)"
               , xlab="Years", ylab="Proportion of healthy hosts: H/N") 
-         for (host in 1:Nhote) {
-             lines(1:nYears, GLArel[host,], lwd=2, lty=host)
-             points(1:nYears, GLArel[host,], lwd=1, pch=PCH[host])
+         for (host in 1:Nhost) {
+             lines(1:nYears, GLArel[host,], lwd=2, lty=host, col=GRAY[host])
+             points(1:nYears, GLArel[host,], lwd=1, pch=PCH[host], col=GRAY[host])
          }
          for (trait in 1:nrow(keyDates)) {
              abline(v=ceiling(keyDates$start[trait]/nTSpY), col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
@@ -674,7 +702,7 @@ if (graphOn==1) {
          axis(1, at=seq(1,nYears,by=(nYears-1)%/%8+1))
          axis(2, at=seq(0,1,.2), las=1)
          legend(nYears*1.05, .5, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.GLA[1:(length(legend.GLA)-1)], cex=0.9
-                , lty=1:Nhote, lwd=2, pch=PCH[1:Nhote], pt.cex=rep(1,Nhote), col=c(rep("black",Nhote)), seg.len=2.5)
+                , lty=1:Nhost, lwd=2, pch=PCH, pt.cex=rep(1,Nhost), col=GRAY, seg.len=2.5)
          dev.off()
           
           ## AUDPC
@@ -685,48 +713,108 @@ if (graphOn==1) {
                , xlab="Years", ylab="Proportion of diseased hosts: (I+R)/K") 
           axis(1, at=seq(1,nYears,by=(nYears-1)%/%8+1))
           axis(2, at=round(seq(0, audpc100S,length.out=5),2), las=1)
-          for (host in 1:Nhote) {
-              lines(1:nYears, audpc[host,], lwd=2, lty=host)
-              points(1:nYears, audpc[host,], lwd=1, pch=PCH[host])  ## need to add the points for rotations
-              points(par("usr")[1], audpc_host[host], pch=PCH[host], xpd=TRUE)
+          for (host in 1:Nhost) {
+              lines(1:nYears, audpc[host,], lwd=2, lty=host, col=GRAY[host])
+              points(1:nYears, audpc[host,], lwd=1, pch=PCH[host], col=GRAY[host])  ## need to add the points for rotations
+              points(par("usr")[1], audpc_host[host], pch=PCH[host], col=GRAY[host], xpd=TRUE)
           }
           for (trait in 1:nrow(keyDates)) {
               abline(v=ceiling(keyDates$start[trait]/nTSpY), col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
               abline(v=ceiling(keyDates$full[trait]/nTSpY), col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=2.6, xpd=FALSE)
           }
-          lines(1:nYears, audpc_year, lwd=2, lty=4, col=COL.tot)
-          points(1:nYears, audpc_year, lwd=1, pch=PCH[4], col=COL.tot)
-          points(par("usr")[1], AUDPC["audpcTOT"], pch=PCH[4], col=COL.tot, cex=1.5, xpd=TRUE)
+          lines(1:nYears, audpc_year, lwd=2, lty=LTY.tot, col=COL.tot)
+          points(1:nYears, audpc_year, lwd=1, pch=PCH.tot, col=COL.tot)
+          points(par("usr")[1], AUDPC["audpcTOT"], pch=PCH.tot, col=COL.tot, cex=1, xpd=TRUE)
           for (i in 1:3){
               if (indexYears$y0[i] <= indexYears$yf[i])
                   segments(indexYears$y0[i]-1/4, par("usr")[3], indexYears$yf[i]+1/4, par("usr")[3], col=COL.periods[i], lwd=12, xpd=FALSE)
           }
           legend(nYears*1.05, .5*audpc100S, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.GLA, cex=0.9
-                 , lty=c(1:Nhote,4), lwd=2, pch=PCH[c(1:Nhote,4)], pt.cex=c(rep(1,Nhote),1.5), col=c(rep("black",Nhote), COL.tot), seg.len=2.5)
+                 , lty=c(1:Nhost,LTY.tot), lwd=2, pch=c(PCH,PCH.tot), pt.cex=c(rep(1,Nhost),1), col=c(GRAY, COL.tot), seg.len=2.5)
+          dev.off()
+          
+          ## Production
+          productTot <- apply(product,2,sum)
+          maxProd <- max(productTot)
+          tiff(filename=paste(pathRES, "/production.tiff",sep=""), width=180, height=110, units='mm', compression='lzw', res=300)
+          par(xpd=NA, cex=.9,mar=c(4,4,0,9))
+          plot(0,0, type="n", bty="n", xlim=c(1, nYears), ylim=c(0, maxProd), xaxt="n", yaxt="n"
+               , xlab="Years", ylab="Production (weight units)") 
+          axis(1, at=seq(1,nYears,by=(nYears-1)%/%8+1))
+          axis(2, at=round(seq(0, maxProd,length.out=5)), las=1)
+          for (host in 1:Nhost) {
+              lines(1:nYears, product[host,], lwd=2, lty=host, col=GRAY[host])
+              points(1:nYears, product[host,], lwd=1, pch=PCH[host], col=GRAY[host])  ## need to add the points for rotations
+              points(par("usr")[1], mean(product[host,]), pch=PCH[host], col=GRAY[host], xpd=TRUE)
+          }
+          lines(1:nYears, productTot, lwd=2, lty=LTY.tot, col=COL.tot)
+          points(1:nYears, productTot, lwd=1, pch=PCH.tot, col=COL.tot)
+          points(par("usr")[1], mean(productTot), pch=PCH.tot, col=COL.tot, cex=1, xpd=TRUE)
+          legend(nYears*1.05, .5*maxProd, title.adj=-.01, bty="n", title="Cultivar:", legend=legend.GLA, cex=0.9
+                 , lty=c(1:Nhost,LTY.tot), lwd=2, pch=c(PCH,PCH.tot), pt.cex=c(rep(1,Nhost),1), col=c(GRAY, COL.tot), seg.len=2.5)
+          dev.off()
+          
+          ## Economic performance
+          maxEco <- max(benefit, cost, balance)
+          minEco <- min(0, benefit, cost, balance)
+          tiff(filename=paste(pathRES, "/grossMargin.tiff",sep=""), width=180, height=110, units='mm', compression='lzw', res=300)
+          par(xpd=NA, cex=.9,mar=c(4,4,0,9))
+          plot(0,0, type="n", bty="n", xlim=c(1, nYears), ylim=c(minEco, maxEco), xaxt="n", yaxt="n"
+               , xlab="Years", ylab="Monetary units") 
+          axis(1, at=seq(1,nYears,by=(nYears-1)%/%8+1))
+          axis(2, at=round(seq(minEco, maxEco,length.out=5)), las=1)
+          if (minEco<0)
+              abline(h=0, lwd=1, lty=2, col="gray", xpd=FALSE)
+          
+          lines(1:nYears, benefit, lwd=2, lty=1, col="black")
+          points(1:nYears, benefit, lwd=1, pch=PCH[1], col="black")  ## need to add the points for rotations
+          points(par("usr")[1], mean(benefit), pch=PCH[1], col="black", xpd=TRUE)
+          lines(1:nYears, cost, lwd=2, lty=2, col="gray50")
+          points(1:nYears, cost, lwd=1, pch=PCH[1]+1, col="gray50")  ## need to add the points for rotations
+          points(par("usr")[1], mean(cost), pch=PCH[1]+1, col="gray50", xpd=TRUE)
+          
+          lines(1:nYears, balance, lwd=2, lty=LTY.tot, col=COL.tot)
+          points(1:nYears, balance, lwd=1, pch=PCH.tot, col=COL.tot)
+          points(par("usr")[1], mean(balance), pch=PCH.tot, col=COL.tot, cex=1, xpd=TRUE)
+          
+          legend(nYears*1.05, .5*maxEco, title.adj=-.01, bty="n", legend=c("Benefit","Cost","Gross Margin"), cex=0.9
+                 , lty=c(1:2,LTY.tot), lwd=2, pch=c(PCH[1],PCH[1]+1,PCH.tot), pt.cex=rep(1,3), col=c("black", "gray50", COL.tot), seg.len=2.5)
           dev.off()
           
      }
      
      ####
-     ####  C) MAPS of HLIR dynamic  ####
+     ####  C) VIDEO (MAPS of HLIR dynamic)  ####
      ####
+     if (video){
+         
+         if( system("ffmpeg -version", ignore.stdout=TRUE) == 127) 
+             stop("You need to install ffmpeg before generating videos")
+         
+         
      graphics.off()
+     # library("sf")
+     # library(animation)
+     dir.create("maps")
      
-     title.H <- "Proportion of healty hosts"
+     # title.H <- "Proportion of healty hosts"
      title.IR <- "Proportion of diseased hosts"
-     invlogitbound <- 6
-     intvls <- sort(c(0, invlogit(seq(-invlogitbound,invlogitbound,l=nCol-2)), 1), decreasing=FALSE)   ## intervals to define coloration
+     invlogitbound <- 3
+     maxColorScale <- 1
+     # intvls <- maxColorScale * sort(c(0, invlogit(seq(-invlogitbound,invlogitbound,l=nCol-2)), 1), decreasing=FALSE)   ## intervals to define coloration
+     intvls <- maxColorScale * sort(seq(0, 1, l=nCol), decreasing=FALSE)
      # colMap <- heat.colors(nCol, alpha=.3)    ## color for each interval (alpha = transparency)
      # plot(1:nCol~rep(0,nCol),col=colMap, pch=15, cex=3)
-     dens.H <- c(0,8,15)
-     angle.H <- c(0,30,120)
+     dens.H <- c(0,8,15,12,18)[1:Nhost]
+     angle.H <- c(0,30,120,75,165)[1:Nhost]
      legend.H <- sprintf("%.3f",intvls)
-     K_poly <- rep(0,nPoly)
-     
+     legend.H <- paste(intvls*100,"%", sep="")
+ 
      for (y in 1:nYears) {
          print(paste("Year",y,"/",nYears, " -  habitat",rotation[y]))
-         hab <- habitat[,rotation[y]]
-         for (host in 1:Nhote) {
+         hab <- habitat[,rotation[y]]#habitat[[rotation[y]]][,y]
+         K_poly <- rep(0,Npoly)
+         for (host in 1:Nhost) {
              K_poly <- K_poly + (K[,host]*(hab==host))
              if (strat=="MI" & host>1)
                  K_poly <- K_poly + (K[,host]*(habitat[,2]==host))
@@ -735,27 +823,33 @@ if (graphOn==1) {
              subtitle.H <- paste("Year =", y, "   Day =", d)
              ## Proportion of each type of host relative to carrying capacity
              ts <- (y-1)*nTSpY + d
+             # N_poly <- apply(H[[ts]],1,sum) + apply(L[[ts]],3,sum) + apply(I[[ts]],3,sum) + apply(R[[ts]],3,sum)
+             
              propH <- apply(H[[ts]],1,sum) / K_poly
              # propL <- apply(L[[ts]],3,sum) / K_poly
              propI <- apply(I[[ts]],3,sum) / K_poly
              propR <- apply(R[[ts]],3,sum) / K_poly
              intvlsH <- findInterval(propH, intvls)
-             intvlsIR <- findInterval(propI + propR, intvls)
              
-             png(filename=paste(pathRES, "/HLIR_",sprintf("%02d",y),"-",sprintf("%03d",d),".png",sep=""),width=2000,height=1000)
+             # propIR <- (apply(I[[ts]],3,sum) + apply(R[[ts]],3,sum)) / N_poly
+             propIR <- (propI + propR)
+             intvlsIR <- findInterval(propIR, intvls)
+
+             png(filename=paste(pathRES, "/maps/HLIR_",sprintf("%02d",y),"-",sprintf("%03d",d),".png",sep=""),width=700,height=350,units="mm",res=72)
              par(mfrow=c(1,2), cex=2, xpd=NA, mar=c(9.5,5,4,2))
              ## Map dynamic of healthy hosts
-             # plotland(landscape, GREEN[intvlsH], dens.H[hab], angle.H[hab], GREEN, dens.H, angle.H, title.H, subtitle.H, legend.hab, legend.H, "H/K")
+             # plot.land(landscape, GREEN[intvlsH], dens.H[hab], angle.H[hab], GREEN, dens.H, angle.H, title.H, subtitle.H, legend.hab, legend.H, "H/K")
              
              ## moving AUDPC
-             plot(0,0, type="n", bty="n", xlim=c(1, nYears), ylim=c(0, audpc100S), xaxt="n", yaxt="n"
-                  , xlab="", ylab="Proportion of diseased hosts: (I+R)/K", main="AUDPC") 
+             plot(0,0, type="n", bty="n", xlim=c(1, nYears), ylim=c(0,1), xaxt="n", yaxt="n"
+                  , xlab="", ylab="", main="Disease severity relative to a fully susceptible landscape") 
              axis(1, at=seq(1,nYears,by=(nYears-1)%/%8+1))
-             axis(2, at=round(seq(0, audpc100S,length.out=5),2), las=1)
+             ticksMarks <- round(seq(0,1,length.out=5),2)
+             axis(2, at=ticksMarks, labels=paste(100*ticksMarks, "%"), las=1)
              title(xlab="Years", mgp=c(2,1,0))
-             for (host in 1:Nhote) {
-                 lines(1:y, audpc[host,1:y], lwd=2, lty=host)
-                 points(1:y, audpc[host,1:y], lwd=1, pch=PCH[host])  ## need to add the points for rotations
+             for (host in 1:Nhost) {
+                 lines(1:y, audpc[host,1:y]/audpc100S, lwd=2, lty=host, col=GRAY[host])
+                 points(1:y, audpc[host,1:y]/audpc100S, lwd=1, pch=PCH[host], col=GRAY[host])  ## need to add the points for rotations
              }
              for (trait in 1:nrow(keyDates)) {
                  date1 <- ceiling(keyDates$start[trait]/nTSpY)
@@ -765,19 +859,48 @@ if (graphOn==1) {
                  if (!is.na(date2) & date2 <= y)
                      abline(v=date2, col=keyDates$COL[trait], lty=keyDates$LTY[trait], lwd=4, xpd=FALSE)
              }
-             lines(1:y, audpc_year[1:y], lwd=2, lty=4, col=COL.tot)
-             points(1:y, audpc_year[1:y], lwd=1, pch=PCH[4], col=COL.tot)
-             legend(nYears/3, -audpc100S/5, bty="n", legend=legend.GLA, cex=1
-                    , lty=c(1:Nhote,4), lwd=2, pch=PCH[c(1:Nhote,4)], pt.cex=c(rep(1,Nhote),1.5), col=c(rep("black",Nhote), COL.tot), seg.len=2.5)
+             lines(1:y, audpc_year[1:y]/audpc100S, lwd=2, lty=LTY.tot, col=COL.tot)
+             points(1:y, audpc_year[1:y]/audpc100S, lwd=1, pch=PCH.tot, col=COL.tot)
+             legend(nYears/3, -1/5, bty="n", legend=legend.GLA, cex=1
+                    , lty=c(1:Nhost,LTY.tot), lwd=2, pch=c(PCH,PCH.tot), pt.cex=c(rep(1,Nhost),1), col=c(GRAY, COL.tot), seg.len=2.5)
              
              ## Map dynamic of diseased hosts
-             plotland(trans.landscape_tmp, RED[intvlsIR], dens.H[hab], angle.H[hab], RED, dens.H, angle.H, title.IR, subtitle.H, legend.hab, legend.H, "(I+R)/K")
+             plotland(trans.landscape_tmp, COL1[intvlsIR], dens.H[hab], angle.H[hab], COL1, dens.H, angle.H, title.IR, subtitle.H, legend.hab, legend.H, " ")
              dev.off()
          } ## for d
      }  ## for y
      
-    
-} ## if graphOn
+     ## Convert png files to mp4 video
+     setwd("maps")
+     # title_video <- paste("simul_",strat,Nhost, "_prop", round(propSR,2), "_agreg", isolSR,"_rep",seed,".mp4", sep="")
+     title_video <- paste("video_",strat,Nhost,".mp4", sep="")
+     command_line <- paste("ffmpeg -f image2 -framerate ", nMapPY/2, " -pattern_type glob -i \"*.png\" ", title_video,sep="")
+     system(command_line)
+
+     system(paste("mv ", title_video, " ", "../."))
+     setwd("../")
+     print("remove directory maps")
+     system("rm -rf maps")
+     
+     ### Not used  (gif too big)
+     # convert the .png files to one .gif file using ImageMagick. 
+     # The system() function executes the command as if it was done
+     # in the terminal. the -delay flag sets the time between showing
+     # the frames, i.e. the speed of the animation.
+     
+     #system("convert -delay 10 *.png video_simul.gif")
+     #saveGIF({xxxxx},movie.name="test.gif",interval=0.2) 
+     #system("ffmpeg -framerate 1 -i *.png -r 10 -c:v libx264 -crf 15 -pix_fmt yuv420p out.mp4")  
+ 
+     
+     } ## if video
+     
+} ## if graphic
+
+
+print("remove binary files")
+file.remove(list.files(pattern="\\.bin$"))   # delete all the binary files
+print(paste("model outputs stored in :", pathRES))
 
 }
 

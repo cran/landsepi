@@ -1,6 +1,6 @@
 # Part of the landsepi R package.
-# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@csiro.au>
-#                    Julien Papaix <julien.papaix@csiro.au>
+# Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
+#                    Julien Papaix <julien.papaix@inra.fr>
 #                    Jean-François Rey <jean-francois.rey@inra.fr>
 #
 # This program is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@
 
 #' @title Plotting the landscape
 #' @name plotland
-#' @description Plot a landscape with colors or hatched lines on fields
+#' @description Plot a landscape with colors or hatched lines to represent different types of fields
 #' @param landscape a spatialpolygon object containing field coordinates 
 #' @param COL vector containing the color of each field
 #' @param DENS vector containing the density of hatched lines for each field

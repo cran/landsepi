@@ -4,36 +4,36 @@
 \alias{multiN}
 \title{Allocation of cultivars}
 \usage{
-multiN(d, area, aggreg, prop)
+multiN(d, area, range, prop)
 }
 \arguments{
 \item{d}{a matrix of the pairwise distances between the centroids of the fields of the landscape.}
 
 \item{area}{vector containing the areas of the fields.}
 
-\item{aggreg}{level of spatial aggregation (<0 for fragmented landscapes, >0 for aggregated landscapes, =0 for random allocation of cultivars).}
+\item{range}{range of spatial autocorrelation between fields (<0 for fragmented landscapes, >0 for aggregated landscapes, =0 for random allocation).}
 
-\item{prop}{relative proportion of the second crop.}
+\item{prop}{relative proportion of the second type of crop.}
 }
 \value{
-A dataframe containing the index of each field (column 1) and the index (0 or 1) of the cultivar grown on these fields (column 2).
+A dataframe containing the index of each field (column 1) and the index (0 or 1) of the type of crop grown on these fields (column 2).
 }
 \description{
-Algorithm based on latent Gaussian fields to allocate two different crop cultivars across the simulated landscapes.
+Algorithm based on latent Gaussian fields to allocate two different types of crops across the simulated landscapes.
 }
 \details{
-This algorithm allows the control of the proportions of each cultivar in terms of surface coverage, and their level of spatial aggregation. 
+This algorithm allows the control of the proportions of each type of crop in terms of surface coverage, and their level of spatial aggregation. 
 A random vector of values is drawn from a multivariate normal distribution with expectation 0 and a variance-covariance matrix 
 which depends on the pairwise distances between the centroids of the fields. The variance-covariance matrix is computed from a periodic function for highly 
-fragmented or highly aggregated landscapes, an exponential function for moderately aggregated landscapes, and from a normal distribution for a random allocation of 
-cultivars. Next, the crop cultivars are allocated to different fields depending on whether the each value drawn from the multivariate normal distribution 
-is above or below a threshold. The proportion of each cultivar in the landscape is controlled by the value of this threshold (parameter prop).
+fragmented or highly aggregated types of crops, an exponential function for moderately aggregated types of crops, and from a normal distribution for a random allocation of 
+the types of crops. Next, the two types of crops are allocated to different fields depending on whether the each value drawn from the multivariate normal distribution 
+is above or below a threshold. The proportion of each type of crop in the landscape is controlled by the value of this threshold (parameter prop).
 }
 \examples{
 \dontrun{
 d <- matrix(rpois(100,100), nrow=10)
 area <- data.frame(num=1:10, area=10)
 ## Fragmented landscape
-multiN(d, area, aggreg=-2, prop=0.5)
+multiN(d, area, range=-2, prop=0.5)
 }
 }
