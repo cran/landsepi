@@ -17,8 +17,8 @@ architecture to simulate plant response to disease.
 \tabular{ll}{
          Package: \tab landsepi\cr
          Type: \tab Package\cr
-         Version: \tab 0.0.6\cr
-         Date: \tab 2019-01-09\cr
+         Version: \tab 0.0.7\cr
+         Date: \tab 2019-01-14\cr
          License: \tab GPL (>=2)\cr
          }
 

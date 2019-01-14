@@ -193,6 +193,7 @@ simul_landsepi <- function(seed=12345, nYears=5, nTSpY=120
     pathRES_init <- getwd()
     timeSimul <- paste(strsplit(as.character(Sys.time()), " ")[[1]], collapse="_")
     nameDir <- paste("simul_landsepi_", timeSimul, sep="")
+    nameDir <- gsub(":","-",nameDir)
     dir.create(nameDir)
     setwd(nameDir)
     pathRES <- getwd()
