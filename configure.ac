@@ -33,7 +33,7 @@ AC_MSG_NOTICE([${R_HOME}])
 #CXX1XSTD=`"${R_HOME}/bin/R" CMD config CXX1XSTD`
 #CXX="${CXX1X} ${CXX1XSTD}"
 CXX=`"${R_HOME}/bin/R" CMD config CXX`
-CPP=`"${R_HOME}/bin/R" CMD config CPP`
+#CPP=`"${R_HOME}/bin/R" CMD config CPP`
 CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
 #CXX1XFLAGS=`"${R_HOME}/bin/R" CMD config CXX1XFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
