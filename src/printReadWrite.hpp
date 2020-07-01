@@ -1,14 +1,14 @@
-/* 
+/*
  * Part of the landsepi R package.
- * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inra.fr>
- *                    Julien Papaix <julien.papaix@inra.fr>
- *                    Jean-Frnaçois Rey <jean-francois.rey@inra.fr>
+ * Copyright (C) 2017 Loup Rimbaud <loup.rimbaud@inrae.fr>
+ *                    Julien Papaix <julien.papaix@inrae.fr>
+ *                    Jean-François Rey <jean-francois.rey@inrae.fr>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -19,49 +19,90 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #ifndef __PRINT_READ_WRITE__
 #define __PRINT_READ_WRITE__
 
-#define NLOCI 8          /* number of resistance/adaptation loci */
+#include <stdio.h> // fwrite, fprintf
+#include <array>
+#include <string>
+#include <vector>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "memory.hpp"
-#include "functions.hpp"
-#include <string.h>
+#include "Cultivar.hpp"
+#include "Model.hpp"
+#include "functions.hpp" // sum2_2, sum1_3...
 
 /* ************************************************************************* */
 /*                         printReadWrite.c                                  */
 /* ************************************************************************* */
 
-/* Print a vector of integer */
-void print_i1(FILE *f, int n, int *t, char *title);
+class Model; // Forward declaration of Model because printReadWrite compile before Model
 
-/* Print a vector of float */
-void print_d1(FILE *f, int n, double *t, char *title); 
+/* Print a vector */
+template <typename T>
+void print_1d(FILE* f, const std::vector<T>& t, const std::string& title) {
+    if(title != "") {
+        fprintf(f, "%s : ", title.c_str());
+    }
+    for(unsigned int i = 0; i < t.size(); i++) {
+        if(typeid(T) == typeid(int)) {
+            fprintf(f, "%7d", t[i]);
+        } else if(typeid(T) == typeid(double)) {
+            fprintf(f, "%.3f ", t[i]);
+        } else {
+            fprintf(f, "NaN");
+        }
+    }
+    fprintf(f, "\n");
+}
 
-/* Print a table of integer */
-void print_i2(FILE *f, int l, int c, int **t, const char *title);
+/* Print an array */
+template <typename T, size_t n>
+void print_1d(FILE* f, const std::array<T, n>& t, const std::string& title) {
+    if(title != "") {
+        fprintf(f, "%s : \n", title.c_str());
+    }
+    for(unsigned int i = 0; i < n; i++) {
+        if(typeid(T) == typeid(int)) {
+            fprintf(f, "%7d ", t[i]);
+        } else if(typeid(T) == typeid(double)) {
+            fprintf(f, "%.3f ", t[i]);
+        } else {
+            fprintf(f, "NaN ");
+        }
+    }
+    fprintf(f, "\n");
+}
 
-/* Print a 3-dimension table of integer */
-void print_i3(FILE *f, int z, int l, int c, int ***t, char *title);
-/* Print a table of float */
-void print_d2(FILE *f, int l, int c, double **t, char *title);
-/* Print a 3-dimension table of float */
-void print_d3(FILE *f, int z, int l, int c, double ***t, char *title);
+/* Print a table */
+template <typename T>
+void print_2d(FILE* f, const Vector2D<T>& t, const std::string& title) {
+    if(title != "") {
+        fprintf(f, "%s : \n", title.c_str());
+    }
+    for(unsigned int i = 0; i < t.size(); i++) {
+        print_1d(f, t[i], "");
+    }
+    fprintf(f, "\n");
+}
+
+/* Print a 3-dimension table */
+template <typename T>
+void print_3d(FILE* f, const Vector3D<T>& t, const std::string& title) {
+    if(title != "") {
+        fprintf(f, "%s : \n", title.c_str());
+    }
+    for(unsigned int i = 0; i < t.size(); i++) {
+        print_2d(f, t[i], "");
+    }
+    fprintf(f, "\n");
+}
 /* Print the sum of the 1st dimension a table of integer of dimension 3 */
-void print_i3sum1(FILE *f, int z, int l, int c, int ***t, char *title); 
+void print_i2sum2(FILE* f, const Vector2D<int>& t, const std::string& title);
 /* Print the sum of the 1st dimension a table of float of dimension 3 */
-void print_d3sum1(FILE *f, int z, int l, int c, double ***t, char *title);
+void print_d2sum2(FILE* f, const Vector2D<double>& t, const std::string& title);
 /* Print the sum of the 1st dimension a table of integer of dimension 3 */
-void print_i2sum2(FILE *f, int l, int c, int **t, char *title);
+void print_i3sum1(FILE* f, const int& z, const int& l, const int& c, const Vector3D<int>& t, const std::string& title);
 /* Print the sum of the 1st dimension a table of float of dimension 3 */
-void print_d2sum2(FILE *f, int l, int c, double **t, char *title); 
-/* Print the parameters in the console (f=stdout) or in an output .txt file */
-void print_param(FILE *f, unsigned long int seed, int nYears, int nTSpY, int Npoly, int Nhost, char *strat, double *C0, double *Cmax, double *growthH, double *reproH, double pI0, double pSurv, double kpatho, double spatho, double sigpatho, double eff, double repro, double *Tlat, double *Tspo, int Npatho, int Naggr, int **resistance, int *adaptation, double MGeff, double QReff, double *timeToQR, double taumut, double probSex, double costInfect, double costAggr, double beta);
-/* Write model output in .txt files and print output on screen */
-void write_HHjuvSLIR(int Npoly, int Npatho, int Nhost, int t, int **H, int **Hjuv, int **S, int ***L, int ***I, int ***R, FILE *fH, FILE *fHjuv, FILE *fS, FILE *fL, FILE *fI, FILE *fR/*, int printOn*/);
-
+void print_d3sum1(FILE* f, const int& z, const int& l, const int& c, const Vector3D<double>& t,
+                  const std::string& title);
 #endif
-

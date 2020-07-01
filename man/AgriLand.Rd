@@ -2,73 +2,122 @@
 % Please edit documentation in R/AgriLand.R
 \name{AgriLand}
 \alias{AgriLand}
-\title{Landscape generation}
+\title{Landscape allocation}
 \usage{
-AgriLand(landscape, filename = "landscapeTEST1", propSR, isolSR, propRR,
-  isolRR, strat, Nhost, nYears, seed, graphic = FALSE)
+AgriLand(
+  landscape,
+  Nyears,
+  rotation_period = 0,
+  rotation_sequence = list(c(0, 1, 2)),
+  rotation_realloc = FALSE,
+  prop = list(c(1/3, 1/3, 1/3)),
+  aggreg = list(1),
+  algo = "periodic",
+  croptype_names = c(),
+  graphic = FALSE,
+  outputDir = "./"
+)
 }
 \arguments{
 \item{landscape}{a spatialpolygon object containing field coordinates.}
 
-\item{filename}{a character string specifying the output layer name.}
+\item{Nyears}{an integer giving the number of simulated cropping seasons.}
 
-\item{propSR}{proportion of fields where resistance is deployed: (RC)/(SC+RC) or (RC1+RC2)/(SC+RC1+RC2). Must be between 0 and 1.}
+\item{rotation_period}{number of years before rotation of the landscape. There is no rotation if rotation_period=0 or rotation_period=Nyears.}
 
-\item{isolSR}{an integer giving the spatial aggregation of fields where resistance is deployed (1=highly fragmented, 2=balanced, 3=highly aggregated).}
+\item{rotation_sequence}{a list, each element of the list contains indices of croptypes that are cultivated during a period given by "rotation_period".
+There is no change in cultivated croptypes if the list contains only one element (e.g. only one vector c(0,1,2), indicating cultivation of
+croptypes 0, 1 and 2).}
 
-\item{propRR}{when applicable (mixtures and mosaics only), relative proportion of the second resistant cultivar: (RC2)/(RC1+RC2). Must be between 0 and 1.}
+\item{rotation_realloc}{a logical indicating if a new random allocation of croptypes is performed when the landscape is rotated
+(FALSE=static allocation, TRUE=dynamic allocation). Note that if rotation_realloc=FALSE, all elements of the list "rotation_sequence"
+must have the same length, and only the first element of the lists "prop" and "aggreg" will be used.}
 
-\item{isolRR}{when applicable, an integer giving the spatial (for mosaics) or temporal (for rotations) aggregation of fields 
-cultivated with the second resistant cultivar (1=highly fragmented, 2=balanced, 3=highly aggregated).}
+\item{prop}{a list of the same size as "rotation_sequence", each element of the list contains a vector of the proportions (in surface)
+associated with the croptypes in "rotation_sequence". A single vector can be given instead of a list if all elements of
+"rotation_sequence" are associated with the same proportions.}
 
-\item{strat}{a character string specifying the deployment strategy ("MO"=mosaic, "MI"=mixture, "RO"=rotations, "PY"=pyramiding).}
+\item{aggreg}{a list of the same size as "rotation_sequence", each element of the list is a single double indicating the degree of
+aggregation of the landscape. This double must greater or equal 0; the greater its value, the higher the degree of
+spatial aggregation (roughly, aggreg between 0 and 0.1 for fragmented landscapes, between 0.1 and 0.5 for balanced
+landscapes, between 0.5 and 3 for aggregated landscapes, and above 3 for highly aggregated landscapes).
+A single double can be given instead of a list if all elements of
+"rotation_sequence" are associated with the same level of aggregation.}
 
-\item{Nhost}{an integer giving the number of cultivars (1, 2 or 3).}
+\item{algo}{the algorithm used for the computation of the variance-covariance matrix of the multivariate
+normal distribution: "exp" for exponential function, "periodic" for periodic function,
+"random" for random draw (see details of function multiN). If algo="random", the parameter aggreg is not used.}
 
-\item{nYears}{an integer giving the number of simulated years.}
+\item{croptype_names}{a vector of croptype names (for legend in graphic).}
 
-\item{seed}{an integer giving the seed value (for random number generator).}
+\item{graphic}{a logical indicating if a graphic of the landscape must be generated (TRUE) or not (FALSE).}
 
-\item{graphic}{a logical indicating if a graph of the landscape must be generated (TRUE) or not (FALSE).}
+\item{outputDir}{a directory to save graphic}
 }
 \value{
-a shapefile containing the landscape structure (i.e. coordinates of field boundaries) and composition (i.e. cultivars) in time (i.e. each year) and space (i.e. each field).
+a gpkg (shapefile) containing the landscape structure (i.e. coordinates of field boundaries),
+the area and composition (i.e. croptypes) in time (i.e. each year) for each field. A png graphic can be generated if graphic=TRUE.
 }
 \description{
-Generate a landscape composed of fields where a susceptible (SC) and one (RC) or two (RC1 and RC2) resistant cultivars 
+Generates a landscape composed of fields where croptypes
 are allocated with controlled proportions and spatio-temporal aggregation.
 }
 \details{
-An algorithm based on latent Gaussian fields is used to allocate two different crop cultivars across the simulated landscapes 
-(e.g. a susceptible and a resistant cultivar, denoted as SC and RC, respectively). This algorithm allows the control of the proportions 
-of each cultivar in terms of surface coverage, and their level of spatial aggregation. A random vector of values is drawn from a 
-multivariate normal distribution with expectation 0 and a variance-covariance matrix which depends on the pairwise distances between 
-the centroids of the fields. Next, the crop cultivars are allocated to different fields depending on whether each value drawn from the 
-multivariate normal distribution is above or below a threshold. The proportion of each cultivar in the landscape is controlled by the value 
-of this threshold. The sequential use of this algorithm allows the allocation of more than two crop cultivars (e.g. SC, RC1 and RC2). 
-Therefore, deployment strategies involving two sources of resistance is simulated by: 
+An algorithm based on latent Gaussian fields is used to allocate two different croptypes
+across the simulated landscapes (e.g. a susceptible and a resistant cultivar, denoted as
+SC and RC, respectively). This algorithm allows the control of the proportions of each croptype
+in terms of surface coverage, and their level of spatial aggregation.
+A random vector of values is drawn from a multivariate normal distribution with expectation 0
+and a variance-covariance matrix which depends on the pairwise distances between
+the centroids of the fields. Next, the croptypes are allocated to different fields
+depending on whether each value drawn from the multivariate normal distribution is above
+or below a threshold. The proportion of each cultivar in the landscape is controlled by the value
+of this threshold. To allocate more than two croptypes, \code{AgriLand} uses sequentially
+this algorithm. For instance, the allocation of three croptypes (e.g. SC, RC1 and RC2)
+is performed as follows:
 \enumerate{
-\item running the allocation algorithm once to segregate the fields where the susceptible cultivar is grown, and 
-\item applying one of the following deployment strategies to the remaining candidate fields:
-\itemize{
-\item Mosaics: two resistant cultivars (RC1 and RC2, carrying the first and the second resistance sources, respectively) are assigned to candidate 
-fields by re-running the allocation algorithm;
-\item Mixtures: both RC1 and RC2 are allocated to all candidate fields;
-\item Rotations: RC1 and RC2 are alternatively cultivated in candidate fields, depending on the number of cropping 
-seasons over which a given cultivar is grown before being rotated;
-\item Pyramiding: all candidate fields are cultivated with RC12, a resistant cultivar carrying both resistance sources.
-}
+\item the allocation algorithm is run once to segregate the fields where the susceptible
+cultivar is grown, and
+\item the two resistant cultivars (RC1 and RC2) are assigned to the remaining candidate
+fields by re-running the allocation algorithm.
 }
 }
 \examples{
-## Generate a landscape consisting in a mosaic of fields cultivated with a susceptible cultivar
-## and two resistant cultivars in balanced proportions and high level of spatial aggregation
-\dontrun{ 
-landscapeTEST1
-AgriLand(landscapeTEST1,filename="landscapeTEST1",propSR=2/3,isolSR=3,
-propRR=1/2,isolRR=3,strat="MO",Nhost=3,nYears=30,seed=12345,graphic=TRUE)
+\dontrun{
+data(landscapeTEST)
+landscape <- get("landscapeTEST1")
+set.seed(12345)
+## Generate a mosaic of three croptypes in balanced proportions
+## and high level of spatial aggregation
+AgriLand(landscape,
+  Nyears = 10,
+  rotation_sequence = c(0, 1, 2), prop = rep(1 / 3, 3),
+  aggreg = rep(10, 3), algo = "periodic",
+  graphic = TRUE, outputDir = getwd()
+)
+
+## Generate a dynamic mosaic of two croptypes in unbalanced proportions
+## and low level of spatial aggregation,
+## the second croptype being replaced every 5 years without changing field allocation
+AgriLand(landscape,
+  Nyears = 20, rotation_period = 5, rotation_sequence = list(c(0, 1), c(0, 2)),
+  prop = c(1 / 3, 2 / 3), aggreg = c(0.07, 0.07), algo = "periodic", graphic = TRUE,
+  outputDir = getwd()
+)
+
+## Generate a dynamic mosaic of four croptypes in balanced proportions
+## and medium level of spatial aggregation,
+## with field allocation changing every year
+AgriLand(landscape,
+  Nyears = 5, rotation_period = 1, rotation_realloc = TRUE,
+  rotation_sequence = c(0, 1, 2, 3),
+  prop = rep(1 / 4, 4), aggreg = 0.25, algo = "exp", graphic = TRUE, outputDir = getwd()
+)
 }
 }
 \references{
 Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
+}
+\seealso{
+\link{multiN}, \link{periodic_cov}, \link{allocateLandscapeCroptypes}
 }

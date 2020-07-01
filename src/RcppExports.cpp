@@ -6,25 +6,30 @@
 using namespace Rcpp;
 
 // model_landsepi
-void model_landsepi(Rcpp::List timeP, Rcpp::List landscape, Rcpp::List dispersal, Rcpp::List inits, int val_seed, Rcpp::List hostP, Rcpp::List pathoP, Rcpp::List evolP);
-RcppExport SEXP _landsepi_model_landsepi(SEXP timePSEXP, SEXP landscapeSEXP, SEXP dispersalSEXP, SEXP initsSEXP, SEXP val_seedSEXP, SEXP hostPSEXP, SEXP pathoPSEXP, SEXP evolPSEXP) {
+void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp::NumericMatrix rotation_matrix, Rcpp::NumericMatrix croptypes_cultivars_prop, Rcpp::List dispersal, Rcpp::List inits, int seed, Rcpp::List cultivars_param, Rcpp::List basic_patho_param, Rcpp::List genes_param);
+RcppExport SEXP _landsepi_model_landsepi(SEXP time_paramSEXP, SEXP area_vectorSEXP, SEXP rotation_matrixSEXP, SEXP croptypes_cultivars_propSEXP, SEXP dispersalSEXP, SEXP initsSEXP, SEXP seedSEXP, SEXP cultivars_paramSEXP, SEXP basic_patho_paramSEXP, SEXP genes_paramSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::List >::type timeP(timePSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type landscape(landscapeSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type time_param(time_paramSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type area_vector(area_vectorSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type rotation_matrix(rotation_matrixSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type croptypes_cultivars_prop(croptypes_cultivars_propSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type dispersal(dispersalSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type inits(initsSEXP);
-    Rcpp::traits::input_parameter< int >::type val_seed(val_seedSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type hostP(hostPSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type pathoP(pathoPSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type evolP(evolPSEXP);
-    model_landsepi(timeP, landscape, dispersal, inits, val_seed, hostP, pathoP, evolP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type cultivars_param(cultivars_paramSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type basic_patho_param(basic_patho_paramSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type genes_param(genes_paramSEXP);
+    model_landsepi(time_param, area_vector, rotation_matrix, croptypes_cultivars_prop, dispersal, inits, seed, cultivars_param, basic_patho_param, genes_param);
     return R_NilValue;
 END_RCPP
 }
 
+RcppExport SEXP run_testthat_tests();
+
 static const R_CallMethodDef CallEntries[] = {
-    {"_landsepi_model_landsepi", (DL_FUNC) &_landsepi_model_landsepi, 8},
+    {"_landsepi_model_landsepi", (DL_FUNC) &_landsepi_model_landsepi, 10},
+    {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 0},
     {NULL, NULL, 0}
 };
 

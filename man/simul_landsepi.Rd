@@ -2,203 +2,273 @@
 % Please edit documentation in R/simul_landsepi.R
 \name{simul_landsepi}
 \alias{simul_landsepi}
-\title{Simulation with provided data}
+\title{Simulation with input parameters as data.frames.}
 \usage{
-simul_landsepi(seed = 12345, nYears = 5, nTSpY = 120, idLan = 1,
-  propSR = 2/3, isolSR = 1, propRR = 1/2, isolRR = 1,
-  strat = "MO", Nhost = 3, pI0 = 5e-04, resistance1 = c(1, 0, 0, 0,
-  0, 0, 0, 0), resistance2 = c(0, 1, 0, 0, 0, 0, 0, 0),
-  costInfect = 0.75, costAggr = 0.75, taumut = 1e-07, probSex = 0,
-  MGeff = 1, QReff = 0.5, beta = 1, Naggr = 6, timeToQR_exp = 0,
-  timeToQR_var = 0, C0 = rep(0.1, Nhost), Cmax = rep(2, Nhost),
-  yield = cbind(H = rep(1/(120 * 1000), Nhost), L = rep(0, Nhost), I =
-  rep(0, Nhost), R = rep(0, Nhost)), purchPrice = rep(0.001, Nhost),
-  sellPrice = rep(0.2, Nhost), graphic = TRUE, video = FALSE)
+simul_landsepi(
+  seed = 12345,
+  time_param = list(Nyears = 20, nTSpY = 120),
+  croptype_names,
+  croptypes_cultivars_prop,
+  cultivars,
+  cultivars_genes_list,
+  genes,
+  landscape = NULL,
+  area,
+  rotation,
+  basic_patho_param,
+  disp_patho,
+  disp_host,
+  pI0 = 5e-04,
+  epid_outputs = "all",
+  evol_outputs = "all",
+  thres_breakdown = 50000,
+  GLAnoDis = 1.48315,
+  audpc100S = 0.38,
+  writeTXT = TRUE,
+  graphic = TRUE,
+  videoMP4 = FALSE,
+  keepRawResults = FALSE
+)
 }
 \arguments{
 \item{seed}{an integer used as seed value (for random number generator).}
 
-\item{nYears}{an integer giving the number of simulated years.}
+\item{time_param}{a list of simulation parameters:\itemize{
+\item Nyears = number cropping seasons,
+\item nTSpY = number of time-steps per cropping season.
+}}
 
-\item{nTSpY}{an integer giving the number of time steps per year.}
+\item{croptype_names}{a vector of croptypes names.}
 
-\item{idLan}{an integer giving the index of landscape structure (1 to 5).}
+\item{croptypes_cultivars_prop}{a dataframe with three columns named 'croptypeID' for croptype index,
+'cultivarID' for cultivar index and 'proportion' for the proportion of the cultivar within the croptype.}
 
-\item{propSR}{proportion of fields where resistance is deployed: (RC)/(SC+RC) or (RC1+RC2)/(SC+RC1+RC2). Must be between 0 and 1.}
+\item{cultivars}{a dataframe of parameters associated with each host genotype (i.e. cultivars)
+when cultivated in pure crops. Columns of the dataframe are:\itemize{
+\item cultivarName: cultivar names,
+\item initial_density: host densities (per square meter) at the beginning of the cropping season,
+\item max_density: maximum host densities (per square meter) at the end of the cropping season,
+\item growth rate: host growth rates,
+\item reproduction rate: host reproduction rates,
+\item death rate: host death rates,
+\item yield_H: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status H,
+\item yield_L: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status L,
+\item yield_I: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status I,
+\item yield_R: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status R,
+\item production_cost = overall production costs (in monetary units / ha / cropping season)
+including planting costs, amortisation, labour etc.,
+\item market_value = market values of the productions (in monetary units / weight or volume unit).
+}}
 
-\item{isolSR}{an integer giving the spatial aggregation of fields where resistance is deployed (1=highly fragmented, 2=balanced, 3=highly aggregated).}
+\item{cultivars_genes_list}{a list containing, for each host genotype, the indices of carried resistance genes.}
 
-\item{propRR}{when applicable (mixtures and mosaics only), relative proportion of the second resistant cultivar: (RC2)/(RC1+RC2). Must be between 0 and 1.}
+\item{genes}{a data.frame of parameters associated with each resistance gene and with the evolution of
+each corresponding pathogenicity gene. Columns of the dataframe are:\itemize{
+\item geneName: names of resistance genes,
+\item target_trait: aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes,
+\item efficiency: resistance gene efficiencies (percentage of reduction of targeted aggressiveness components:
+IR, 1/LAT, IP and PR),
+\item time_to_activ_exp: expected delays to resistance activation (for APRs),
+\item time_to_activ_var: variances of the delay to resistance activation (for APRs),
+\item mutation_prob: mutation probabilities for pathogenicity genes (each of them corresponding to a resistance gene),
+\item Nlevels_aggressiveness: number of adaptation levels related to each resistance gene (i.e. 1 + number
+of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene),
+\item fitness_cost: fitness penalties paid by pathogen genotypes fully adapted
+to the considered resistance genes on host that do not carry the resistance genes,
+\item tradeoff_strength: strengths of the trade-off relationships between the level of aggressiveness
+on hosts that do and do not carry the resistance genes.
+}}
 
-\item{isolRR}{when applicable, an integer specifying the spatial (for mosaics: 1=highly fragmented, 2=balanced, 3=highly aggregated) or 
-temporal (for rotations: 1=every year, 2=every two years, 3=every three years) aggregation of fields cultivated with the second resistant cultivar.}
+\item{landscape}{a sp object containing the landscape (required only if videoMP4=TRUE).}
 
-\item{strat}{a character string specifying the deployment strategy ("MO"=mosaic, "MI"=mixture, "RO"=rotations, "PY"=pyramiding).}
+\item{area}{a vector containing polygon areas (must be in square meters).}
 
-\item{Nhost}{an integer giving the number of cultivars (1, 2 or 3).}
+\item{rotation}{a dataframe containing for each field (rows) and year (columns, named "year_1", "year_2", etc.),
+the index of the cultivated croptype. Importantly, the matrix must contain 1 more column than the real number
+of simulated years.}
 
-\item{pI0}{initial probability of infection of the susceptible cultivar. Must be between 0 and 1.}
+\item{basic_patho_param}{a list of pathogen aggressiveness parameters on a susceptible host
+for a pathogen genotype not adapted to resistance: \itemize{
+\item infection_rate = maximal expected infection rate of a propagule on a healthy host,
+\item propagule_prod_rate = maximal expected effective propagule production rate of an infectious host per timestep,
+\item latent_period_exp = minimal expected duration of the latent period,
+\item latent_period_var = variance of the latent period duration,
+\item infectious_period_exp = maximal expected duration of the infectious period,
+\item infectious_period_var = variance of the infectious period duration,
+\item survival_prob = probability for a propagule to survive the off-season,
+\item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning,
+\item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
+\item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
+\item sigmoid_plateau = plateau parameter of the sigmoid contamination function.
+}}
 
-\item{resistance1}{a logical vector of size 8 giving the resistance formula of the 2nd cultivar (see details)}
+\item{disp_patho}{a vectorized matrix giving the probability of pathogen dispersal
+from any field of the landscape to any other field.}
 
-\item{resistance2}{when applicable, a logical vector of size 8 giving the resistance formula of the 3rd cultivar (see details)}
+\item{disp_host}{a vectorized matrix giving the probability of host dispersal
+from any field of the landscape to any other field}
 
-\item{costInfect}{cost of infectivity paid by infective pathogens (i.e. adapted to plant cultivars carrying a major gene) on susceptible hosts. Must be between 0 and 1.}
+\item{pI0}{initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
+at the beginning of the simulation. Must be between 0 and 1.}
 
-\item{costAggr}{cost of aggressiveness paid by fully adapted pathogens (relative to plant cultivars carrying a quantitative resistance trait) on fully susceptible hosts. Must be between 0 and 1.}
+\item{epid_outputs}{a character string (or a vector of character strings if several outputs are to be computed)
+specifying the type of epidemiological and economic outputs to generate (see details):
+\itemize{
+\item "audpc" : Area Under Disease Progress Curve (average proportion of diseased hosts relative
+to the carryng capacity)
+\item "gla_abs" : Absolute Green Leaf Area (average number of healthy hosts per square meter)
+\item "gla_rel" : Relative Green Leaf Area (average proportion of healthy hosts relative to the
+total number of existing hosts)
+\item "eco_cost" : total crop costs (in weight or volume units per ha)
+\item "eco_product" : total crop production(in monetary units per ha)
+\item "eco_benefit" : total crop benefits (in monetary units per ha)
+\item "eco_grossmargin" : Gross Margin (benefits - costs, in monetary units per ha)
+\item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: Epidemic dynamics
+related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only,
+works only if graphic=TRUE.
+\item "all" : compute all these outputs (default)
+\item "" : none of these outputs will be generated.
+}}
 
-\item{taumut}{mutation probability: probability for a propagule to change its infectivity or its aggressiveness on a resistant cultivar 
-carrying a major gene or a quantitative resistance trait. Must be above 0. If equal to 0, then the pathogen cannot evolve.}
+\item{evol_outputs}{a character string (or a vector of character strings if several outputs are to be computed)
+specifying the type of evolutionary outputs to generate :\itemize{
+\item "evol_patho": Dynamics of pathogen genotype frequencies
+\item "evol_aggr": Evolution of pathogen aggressiveness
+\item "durability": Durability of resistance genes
+\item "all": compute all these outputs (default)
+\item "": none of these outputs will be generated.
+}}
 
-\item{probSex}{probability for an infection that its reproduction is sexual rather than clonal.}
+\item{thres_breakdown}{an integer (or vector of integers) giving the threshold (i.e. number of infections)
+above which a pathogen genotype is unlikely to go extinct, used to characterise the time to invasion
+of resistant hosts (several values are computed if several thresholds are given in a vector).}
 
-\item{MGeff}{efficiency of major-gene resistance on the infection rate of non-adapted pathogens. Must be between 0 and 1.}
+\item{GLAnoDis}{the absolute Green Leaf Area in absence of disease (used to compute economic outputs).}
 
-\item{QReff}{efficiency of quantitative resistance on the target aggressiveness trait (infection rate, latent period duration, 
-sporulation rate, or sporulation duration) of non-adapted pathogens. Must be between 0 and 1.}
+\item{audpc100S}{the audpc in a fully susceptible landscape (used as reference value for graphics and video).}
 
-\item{beta}{trade-off strength for pathogen adaptation to quantitative resistance (<1 for weak, =1 for linear, >1 for strong). Must be above 0.}
+\item{writeTXT}{a logical indicating if outputs must be written in text files (TRUE, default) or not (FALSE).}
 
-\item{Naggr}{an integer specifying the number of increments to completely adapt to quantitative resistance. Must be greater or equal 2.}
+\item{graphic}{a logical indicating if graphics must be generated (TRUE, default) or not (FALSE).}
 
-\item{timeToQR_exp}{average time to expression of quantitative resistance (to simulate Adult Plant Resistance).}
+\item{videoMP4}{a logical indicating if a video must be generated (TRUE) or not (FALSE, default).
+Works only if graphic=TRUE and epid_outputs="audpc" (or epid_outputs="all").}
 
-\item{timeToQR_var}{variance of the time to expression of quantitative resistance (to simulate Adult Plant Resistance).}
-
-\item{C0}{planting density of the different cultivars (in number of hosts per meter square).}
-
-\item{Cmax}{carrying capacity of the different cultivars (in number of hosts per meter square).}
-
-\item{yield}{a matrix of yield (weight units of product/individual/time-step) for each cultivar (rows) and each sanitary state (columns: H, L, I, R).}
-
-\item{purchPrice}{price of crop planting (in monetary units/planted individual)}
-
-\item{sellPrice}{selling price (in monetary unit/weight units of production)}
-
-\item{graphic}{a logical indicating if graphics must be generated (TRUE) or not (FALSE).}
-
-\item{video}{a logical indicating if a video must be generated (TRUE) or not (FALSE). Works only if graphic is TRUE as well.}
+\item{keepRawResults}{a logical indicating if binary files must be kept after the end of the simulation (default=FALSE).
+Careful, many files may be generated if keepRawResults=TRUE.}
 }
 \value{
-A set of binary files is generated for every year of simulation and every compartment: \itemize{
+A list containing all outputs that have been required via "epid_outputs" and "evol_outputs".
+A set of text files, graphics and a video showing epidemic dynamics can be generated.
+If keepRawResults=TRUE, a set of binary files is generated for every year of simulation and
+every compartment: \itemize{
 \item H: healthy hosts,
 \item Hjuv: juvenile healthy hosts,
 \item L: latently infected hosts,
 \item I: infectious hosts,
 \item R: removed hosts,
-\item S: propagules.
-} 
-Each file indicates for every time-step the number of individuals in each field, and when appropriate for each cultivar and pathotype)
-These binary files are used to generate a set of text files containing all outputs of the simulations (see details).
-A set of graphics and a video showing epidemic maps can also be generated.
+\item P: propagules.}
+Each file indicates for every time-step the number of individuals in each field, and when appropriate for
+each host and pathogen genotypes.
 }
 \description{
-Simulation of plant resistance deployment, using landscape structures provided with the package
-and a parameterisation of the model to represent pathogens as typified by rusts of cereals (e.g. stripe rust, stem rust
-, and leaf rust of wheat and barley). All parameters are optional. See details for explanations.
+Stochastic, spatially-explicit, demo-genetic model simulating the spread and evolution
+of a pathogen in a heterogeneous landscape and generating a wide range of epidemiological, evolutionary
+and economic outputs.
 }
 \details{
-\describe{
-
-\item{Landscape structure}{The landscape structure is the physical structure of the area, defined as the spatial arrangement of fields.}
-
-\item{Deployment strategies}{Deployment strategies include the deployment of a susceptible cultivar (SC)
-and one (RC) or two (RC1 and RC2) resistant cultivars carrying up to four major resistance genes or up to four
-quantitative resistance traits (against infection rate, latent period, sporulation rate and sporulation duration 
-of the pathogen). In addition, the different resistance sources can be combined in time (crop rotation: recurrent
-succession of cultivars in the same field), or space within a single cultivar (pyramiding), in different cultivars
-of the same field (mixtures) or in different fields (mosaics).}
-
-\item{Resistance formulas}{The genetic resistance carried by a plant cultivar is specified by a vector of size 8: the
-four first elements indicate whether the cultivar carries major resistance genes #1, #2, #3 and #4, respectively.
-The following four elements indicate whether the cultivar carried a quantitative resistance trait against the
- infection rate, the latent period duration, the sporulation rate, or the sporulation duration of the pathogen, respectively.
- For example, the formula c(1,0,0,0,0,1,0,0) indicates the presence of major gene #1 and a quantitative resistance which 
- increases the duration of the latent period of the pathogen.}
-
-\item{Model outputs}{ 
-
-\describe{
-\item{\strong{Evolutionary outputs.}}{ \describe{
-\item{\emph{Durability of qualitative resistance:}}{
-For a given major gene, several computations are 
-performed: \itemize{
-\item (d1) time to first appearance of a pathogen mutant;
-\item (d2) time to first true infection of a resistant host by such mutants; and 
-\item (d3) time when the number of infections of resistant hosts by these mutants reaches a threshold above which mutant pathogens are unlikely to go extinct.
-} 
-}
-\item{\emph{Erosion of quantitative resistance:}}{
-pathogen adaptation to quantitative resistance is gradual, so the three measures described above are computed for every step 
-towards complete erosion of resistance (i.e. nAgw-1 levels).} 
-\item{\emph{Durability of a deployment strategy:}}{ a simulation run is divided into three periods: \enumerate{
-\item the initial short-term period when all resistance sources are at their highest potential; 
-\item a transitory period during which a given deployment strategy is only partially effective; and 
-\item a longer-term period when all the resistances have been overcome or completely eroded. 
-}
-To assess the end of the short-term period, the time to establishment (durability measure (d3)) is computed for every major gene, and every quantitative trait 
-at the first level of erosion (agw(p)=2). The minimal value of these measures, denoted by D1, delimitates short-term and transitory periods. 
-Similarly, the time to establishment is computed for every major gene, and for every quantitative trait at the highest level of erosion (agw(p)=nAgw). 
-The maximal value of these measures, termed D2, delimits transitory and long-term periods.
-}
-}
-}
-\item{\strong{Epidemiological outputs.}}{ 
-The epidemiological impact of pathogen spread is evaluated by two different measures: \enumerate{
-\item Green Leaf Area (GLA): The GLA represents the average number of productive hosts per time step and per surface unit.
-\item Area Under Disease Progress Curve (AUDPC): The AUDPC is the average proportion of diseased hosts relative to the carrying capacity and represents disease severity.
-}
-\describe{
-\item{\emph{Global epidemiological control:}}{
-The GLA and AUDPC of every cultivar as well as the whole landscape are averaged across the whole simulation run, 
- to measure the global epidemiological performance of a deployment strategy.} 
- \item{\emph{Short-term epidemiological control:}}{
-  The average GLA and AUDPC of the susceptible 
- cultivar is computed on whole cropping seasons from the beginning of the simulation until the end of 
- the season preceding year before D1.}
- \item{\emph{Epidemiological control during the transitory period:}}{
- The average GLA and AUDPC of the susceptible cultivar is computed on whole seasons from the 
- beginning of the season following year after D1 to the end of the season year before preceding D2.} 
- \item{\emph{Long-term epidemiological control:}}{
- The average GLA and AUDPC of the whole landscape is computed on whole seasons 
- from the beginning of the year after D2 to the end of the simulation.}
- }
- }
- }
-}
-}
+See ?landsepi for details on the model and assumptions.
+Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
+(‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions
+with 'susceptible host') structure with a discrete time step. It simulates the spread and
+evolution of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
+potential bottlenecks to the pathogen. A wide array of resistance deployment strategies can be simulated and
+evaluated using several possible outputs to assess the epidemiological, evolutionary and economic performance
+of deployment strategies (See ?epid_output and ?evol_output for details).
 }
 \examples{
-\donttest{
-## Default parameterisation (5-year simulation of a mosaic deployment strategy of 
-## two resistant cultivars in balanced proportions and low level of spatial aggregation)
-simul_landsepi()
+\dontrun{
+#### Spatially-implicit simulation with 2 patches (S + R) during 3 years ####
 
-## Mosaic of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, isolRR=3, strat="MO", Nhost=3
-, nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
-, costInfect=0.5, taumut=1e-7)
+## Simulation parameters
+time_param <- list(Nyears = 3, nTSpY = 120)
+area <- c(100000, 100000)
+rotation <- data.frame(year_1 = c(0, 1), year_2 = c(0, 1), year_3 = c(0, 1), year_4 = c(0, 1))
+croptype_names <- c("Susceptible crop", "Resistant crop")
+croptypes_cultivars_prop <- data.frame(
+  croptypeID = c(0, 1),
+  cultivarID = c(0, 1),
+  proportion = c(1, 1)
+)
+cultivars <- rbind(
+  loadCultivar(name = "Susceptible", type = "growingHost"),
+  loadCultivar(name = "Resistant", type = "growingHost")
+)
+genes <- loadGene(name = "MG", type = "majorGene")
+cultivars_genes_list <- list(numeric(0), 0)
 
-## Mixture of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, propRR=1/2, strat="MI", Nhost=3
-, nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
-, costInfect=0.5, taumut=1e-7)
+## Run simulation
+simul_landsepi(
+  seed = 12345, time_param, croptype_names, croptypes_cultivars_prop, cultivars,
+  cultivars_genes_list, genes, landscape = NULL, area, rotation,
+  basic_patho_param = loadPathogen(disease = "rust"),
+  disp_patho = c(0.99, 0.01, 0.01, 0.99), disp_host = c(1, 0, 0, 1), pI0 = 5e-4
+)
 
-## Rotations of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, isolRR=1, strat="RO", Nhost=3
-, nYears=50, resistance1=c(1,0,0,0,0,0,0,0), resistance2=c(0,1,0,0,0,0,0,0)
-, costInfect=0.5, taumut=1e-7)
 
-## Pyramiding of two major genes
-simul_landsepi(seed=1, idLan=1, propSR=2/3, isolSR=3, strat="PY", Nhost=2
-, nYears=50, resistance1=c(1,1,0,0,0,0,0,0), costInfect=0.5, taumut=1e-7)
+#### Spatially-explicit simulation with built-in landscape during 10 years ####
+# Generate a mosaic of four croptypes in balanced proportions
+# and medium level of spatial aggregation
 
-## Combination of a major gene with a quantitative resistance against the latent period    
-simul_landsepi(seed=1, idLan=1, propSR=0.8, isolSR=1, strat="PY", Nhost=2
-, nYears=50, resistance1=c(1,0,0,0,0,1,0,0)
-, costInfect=0.5, costAggr=0.5, taumut=1e-7, MGeff=1.0, QReff=0.5, beta=1.0, Naggr=6)
+## Simulation and Landscape parameters
+Nyears <- 10
+landscape <- loadLandscape(1)
+Npoly <- length(landscape)
+library(sf)
+area <- st_area(st_as_sf(landscape))
+rotation <- AgriLand(landscape, Nyears,
+  rotation_period = 1, rotation_realloc = FALSE,
+  rotation_sequence = c(0, 1, 2, 3),
+  prop = rep(1 / 4, 4), aggreg = 0.5, graphic = TRUE, outputDir = getwd()
+)
+rotation <- data.frame(rotation)[, 1:(Nyears + 1)]
+croptype_names <- c("Susceptible crop"
+, "Resistant crop 1"
+, "Resistant crop 2"
+, "Resistant crop 3")
+croptypes_cultivars_prop <- data.frame(croptypeID = c(0, 1, 2, 3), cultivarID = c(0, 1, 2, 3),
+                                       proportion = c(1, 1, 1, 1))
+cultivars <- data.frame(rbind(
+  loadCultivar(name = "Susceptible", type = "growingHost"),
+  loadCultivar(name = "Resistant1", type = "growingHost"),
+  loadCultivar(name = "Resistant2", type = "growingHost"),
+  loadCultivar(name = "Resistant3", type = "growingHost")
+), stringsAsFactors = FALSE)
+genes <- data.frame(rbind(
+  loadGene(name = "MG 1", type = "majorGene"),
+  loadGene(name = "MG 2", type = "majorGene"),
+  loadGene(name = "MG 3", type = "majorGene")
+), stringsAsFactors = FALSE)
+cultivars_genes_list <- list(numeric(0), 0, 1, 2)
+
+## Run simulation
+simul_landsepi(
+  seed = 12345, time_param = list(Nyears = Nyears, nTSpY = 120),
+  croptype_names, croptypes_cultivars_prop, cultivars,
+  cultivars_genes_list, genes, landscape, area, rotation,
+  basic_patho_param = loadPathogen(disease = "rust"),
+  disp_patho = loadDispersalPathogen(1),
+  disp_host = as.numeric(diag(Npoly)),
+  pI0 = 5e-4
+)
 }
+
 }
 \references{
-Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
+Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018).
+Assessing the durability andefficiency of landscape-based strategies to deploy
+plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
+}
+\seealso{
+\link{model_landsepi}, \link{epid_output}, \link{evol_output}, \link{video}, \link{runSimul}
 }
