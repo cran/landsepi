@@ -12,7 +12,7 @@
 
 
 
-<title>Running a simple simulation</title>
+<title>1 - Running a simple simulation</title>
 
 
 
@@ -297,12 +297,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Running a simple simulation</h1>
+<h1 class="title toc-ignore">1 - Running a simple simulation</h1>
 
 
 
-<div id="running-a-simple-simulation" class="section level1">
-<h1>Running a simple simulation</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(landsepi)</a></code></pre></div>
 <div id="general-presentation-of-the-package" class="section level2">
 <h2>General presentation of the package</h2>
@@ -312,15 +310,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h2>Initialisation of simulation parameters</h2>
 <p>The function <code>createSimulParams()</code> will create a directory to store simulation outputs, and return an object of class <code>LandsepiParams</code> that will further contain all simulation parameters.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">simul_params &lt;-<span class="st"> </span><span class="kw">createSimulParams</span>(<span class="dt">outputDir =</span> <span class="kw">getwd</span>())</a>
-<a class="sourceLine" id="cb2-2" title="2"><span class="co">#&gt; Created output directory : /tmp/Rtmpjha3ZI/Rbuild2741676dc59/landsepi/vignettes/simul_landsepi_2020-07-01_11-25-57</span></a>
-<a class="sourceLine" id="cb2-3" title="3"><span class="co">#&gt; Seed for RGN set to : 1593595557</span></a></code></pre></div>
+<a class="sourceLine" id="cb2-2" title="2"><span class="co">#&gt; Created output directory : /tmp/RtmpLxtmHF/Rbuild2746f93d333/landsepi/vignettes/simul_landsepi_2020-07-02_14-23-40</span></a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="co">#&gt; Seed for RGN set to : 1593692620</span></a></code></pre></div>
 <p>In the following, the object <code>simul_params</code> is to be updated with all simulation parameters using <code>set*()</code> functions. To help parameterisation, built-in parameters are available and may be loaded via <code>load*()</code> functions.</p>
 </div>
 <div id="setting-the-seed-and-time-parameters" class="section level2">
 <h2>Setting the seed and time parameters</h2>
 <p>A seed (for random number generator) is randomly generated when <code>simul_params</code> is initialised by <code>createSimulParams()</code>. If a specific seed is required, it can be set using the function <code>setSeed()</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">simul_params<span class="op">@</span>Seed</a>
-<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; [1] 1593595557</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; [1] 1593692620</span></a>
 <a class="sourceLine" id="cb3-3" title="3">simul_params &lt;-<span class="st"> </span><span class="kw">setSeed</span>(simul_params, <span class="dt">seed =</span> <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt; Seed for RGN set to : 1</span></a>
 <a class="sourceLine" id="cb3-5" title="5">simul_params<span class="op">@</span>Seed</a>
@@ -554,7 +552,8 @@ A buit-in parameterisation for classical types of cultivars is available using <
 </div>
 <div id="resistance-genes" class="section level3">
 <h3>Resistance genes</h3>
-<p>Characteristics of each plant resistance gene and each corresponding pathogenicity gene are summarised in a dataframe. A built-in parameterisation for classical resistance sources is available using <code>loadGene()</code> to generate each line of the dataframe. Type “majorGene” is for completely efficient resistance to which pathogen may adapt via a single mutation. Type “APR” stands for Adult Plant Resistance, i.e. a major gene which activates after a delay after planting, and type “QTL” is a partially efficient resistance source to which the pathogen may adapt gradually. The type “immunity” code for a completely efficient resistance gene that cannot be overcome, in such a way that infection is totally impossible; it is helpful to parameterise non-host cultivars.</p>
+<p>Characteristics of each plant resistance gene and each corresponding pathogenicity gene are summarised in a dataframe.<br />
+A built-in parameterisation for classical resistance sources is available using <code>loadGene()</code> to generate each line of the dataframe. Type “majorGene” is for completely efficient resistance to which pathogen may adapt via a single mutation. Type “APR” stands for Adult Plant Resistance, i.e. a major gene which activates after a delay after planting, and type “QTL” is a partially efficient resistance source to which the pathogen may adapt gradually. The type “immunity” code for a completely efficient resistance gene that cannot be overcome, in such a way that infection is totally impossible; it is helpful to parameterise non-host cultivars.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">gene1 &lt;-<span class="st"> </span><span class="kw">loadGene</span>(<span class="dt">name =</span> <span class="st">&quot;MG 1&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;majorGene&quot;</span>)</a>
 <a class="sourceLine" id="cb16-2" title="2">gene2 &lt;-<span class="st"> </span><span class="kw">loadGene</span>(<span class="dt">name =</span> <span class="st">&quot;Lr34&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;APR&quot;</span>)</a>
 <a class="sourceLine" id="cb16-3" title="3">gene3 &lt;-<span class="st"> </span><span class="kw">loadGene</span>(<span class="dt">name =</span> <span class="st">&quot;gene 3&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;QTL&quot;</span>)</a>
@@ -683,12 +682,18 @@ A buit-in parameterisation for classical types of cultivars is available using <
 <a class="sourceLine" id="cb20-26" title="26"><span class="co">#&gt; Resistant2              225          200</span></a>
 <a class="sourceLine" id="cb20-27" title="27"><span class="co">#&gt; Resistant3              225          200</span></a>
 <a class="sourceLine" id="cb20-28" title="28"><span class="co">#&gt; Forest                    0            0</span></a></code></pre></div>
-<p>With this example of parameterisation: - “Susceptible” is a susceptible cultivar (initially infected by a wild-type pathogen) - “Resistant1” is a mono-resistant cultivar - “Resistant2” is a pyramided cultivar - “Resistant3” is a nonhost cultivar - “Forest” is not a crop.<br />
+<p>With this example of parameterisation:<br />
+- “Susceptible” is a susceptible cultivar (initially infected by a wild-type pathogen)<br />
+- “Resistant1” is a mono-resistant cultivar<br />
+- “Resistant2” is a pyramided cultivar<br />
+- “Resistant3” is a nonhost cultivar<br />
+- “Forest” is not a crop.<br />
 Infection is impossible on both “Resistance3” and “Forest”, but the former will be considered for host growth, yield, production costs and benefits, whereas the latter won’t.</p>
 </div>
 <div id="allocating-cultivars-to-croptypes" class="section level3">
 <h3>Allocating cultivars to croptypes</h3>
-<p>Characteristics of each croptype (a croptype is a set of hosts cultivated in a field with specific proportions) are summarised in a dataframe. A buit-in parameterisation for classical croptypes is available using <code>loadCroptypes()</code> to generate the whole table filled with zeros:</p>
+<p>Characteristics of each croptype (a croptype is a set of hosts cultivated in a field with specific proportions) are summarised in a dataframe.<br />
+A buit-in parameterisation for classical croptypes is available using <code>loadCroptypes()</code> to generate the whole table filled with zeros:</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">croptypes &lt;-<span class="st"> </span><span class="kw">loadCroptypes</span>(simul_params, <span class="dt">names =</span> <span class="kw">c</span>(<span class="st">&quot;Susceptible crop&quot;</span></a>
 <a class="sourceLine" id="cb21-2" title="2">                                                   , <span class="st">&quot;Pure resistant crop&quot;</span></a>
 <a class="sourceLine" id="cb21-3" title="3">                                                   , <span class="st">&quot;Mixture&quot;</span></a>
@@ -781,8 +786,14 @@ Briefly, a rotation sequence is defined by a list. Each element of this list is 
 See <code>?epid_output</code> and <code>?evol_output</code> for details on the different output variables.</p>
 <blockquote>
 <p>Possible epidemiological outputs include:<br />
-- <strong>“audpc”</strong> : Area Under Disease Progress Curve (average proportion of diseased hosts relative to the carryng capacity) - <strong>“gla_abs”</strong> : Absolute Green Leaf Area (average number of healthy hosts per square meter)<br />
-- <strong>“gla_rel”</strong> : Relative Green Leaf Area (average proportion of healthy hosts relative to the total number of existing hosts) - <strong>“eco_cost”</strong> : total crop costs (in weight or volume units per ha) - <strong>“eco_product”</strong> : total crop production (in monetary units per ha) - <strong>“eco_benefit”</strong> : total crop benefits (in monetary units per ha) - <strong>“eco_grossmargin”</strong> : Gross Margin (benefits - costs, in monetary units per ha) - <strong>“HLIR_dynamics”, “H_dynamics”, “L_dynamics”, “IR_dynamics”, “HLI_dynamics”</strong>, etc.: Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only, works only if graphic=TRUE.<br />
+- <strong>“audpc”</strong> : Area Under Disease Progress Curve (average proportion of diseased hosts relative to the carryng capacity)<br />
+- <strong>“gla_abs”</strong> : Absolute Green Leaf Area (average number of healthy hosts per square meter)<br />
+- <strong>“gla_rel”</strong> : Relative Green Leaf Area (average proportion of healthy hosts relative to the total number of existing hosts)<br />
+- <strong>“eco_cost”</strong> : total crop costs (in weight or volume units per ha)<br />
+- <strong>“eco_product”</strong> : total crop production (in monetary units per ha)<br />
+- <strong>“eco_benefit”</strong> : total crop benefits (in monetary units per ha)<br />
+- <strong>“eco_grossmargin”</strong> : Gross Margin (benefits - costs, in monetary units per ha)<br />
+- <strong>“HLIR_dynamics”, “H_dynamics”, “L_dynamics”, “IR_dynamics”, “HLI_dynamics”</strong>, etc.: Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only, works only if graphic=TRUE.<br />
 - <strong>“all”</strong> : compute all these outputs (default)<br />
 - <strong>&quot;&quot;</strong> : none of these outputs will be generated.</p>
 </blockquote>
@@ -822,7 +833,6 @@ See <code>?epid_output</code> and <code>?evol_output</code> for details on the d
 <a class="sourceLine" id="cb28-2" title="2">simul_params &lt;-<span class="st"> </span><span class="kw">saveDeploymentStrategy</span>(simul_params)</a></code></pre></div>
 <p>Then, the function <code>runSimul()</code> launches the simulation. Use <code>?runSimul</code> to get all available options.</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1"><span class="kw">runSimul</span>(simul_params, <span class="dt">graphic =</span> <span class="ot">TRUE</span>, <span class="dt">videoMP4 =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
-</div>
 </div>
 
 

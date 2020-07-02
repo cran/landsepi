@@ -1,8 +1,8 @@
 ---
-title: "Parameterising landscape and dispersal in landsepi"
+title: "3 - Parameterising landscape and dispersal in landsepi"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Parameterising landscape and dispersal in landsepi}
+  %\VignetteIndexEntry{3 - Parameterising landscape and dispersal in landsepi}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -15,8 +15,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-
-# Parameterising landscape and dispersal in landsepi
 
 To simulate epidemics in a heterogeneous landscape, *landsepi* needs (among others) these three elements which are 
 related one each other:  

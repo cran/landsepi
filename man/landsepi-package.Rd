@@ -16,8 +16,8 @@ resistance deployment strategies.
 \tabular{ll}{
 Package: \tab landsepi\cr
 Type: \tab Package\cr
-Version: \tab 1.0.0\cr
-Date: \tab 2020-07-01\cr
+Version: \tab 1.0.1\cr
+Date: \tab 2020-07-02\cr
 License: \tab GPL (>=2)\cr
 }
 

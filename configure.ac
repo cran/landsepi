@@ -11,8 +11,8 @@ dnl -----------------------------------------------
 dnl Package name and version number (user defined)
 dnl -----------------------------------------------
 define([THE_PACKAGE_NAME],    [landsepi])
-define([THE_PACKAGE_VERSION], [1.0.0])
-define([THE_PACKAGE_MAINTAINER],  [jean-francois.rey@inra.fr])
+define([THE_PACKAGE_VERSION], [1.0.1])
+define([THE_PACKAGE_MAINTAINER],  [jean-francois.rey@inrae.fr])
 
 dnl --------------------------------
 dnl Initialization macros.
@@ -50,7 +50,7 @@ if test "$enable_debug" != "yes" && test "$DEBUG" != TRUE ; then
   CXXFLAGS="${CXXFLAGS} -w"
 else
   AC_MSG_RESULT(yes)
-  CXXFLAGS=" -pedantic -Wall -Wextra -g -ggdb -O0 -fno-inline"
+  CXXFLAGS=" -pedantic -Wall -Wconversion -Wextra -g -ggdb -O0 -fno-inline"
   CPPFLAGS=" -DDEBUG ${CPPFLAGS}"
 fi
 

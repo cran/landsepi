@@ -1,9 +1,9 @@
 ---
-title: "Running a simple simulation"
+title: "1 - Running a simple simulation"
 data: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Running a simple simulation}
+  %\VignetteIndexEntry{1 - Running a simple simulation}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Running a simple simulation
 
 ```{r, results="hide", message=FALSE}
 library(landsepi)
@@ -190,7 +189,7 @@ cultivars_new
 
 ### Resistance genes
 
-Characteristics of each plant resistance gene and each corresponding pathogenicity gene are summarised in a dataframe. 
+Characteristics of each plant resistance gene and each corresponding pathogenicity gene are summarised in a dataframe.  
 A built-in parameterisation for classical resistance sources is available using `loadGene()` to generate each line of the 
 dataframe. Type "majorGene" is for completely efficient resistance to which pathogen may adapt via a single mutation. Type "APR" 
 stands for Adult Plant Resistance, i.e. a major gene which activates after a delay after planting, and type "QTL" is a 
@@ -261,11 +260,11 @@ simul_params <- allocateCultivarGenes(simul_params
 simul_params@Cultivars
 ```
 
-With this example of parameterisation:
-- "Susceptible" is a susceptible cultivar (initially infected by a wild-type pathogen)
-- "Resistant1" is a mono-resistant cultivar 
-- "Resistant2" is a pyramided cultivar
-- "Resistant3" is a nonhost cultivar
+With this example of parameterisation:  
+- "Susceptible" is a susceptible cultivar (initially infected by a wild-type pathogen)  
+- "Resistant1" is a mono-resistant cultivar  
+- "Resistant2" is a pyramided cultivar  
+- "Resistant3" is a nonhost cultivar  
 - "Forest" is not a crop.  
 Infection is impossible on both "Resistance3" and "Forest", but the former will 
 be considered for host growth, yield, production costs and benefits, whereas the latter won't.
@@ -274,7 +273,8 @@ be considered for host growth, yield, production costs and benefits, whereas the
 ### Allocating cultivars to croptypes
 
 Characteristics of each croptype (a croptype is a set of hosts cultivated in a field with specific proportions) 
-are summarised in a dataframe. A buit-in parameterisation for classical croptypes is available 
+are summarised in a dataframe.  
+A buit-in parameterisation for classical croptypes is available 
 using `loadCroptypes()` to generate the whole table filled with zeros: 
 ```{r}
 croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop"
@@ -361,14 +361,14 @@ See `?epid_output` and `?evol_output` for details on the different output variab
 
 >Possible epidemiological outputs include:  
 - **"audpc"** : Area Under Disease Progress Curve (average proportion of diseased hosts relative 
-to the carryng capacity) 
+to the carryng capacity)  
 - **"gla_abs"** : Absolute Green Leaf Area (average number of healthy hosts per square meter)  
 - **"gla_rel"** : Relative Green Leaf Area  (average proportion of healthy hosts relative to the 
-total number of existing hosts)
-- **"eco_cost"** : total crop costs (in weight or volume units per ha) 
-- **"eco_product"** : total crop production (in monetary units per ha) 
-- **"eco_benefit"** : total crop benefits (in monetary units per ha) 
-- **"eco_grossmargin"** : Gross Margin (benefits - costs, in monetary units per ha) 
+total number of existing hosts)  
+- **"eco_cost"** : total crop costs (in weight or volume units per ha)  
+- **"eco_product"** : total crop production (in monetary units per ha)  
+- **"eco_benefit"** : total crop benefits (in monetary units per ha)  
+- **"eco_grossmargin"** : Gross Margin (benefits - costs, in monetary units per ha)  
 - **"HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics"**, etc.: Epidemic dynamics 
 related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only, 
 works only if graphic=TRUE.  

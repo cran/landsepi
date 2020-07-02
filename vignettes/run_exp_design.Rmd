@@ -1,9 +1,9 @@
 ---
-title: "Running a numerical experimental design"
+title: "2 - Running a numerical experimental design"
 data: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Running a numerical experimental design}
+  %\VignetteIndexEntry{2 - Running a numerical experimental design}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -16,8 +16,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-
-# Running a numerical experimental design
 
 This is an example of how to run a numerical experimental design with *landsepi*.
 ```{r, eval=FALSE, message=FALSE}
@@ -167,12 +165,12 @@ myDesign
 The argument "keepRawResults" from function `runSimul()` allows to keep a set of binary files after the
 end of the simulation.  
 
->This set of binary files is composed of one file per simulated year and per compartment:
-- H: healthy hosts,
-- Hjuv: juvenile healthy hosts,
-- L: latently infected hosts,
-- I: infectious hosts,
-- R: removed hosts,
+>This set of binary files is composed of one file per simulated year and per compartment:  
+- H: healthy hosts,  
+- Hjuv: juvenile healthy hosts,  
+- L: latently infected hosts,  
+- I: infectious hosts,  
+- R: removed hosts,  
 - P: propagules.  
 Each file indicates for every time-step the number of individuals in each field, 
 and when appropriate for each host and pathogen genotypes.

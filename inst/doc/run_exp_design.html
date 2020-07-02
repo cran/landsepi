@@ -12,7 +12,7 @@
 
 
 
-<title>Running a numerical experimental design</title>
+<title>2 - Running a numerical experimental design</title>
 
 
 
@@ -297,12 +297,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Running a numerical experimental design</h1>
+<h1 class="title toc-ignore">2 - Running a numerical experimental design</h1>
 
 
 
-<div id="running-a-numerical-experimental-design" class="section level1">
-<h1>Running a numerical experimental design</h1>
 <p>This is an example of how to run a numerical experimental design with <em>landsepi</em>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(landsepi)</a></code></pre></div>
 <div id="write-the-experimental-design" class="section level2">
@@ -327,11 +325,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb3-2" title="2">myDesign &lt;-<span class="st"> </span><span class="kw">cbind</span>(<span class="dt">simul =</span> <span class="dv">1</span><span class="op">:</span>n, <span class="dt">seed =</span> <span class="kw">sample</span>(n<span class="op">*</span><span class="dv">100</span>, n), myDesign)</a>
 <a class="sourceLine" id="cb3-3" title="3">myDesign</a>
 <a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt;   simul seed nTSpY   pI0 infection_rate id_landscape aggreg R_efficiency</span></a>
-<a class="sourceLine" id="cb3-5" title="5"><span class="co">#&gt; 1     1  490   120 0e+00            0.5            1   0.07          1.0</span></a>
-<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt; 2     2   22   110 1e-04            0.4            2   0.07          0.9</span></a>
-<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&gt; 3     3  170   100 5e-04            0.3            3   0.25          0.8</span></a>
-<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; 4     4  284    90 1e-03            0.2            4  10.00          0.7</span></a>
-<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt; 5     5  139    80 1e-02            0.1            5  10.00          0.6</span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co">#&gt; 1     1  237   120 0e+00            0.5            1   0.07          1.0</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt; 2     2  234   110 1e-04            0.4            2   0.07          0.9</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&gt; 3     3  321   100 5e-04            0.3            3   0.25          0.8</span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; 4     4   49    90 1e-03            0.2            4  10.00          0.7</span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt; 5     5  136    80 1e-02            0.1            5  10.00          0.6</span></a>
 <a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt;   growth_rate durab_MG1 durab_MG2 mean_audpc</span></a>
 <a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt; 1         0.1        NA        NA         NA</span></a>
 <a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt; 2         0.2        NA        NA         NA</span></a>
@@ -443,7 +441,13 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h2>Compute your own output variables</h2>
 <p>The argument “keepRawResults” from function <code>runSimul()</code> allows to keep a set of binary files after the end of the simulation.</p>
 <blockquote>
-<p>This set of binary files is composed of one file per simulated year and per compartment: - H: healthy hosts, - Hjuv: juvenile healthy hosts, - L: latently infected hosts, - I: infectious hosts, - R: removed hosts, - P: propagules.<br />
+<p>This set of binary files is composed of one file per simulated year and per compartment:<br />
+- H: healthy hosts,<br />
+- Hjuv: juvenile healthy hosts,<br />
+- L: latently infected hosts,<br />
+- I: infectious hosts,<br />
+- R: removed hosts,<br />
+- P: propagules.<br />
 Each file indicates for every time-step the number of individuals in each field, and when appropriate for each host and pathogen genotypes.</p>
 </blockquote>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co">## Disable computation of outputs:</span></a>
@@ -526,7 +530,6 @@ Each file indicates for every time-step the number of individuals in each field,
 <a class="sourceLine" id="cb7-71" title="71">    </a>
 <a class="sourceLine" id="cb7-72" title="72">    index &lt;-<span class="st"> </span>index <span class="op">+</span><span class="st"> </span>nTSpY</a>
 <a class="sourceLine" id="cb7-73" title="73">}</a></code></pre></div>
-</div>
 </div>
 
 

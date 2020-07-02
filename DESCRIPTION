@@ -2,8 +2,8 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 1.0.0
-Date: 2020-07-01
+Version: 1.0.1
+Date: 2020-07-02
 Authors@R: c(person("Loup", "Rimbaud", role = "aut", email = "loup.rimbaud@inrae.fr"),
         person("Julien", "Papaix", role = "aut", email = "julien.papaix@inrae.fr"),
         person("Jean-Francois", "Rey", role = "cre", email = "jean-francois.rey@inrae.fr"),
@@ -43,6 +43,6 @@ LinkingTo: Rcpp, testthat
 RoxygenNote: 7.1.1
 Suggests: testthat, shiny, shinyjs, DT, knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2020-07-01 09:26:01 UTC; root
+Packaged: 2020-07-02 12:23:43 UTC; root
 Repository: CRAN
-Date/Publication: 2020-07-01 14:40:02 UTC
+Date/Publication: 2020-07-02 13:10:02 UTC

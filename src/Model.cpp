@@ -174,7 +174,7 @@ void Model::reproSex(const int& t, std::vector<int>& P, const Vector2D<int>& I, 
                 } else {
                     /* Random loci segregation for each propagule */
                     for(int s = 0; s < Pprod; s++) {
-                        const int randNum = static_cast<int>(pow(2, this->Ngene) * rng_uniform());
+                        const int randNum = static_cast<int>(pow(2, static_cast<double>(this->Ngene)) * rng_uniform());
                         int randBin = as_binary(randNum);
                         std::vector<int> aggr_new(this->Ngene);
                         for(int locus = 0; locus < this->Ngene; locus++) { /* i.e. for each locus */
