@@ -25,11 +25,8 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP run_testthat_tests();
-
 static const R_CallMethodDef CallEntries[] = {
     {"_landsepi_model_landsepi", (DL_FUNC) &_landsepi_model_landsepi, 10},
-    {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 0},
     {NULL, NULL, 0}
 };
 

@@ -14,30 +14,108 @@
 
 <title>3 - Parameterising landscape and dispersal in landsepi</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+<style type="text/css">
+a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
+a.anchor-section::before {content: '#';}
+.hasAnchor:hover a.anchor-section {visibility: visible;}
+</style>
+<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
+document.addEventListener('DOMContentLoaded', function() {
+  // Do nothing if AnchorJS is used
+  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
+    return;
+  }
+
+  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+  // Do nothing if sections are already anchored
+  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
+    return null;
+  }
+
+  // Use section id when pandoc runs with --section-divs
+  const section_id = function(x) {
+    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
+            ? x.id : '');
+  };
+
+  // Add anchors
+  h.forEach(function(x) {
+    const id = x.id || section_id(x.parentElement);
+    if (id === '') {
+      return null;
+    }
+    let anchor = document.createElement('a');
+    anchor.href = '#' + id;
+    anchor.classList = ['anchor-section'];
+    x.classList.add('hasAnchor');
+    x.appendChild(anchor);
+  });
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -46,9 +124,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -309,12 +387,12 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="using-your-own-landscape" class="section level2">
 <h2>Using your own landscape</h2>
 <p>Any landscape can be used to simulate epidemics in <em>landsepi</em>, provided that it is in <em>sp</em> or <em>sf</em> format and contains, at least, polygon coordinates.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(sf)</a>
-<a class="sourceLine" id="cb1-2" title="2">mylandscape &lt;-<span class="st"> </span><span class="kw">st_read</span>(<span class="dt">dsn =</span> <span class="st">&quot;myshapefile.shp&quot;</span>)</a>
-<a class="sourceLine" id="cb1-3" title="3"><span class="kw">library</span>(landsepi)</a>
-<a class="sourceLine" id="cb1-4" title="4">simul_params &lt;-<span class="st"> </span><span class="kw">createSimulParams</span>(<span class="dt">outputDir =</span> <span class="kw">getwd</span>())</a>
-<a class="sourceLine" id="cb1-5" title="5">simul_params &lt;-<span class="st"> </span><span class="kw">setLandscape</span>(simul_params, mylandscape)</a>
-<a class="sourceLine" id="cb1-6" title="6">simul_params<span class="op">@</span>Landscape</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">library</span>(sf)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a>mylandscape &lt;-<span class="st"> </span><span class="kw">st_read</span>(<span class="dt">dsn =</span> <span class="st">&quot;myshapefile.shp&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="kw">library</span>(landsepi)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>simul_params &lt;-<span class="st"> </span><span class="kw">createSimulParams</span>(<span class="dt">outputDir =</span> <span class="kw">getwd</span>())</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>simul_params &lt;-<span class="st"> </span><span class="kw">setLandscape</span>(simul_params, mylandscape)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>simul_params<span class="op">@</span>Landscape</span></code></pre></div>
 <p>Then you can simply call the method <strong>allocateLandscapeCroptypes</strong> to allocate croptypes to the fields of the landscape with controlled proportions and spatio-temporal aggregation (<em>see tutorial on how to <a href="run_simple_simul.html">run a simple simulation</a></em>). Otherwise, you can use your own allocation (see below).</p>
 </div>
 <div id="using-your-own-croptype-allocation" class="section level2">
@@ -351,11 +429,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </tbody>
 </table>
 <p>An example for sf landscape:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">mylandscape<span class="op">$</span>year_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">13</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>) <span class="co"># croptypes ID allocated to the different polygons</span></a>
-<a class="sourceLine" id="cb2-2" title="2">mylandscape<span class="op">$</span>year_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">13</span>,<span class="dv">1</span>,<span class="dv">1</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a>mylandscape<span class="op">$</span>year_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">13</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>) <span class="co"># croptypes ID allocated to the different polygons</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>mylandscape<span class="op">$</span>year_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">13</span>,<span class="dv">1</span>,<span class="dv">1</span>)</span></code></pre></div>
 <p>Then simply add your landscape to the simulation parameters:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">simul_params &lt;-<span class="st"> </span><span class="kw">setLandscape</span>(simul_params, mylandscape)</a>
-<a class="sourceLine" id="cb3-2" title="2">simul_params<span class="op">@</span>Landscape</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>simul_params &lt;-<span class="st"> </span><span class="kw">setLandscape</span>(simul_params, mylandscape)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>simul_params<span class="op">@</span>Landscape</span></code></pre></div>
 </div>
 <div id="computing-the-dispersal-matrix" class="section level2">
 <h2>Computing the dispersal matrix</h2>
@@ -370,105 +448,105 @@ Then, (let say the name of your kernel is <code>f</code>) use <code>dispf=f</cod
 <div id="an-example" class="section level4">
 <h4>An example</h4>
 <p>Here is an example of how to compute a dispersal matrix using the dispersal kernel of oilseed rape pollen (available in <em>RCALI</em>: use <code>dispf=1</code> in the arguments of function <code>califlopp</code>).</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">install.packages</span>(<span class="st">&quot;RCALI&quot;</span>)</a>
-<a class="sourceLine" id="cb4-2" title="2"><span class="kw">library</span>(RCALI)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">install.packages</span>(<span class="st">&quot;RCALI&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a><span class="kw">library</span>(RCALI)</span></code></pre></div>
 <p>In this example, the dispersal matrix will be computed for the first landscape supplied in <em>landsepi</em>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">library</span>(landsepi)</a></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">landscape &lt;-<span class="st"> </span>landscapeTEST1</a>
-<a class="sourceLine" id="cb6-2" title="2">Npoly &lt;-<span class="st"> </span><span class="kw">length</span>(landscape)</a>
-<a class="sourceLine" id="cb6-3" title="3">Npoly</a>
-<a class="sourceLine" id="cb6-4" title="4"><span class="kw">plot</span>(landscape)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="kw">library</span>(landsepi)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a>landscape &lt;-<span class="st"> </span>landscapeTEST1</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>Npoly &lt;-<span class="st"> </span><span class="kw">length</span>(landscape)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>Npoly</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a><span class="kw">plot</span>(landscape)</span></code></pre></div>
 <p>The function <code>califlopp</code> needs a specific format for the coordinates of each polygon (i.e. fields) composing the landscape.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">file_land &lt;-<span class="st"> &quot;land_rcali.txt&quot;</span>  <span class="co">## input for califlopp</span></a>
-<a class="sourceLine" id="cb7-2" title="2">file_disp &lt;-<span class="st"> &quot;disp_rcali.txt&quot;</span>  <span class="co">## output for califlopp</span></a>
-<a class="sourceLine" id="cb7-3" title="3"></a>
-<a class="sourceLine" id="cb7-4" title="4"><span class="co">## Formatting the polygons-file for califlopp</span></a>
-<a class="sourceLine" id="cb7-5" title="5"><span class="kw">cat</span>(Npoly, <span class="dt">file=</span>file_land)</a>
-<a class="sourceLine" id="cb7-6" title="6"><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>Npoly) {</a>
-<a class="sourceLine" id="cb7-7" title="7">  <span class="co">## extract coordinates of polygon vertices</span></a>
-<a class="sourceLine" id="cb7-8" title="8">  coords &lt;-<span class="st"> </span>landscape<span class="op">@</span>polygons[[k]]<span class="op">@</span>Polygons[[<span class="dv">1</span>]]<span class="op">@</span>coords  </a>
-<a class="sourceLine" id="cb7-9" title="9">  n &lt;-<span class="st"> </span><span class="kw">nrow</span>(coords)</a>
-<a class="sourceLine" id="cb7-10" title="10">  <span class="kw">cat</span>(<span class="ot">NULL</span>, <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb7-11" title="11">  <span class="kw">cat</span>(<span class="kw">c</span>(k,k,n), <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb7-12" title="12">  <span class="kw">cat</span>(<span class="ot">NULL</span>, <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb7-13" title="13">  <span class="kw">cat</span>(coords[<span class="dv">1</span><span class="op">:</span>n,<span class="dv">1</span>], <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb7-14" title="14">  <span class="kw">cat</span>(<span class="ot">NULL</span>,<span class="dt">file=</span>file_land,<span class="dt">append=</span>T,<span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb7-15" title="15">  <span class="kw">cat</span>(coords[<span class="dv">1</span><span class="op">:</span>n,<span class="dv">2</span>], <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb7-16" title="16">}</a>
-<a class="sourceLine" id="cb7-17" title="17"><span class="kw">cat</span>(<span class="ot">NULL</span>, <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a>file_land &lt;-<span class="st"> &quot;land_rcali.txt&quot;</span>  <span class="co">## input for califlopp</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>file_disp &lt;-<span class="st"> &quot;disp_rcali.txt&quot;</span>  <span class="co">## output for califlopp</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a><span class="co">## Formatting the polygons-file for califlopp</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a><span class="kw">cat</span>(Npoly, <span class="dt">file=</span>file_land)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>Npoly) {</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a>  <span class="co">## extract coordinates of polygon vertices</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true"></a>  coords &lt;-<span class="st"> </span>landscape<span class="op">@</span>polygons[[k]]<span class="op">@</span>Polygons[[<span class="dv">1</span>]]<span class="op">@</span>coords  </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true"></a>  n &lt;-<span class="st"> </span><span class="kw">nrow</span>(coords)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true"></a>  <span class="kw">cat</span>(<span class="ot">NULL</span>, <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true"></a>  <span class="kw">cat</span>(<span class="kw">c</span>(k,k,n), <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true"></a>  <span class="kw">cat</span>(<span class="ot">NULL</span>, <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true"></a>  <span class="kw">cat</span>(coords[<span class="dv">1</span><span class="op">:</span>n,<span class="dv">1</span>], <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true"></a>  <span class="kw">cat</span>(<span class="ot">NULL</span>,<span class="dt">file=</span>file_land,<span class="dt">append=</span>T,<span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true"></a>  <span class="kw">cat</span>(coords[<span class="dv">1</span><span class="op">:</span>n,<span class="dv">2</span>], <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true"></a>}</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true"></a><span class="kw">cat</span>(<span class="ot">NULL</span>, <span class="dt">file=</span>file_land, <span class="dt">append=</span>T, <span class="dt">sep=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <p>Then the function <code>califlopp</code> calculates the flow of particles between polygons using an integration method. See <code>?califlopp</code> for details.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">param &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">input=</span><span class="dv">2</span>, <span class="dt">output=</span><span class="dv">0</span>, <span class="dt">method=</span><span class="st">&quot;cub&quot;</span>, <span class="dt">dp=</span><span class="dv">6000</span>, <span class="dt">dz=</span><span class="dv">6000</span></a>
-<a class="sourceLine" id="cb8-2" title="2">              , <span class="dt">warn.poly=</span><span class="ot">FALSE</span>, <span class="dt">warn.conv=</span><span class="ot">FALSE</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb8-3" title="3"><span class="kw">califlopp</span>(<span class="dt">file=</span>file_land, <span class="dt">dispf=</span><span class="dv">1</span>, <span class="dt">param=</span>param, <span class="dt">resfile=</span>file_disp)</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>param &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">input=</span><span class="dv">2</span>, <span class="dt">output=</span><span class="dv">0</span>, <span class="dt">method=</span><span class="st">&quot;cub&quot;</span>, <span class="dt">dp=</span><span class="dv">6000</span>, <span class="dt">dz=</span><span class="dv">6000</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>              , <span class="dt">warn.poly=</span><span class="ot">FALSE</span>, <span class="dt">warn.conv=</span><span class="ot">FALSE</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a><span class="kw">califlopp</span>(<span class="dt">file=</span>file_land, <span class="dt">dispf=</span><span class="dv">1</span>, <span class="dt">param=</span>param, <span class="dt">resfile=</span>file_disp)</span></code></pre></div>
 <p>The output of califlopp must then be reformatted to generate the dispersal matrix that will be further used in <em>landsepi</em>. The vector of field areas can also be generated.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="co">## Import califlopp results</span></a>
-<a class="sourceLine" id="cb9-2" title="2">disp_df &lt;-<span class="st"> </span><span class="kw">getRes</span>(file_disp)</a>
-<a class="sourceLine" id="cb9-3" title="3">emitter &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>poly1, disp_df<span class="op">$</span>poly2)</a>
-<a class="sourceLine" id="cb9-4" title="4">receiver &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>poly2, disp_df<span class="op">$</span>poly1)</a>
-<a class="sourceLine" id="cb9-5" title="5"></a>
-<a class="sourceLine" id="cb9-6" title="6"><span class="co">## Write a text file containing a vector of areas of all polygons</span></a>
-<a class="sourceLine" id="cb9-7" title="7">area_e &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>area1, disp_df<span class="op">$</span>area2)</a>
-<a class="sourceLine" id="cb9-8" title="8">area_r &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>area2, disp_df<span class="op">$</span>area1)</a>
-<a class="sourceLine" id="cb9-9" title="9">area &lt;-<span class="st"> </span><span class="kw">as.vector</span>(<span class="kw">by</span>(area_e, emitter, mean))</a>
-<a class="sourceLine" id="cb9-10" title="10"><span class="kw">write</span>(area, <span class="dt">file=</span><span class="st">&quot;area.txt&quot;</span>, <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>)</a>
-<a class="sourceLine" id="cb9-11" title="11"></a>
-<a class="sourceLine" id="cb9-12" title="12"><span class="co">## Generation of the dispersal matrix</span></a>
-<a class="sourceLine" id="cb9-13" title="13">name_f &lt;-<span class="st"> &quot;mean.flow&quot;</span></a>
-<a class="sourceLine" id="cb9-14" title="14">flow_mean &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df[,name_f], disp_df[,name_f])</a>
-<a class="sourceLine" id="cb9-15" title="15">flow_f &lt;-<span class="st"> </span><span class="kw">cbind</span>(emitter, receiver, flow_mean, area_e, area_r)</a>
-<a class="sourceLine" id="cb9-16" title="16"></a>
-<a class="sourceLine" id="cb9-17" title="17"><span class="co">## Remove the doublons (i.e. half the lines where emitter == receiver)</span></a>
-<a class="sourceLine" id="cb9-18" title="18">flow_f[<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(disp_df),][(disp_df<span class="op">$</span>poly2 <span class="op">-</span><span class="st"> </span>disp_df<span class="op">$</span>poly1) <span class="op">==</span><span class="st"> </span><span class="dv">0</span>,] &lt;-<span class="st"> </span><span class="ot">NA</span></a>
-<a class="sourceLine" id="cb9-19" title="19">flow_f &lt;-<span class="st"> </span>flow_f[<span class="kw">is.na</span>(<span class="kw">apply</span>(flow_f, <span class="dv">1</span>, sum)) <span class="op">==</span><span class="st"> </span>F,]</a>
-<a class="sourceLine" id="cb9-20" title="20">flow_f &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(flow_f)</a>
-<a class="sourceLine" id="cb9-21" title="21"><span class="kw">colnames</span>(flow_f) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;emitter&quot;</span>, <span class="st">&quot;receiver&quot;</span>, <span class="st">&quot;flow&quot;</span>, <span class="st">&quot;area_e&quot;</span>, <span class="st">&quot;area_r&quot;</span>)</a>
-<a class="sourceLine" id="cb9-22" title="22">flow_f &lt;-<span class="st"> </span>flow_f[<span class="kw">order</span>(flow_f<span class="op">$</span>emitter),]</a>
-<a class="sourceLine" id="cb9-23" title="23"></a>
-<a class="sourceLine" id="cb9-24" title="24"><span class="co">## lines: emitter</span></a>
-<a class="sourceLine" id="cb9-25" title="25"><span class="co">## columns: receiver</span></a>
-<a class="sourceLine" id="cb9-26" title="26">matrix_f &lt;-<span class="st"> </span><span class="ot">NULL</span></a>
-<a class="sourceLine" id="cb9-27" title="27"><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>Npoly){</a>
-<a class="sourceLine" id="cb9-28" title="28">  <span class="co">## flow divided by the emitter area</span></a>
-<a class="sourceLine" id="cb9-29" title="29">  matrix_f &lt;-<span class="st"> </span><span class="kw">cbind</span>(matrix_f, flow_f<span class="op">$</span>flow[flow_f<span class="op">$</span>receiver<span class="op">==</span>k] <span class="op">/</span><span class="st"> </span>area)</a>
-<a class="sourceLine" id="cb9-30" title="30">}</a>
-<a class="sourceLine" id="cb9-31" title="31"></a>
-<a class="sourceLine" id="cb9-32" title="32"><span class="co">## In order to have sum == 1</span></a>
-<a class="sourceLine" id="cb9-33" title="33">flowtot_f &lt;-<span class="st"> </span><span class="kw">apply</span>(matrix_f,<span class="dv">1</span>,sum)</a>
-<a class="sourceLine" id="cb9-34" title="34"><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>Npoly){</a>
-<a class="sourceLine" id="cb9-35" title="35">  matrix_f[k,] &lt;-<span class="st"> </span>(matrix_f[k,] <span class="op">/</span><span class="st"> </span>flowtot_f[k])</a>
-<a class="sourceLine" id="cb9-36" title="36">}</a>
-<a class="sourceLine" id="cb9-37" title="37"></a>
-<a class="sourceLine" id="cb9-38" title="38"><span class="kw">write</span>(<span class="kw">as.vector</span>(matrix_f), <span class="dt">file=</span><span class="st">&quot;dispersal.txt&quot;</span>, <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="co">## Import califlopp results</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>disp_df &lt;-<span class="st"> </span><span class="kw">getRes</span>(file_disp)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>emitter &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>poly1, disp_df<span class="op">$</span>poly2)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a>receiver &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>poly2, disp_df<span class="op">$</span>poly1)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a><span class="co">## Write a text file containing a vector of areas of all polygons</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>area_e &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>area1, disp_df<span class="op">$</span>area2)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a>area_r &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df<span class="op">$</span>area2, disp_df<span class="op">$</span>area1)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>area &lt;-<span class="st"> </span><span class="kw">as.vector</span>(<span class="kw">by</span>(area_e, emitter, mean))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a><span class="kw">write</span>(area, <span class="dt">file=</span><span class="st">&quot;area.txt&quot;</span>, <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a><span class="co">## Generation of the dispersal matrix</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a>name_f &lt;-<span class="st"> &quot;mean.flow&quot;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a>flow_mean &lt;-<span class="st"> </span><span class="kw">c</span>(disp_df[,name_f], disp_df[,name_f])</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true"></a>flow_f &lt;-<span class="st"> </span><span class="kw">cbind</span>(emitter, receiver, flow_mean, area_e, area_r)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true"></a><span class="co">## Remove the doublons (i.e. half the lines where emitter == receiver)</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true"></a>flow_f[<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(disp_df),][(disp_df<span class="op">$</span>poly2 <span class="op">-</span><span class="st"> </span>disp_df<span class="op">$</span>poly1) <span class="op">==</span><span class="st"> </span><span class="dv">0</span>,] &lt;-<span class="st"> </span><span class="ot">NA</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true"></a>flow_f &lt;-<span class="st"> </span>flow_f[<span class="kw">is.na</span>(<span class="kw">apply</span>(flow_f, <span class="dv">1</span>, sum)) <span class="op">==</span><span class="st"> </span>F,]</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true"></a>flow_f &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(flow_f)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true"></a><span class="kw">colnames</span>(flow_f) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;emitter&quot;</span>, <span class="st">&quot;receiver&quot;</span>, <span class="st">&quot;flow&quot;</span>, <span class="st">&quot;area_e&quot;</span>, <span class="st">&quot;area_r&quot;</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true"></a>flow_f &lt;-<span class="st"> </span>flow_f[<span class="kw">order</span>(flow_f<span class="op">$</span>emitter),]</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true"></a><span class="co">## lines: emitter</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true"></a><span class="co">## columns: receiver</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true"></a>matrix_f &lt;-<span class="st"> </span><span class="ot">NULL</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>Npoly){</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true"></a>  <span class="co">## flow divided by the emitter area</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true"></a>  matrix_f &lt;-<span class="st"> </span><span class="kw">cbind</span>(matrix_f, flow_f<span class="op">$</span>flow[flow_f<span class="op">$</span>receiver<span class="op">==</span>k] <span class="op">/</span><span class="st"> </span>area)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true"></a>}</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true"></a><span class="co">## In order to have sum == 1</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true"></a>flowtot_f &lt;-<span class="st"> </span><span class="kw">apply</span>(matrix_f,<span class="dv">1</span>,sum)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>Npoly){</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true"></a>  matrix_f[k,] &lt;-<span class="st"> </span>(matrix_f[k,] <span class="op">/</span><span class="st"> </span>flowtot_f[k])</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true"></a>}</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true"></a></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true"></a><span class="kw">write</span>(<span class="kw">as.vector</span>(matrix_f), <span class="dt">file=</span><span class="st">&quot;dispersal.txt&quot;</span>, <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>)</span></code></pre></div>
 <p>Then, to read the file, use:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">disp_patho &lt;-<span class="st"> </span><span class="kw">scan</span>(<span class="st">&quot;dispersal.txt&quot;</span>, <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a>disp_patho &lt;-<span class="st"> </span><span class="kw">scan</span>(<span class="st">&quot;dispersal.txt&quot;</span>, <span class="dt">sep=</span><span class="st">&quot;,&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="plotting-landscape-and-dispersal" class="section level2">
 <h2>Plotting landscape and dispersal</h2>
 <p>Landscape structure can be plotted using the basic function <code>plot()</code>, or using the landsepi function <code>plotland()</code>:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">landscape &lt;-<span class="st"> </span>landscapeTEST1</a>
-<a class="sourceLine" id="cb11-2" title="2"><span class="kw">plot</span>(landscape)</a>
-<a class="sourceLine" id="cb11-3" title="3"><span class="kw">plotland</span>(landscape)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a>landscape &lt;-<span class="st"> </span>landscapeTEST1</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a><span class="kw">plot</span>(landscape)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a><span class="kw">plotland</span>(landscape)</span></code></pre></div>
 <p>To highlight a specific field:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">poly &lt;-<span class="st"> </span><span class="dv">10</span></a>
-<a class="sourceLine" id="cb12-2" title="2">colFields &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="st">&quot;white&quot;</span>, <span class="kw">length</span>(landscape))</a>
-<a class="sourceLine" id="cb12-3" title="3">colFields[poly] &lt;-<span class="st"> &quot;red&quot;</span></a>
-<a class="sourceLine" id="cb12-4" title="4"><span class="kw">plot</span>(landscape, <span class="dt">col =</span> colFields)</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a>poly &lt;-<span class="st"> </span><span class="dv">10</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a>colFields &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="st">&quot;white&quot;</span>, <span class="kw">length</span>(landscape))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a>colFields[poly] &lt;-<span class="st"> &quot;red&quot;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true"></a><span class="kw">plot</span>(landscape, <span class="dt">col =</span> colFields)</span></code></pre></div>
 <p>To check the dispersal matrix and represent in a graphic the flow emitted by a specific polygon, use:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co">## convert dispersal in matrix</span></a>
-<a class="sourceLine" id="cb13-2" title="2">mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(disp_patho, <span class="dt">nrow=</span><span class="kw">sqrt</span>(<span class="kw">length</span>(disp_patho)))</a>
-<a class="sourceLine" id="cb13-3" title="3">poly &lt;-<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb13-4" title="4">dispToPlot &lt;-<span class="st"> </span><span class="kw">log10</span>(mat[poly,])</a>
-<a class="sourceLine" id="cb13-5" title="5"></a>
-<a class="sourceLine" id="cb13-6" title="6"><span class="co">## Colour palette</span></a>
-<a class="sourceLine" id="cb13-7" title="7">nCol &lt;-<span class="st"> </span><span class="dv">11</span></a>
-<a class="sourceLine" id="cb13-8" title="8">whiteYellowRed &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(<span class="kw">c</span>(<span class="st">&quot;white&quot;</span>, <span class="st">&quot;#FFFF99&quot;</span>, <span class="st">&quot;#990000&quot;</span>))</a>
-<a class="sourceLine" id="cb13-9" title="9">col_disp &lt;-<span class="st"> </span><span class="kw">whiteYellowRed</span>(nCol)</a>
-<a class="sourceLine" id="cb13-10" title="10">intvls &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="kw">min</span>(dispToPlot) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="kw">max</span>(dispToPlot) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">length.out=</span>nCol)</a>
-<a class="sourceLine" id="cb13-11" title="11">intvls_disp &lt;-<span class="st"> </span><span class="kw">findInterval</span>(dispToPlot, intvls)</a>
-<a class="sourceLine" id="cb13-12" title="12"></a>
-<a class="sourceLine" id="cb13-13" title="13"><span class="co">## Plot</span></a>
-<a class="sourceLine" id="cb13-14" title="14"><span class="kw">plot</span>(land, <span class="dt">col =</span> col_disp[intvls_disp], <span class="dt">main=</span><span class="kw">paste</span>(<span class="st">&quot;Dispersal from polygon&quot;</span>, poly))</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="co">## convert dispersal in matrix</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(disp_patho, <span class="dt">nrow=</span><span class="kw">sqrt</span>(<span class="kw">length</span>(disp_patho)))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a>poly &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a>dispToPlot &lt;-<span class="st"> </span><span class="kw">log10</span>(mat[poly,])</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true"></a><span class="co">## Colour palette</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true"></a>nCol &lt;-<span class="st"> </span><span class="dv">11</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true"></a>whiteYellowRed &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(<span class="kw">c</span>(<span class="st">&quot;white&quot;</span>, <span class="st">&quot;#FFFF99&quot;</span>, <span class="st">&quot;#990000&quot;</span>))</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true"></a>col_disp &lt;-<span class="st"> </span><span class="kw">whiteYellowRed</span>(nCol)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true"></a>intvls &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="kw">min</span>(dispToPlot) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="kw">max</span>(dispToPlot) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">length.out=</span>nCol)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true"></a>intvls_disp &lt;-<span class="st"> </span><span class="kw">findInterval</span>(dispToPlot, intvls)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true"></a><span class="co">## Plot</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true"></a><span class="kw">plot</span>(land, <span class="dt">col =</span> col_disp[intvls_disp], <span class="dt">main=</span><span class="kw">paste</span>(<span class="st">&quot;Dispersal from polygon&quot;</span>, poly))</span></code></pre></div>
 </div>
 
 

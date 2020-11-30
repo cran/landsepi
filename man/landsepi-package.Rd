@@ -16,8 +16,8 @@ resistance deployment strategies.
 \tabular{ll}{
 Package: \tab landsepi\cr
 Type: \tab Package\cr
-Version: \tab 1.0.1\cr
-Date: \tab 2020-07-02\cr
+Version: \tab 1.0.2\cr
+Date: \tab 2020-11-26\cr
 License: \tab GPL (>=2)\cr
 }
 
@@ -202,8 +202,8 @@ url: https://cran.r-project.org/package=landsepi.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi}
-  \item Report bugs at \url{https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi/issues}
+  \item \url{https://gitlab.paca.inrae.fr/CSIRO-INRA/landsepi}
+  \item Report bugs at \url{https://gitlab.paca.inrae.fr/CSIRO-INRA/landsepi/-/issues}
 }
 
 }
