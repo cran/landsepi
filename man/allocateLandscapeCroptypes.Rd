@@ -48,7 +48,8 @@ of aggregation.}
 \item{algo}{the algorithm used for the computation of the variance-covariance matrix
 of the multivariate normal distribution: "exp" for exponential function, "periodic"
 for periodic function, "random" for random draw (see details of function multiN).
-If algo="random", the parameter aggreg is not used.}
+If algo="random", the parameter aggreg is not used.
+Algorithm "exp" is preferable for big landscapes.}
 
 \item{graphic}{a logical indicating if graphics must be generated (TRUE) or not (FALSE).}
 }

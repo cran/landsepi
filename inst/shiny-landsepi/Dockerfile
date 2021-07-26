@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-dev/unstable \
     libgsl-dev \
     ffmpeg \
+    lsb-release \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -45,7 +46,7 @@ RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION 
   && rm -f version.txt ss-latest.deb \
   && rm -rf /var/lib/apt/lists/*
 
-RUN Rscript -e "install.packages(c('shiny','htmltools', 'DT', 'shinyjs', 'Rcpp', 'rgdal', 'sp', 'devtools', 'Matrix', 'mvtnorm', 'rgeos', 'maptools', 'fields', 'splancs', 'sf', 'RSQLite', 'foreach', 'parallel', 'doParallel', 'gridExtra', 'png', 'grid', 'future', 'promises'), repos='https://cran.biotools.fr/')"
+RUN Rscript -e "install.packages(c('shiny','shinyBS', 'htmltools', 'DT', 'shinyjs', 'Rcpp', 'rgdal', 'sp', 'devtools', 'Matrix', 'mvtnorm', 'rgeos', 'maptools', 'fields', 'splancs', 'sf', 'RSQLite', 'foreach', 'parallel', 'doParallel', 'gridExtra', 'png', 'grid', 'future', 'promises', 'shinyalert'), repos='https://cran.biotools.fr/')"
 
 RUN echo 'run_as shiny;\n\
   preserve_logs true;\n\
@@ -101,6 +102,7 @@ RUN mkdir -p /srv/shiny-server/landsepi
 COPY inst/shiny-landsepi/ui.R /srv/shiny-server/landsepi
 COPY inst/shiny-landsepi/server.R /srv/shiny-server/landsepi
 COPY inst/shiny-landsepi/global.R /srv/shiny-server/landsepi
+COPY inst/shiny-landsepi/modules/editableDT.R /srv/shiny-server/landsepi/modules/editableDT.R
 COPY inst/shiny-landsepi/www/* /srv/shiny-server/landsepi/www/
 RUN chown -R shiny.root /srv/shiny-server
 RUN chown -R shiny.root /usr/bin/shiny-server.sh \

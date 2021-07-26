@@ -14,7 +14,6 @@ video(
   croptypes,
   croptype_names = c(),
   cultivars_param,
-  audpc100S,
   keyDates = NULL,
   nMapPY = 5,
   path = getwd()
@@ -47,13 +46,12 @@ of simulated years.}
 \item{cultivars_param}{a list of parameters associated with each host genotype (i.e. cultivars)
 when cultivated in pure crops:\itemize{
 \item name = vector of cultivar names,
-\item max_density = vector of maximum host densities (per square meter) at the end of the cropping season,
+\item max_density = vector of maximum host densities (per square meter) at the end of the cropping season
+as if cultivated in pure crops,
 \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes.
 }}
 
-\item{audpc100S}{AUDPC of a 100\% susceptible landscape, used as a reference.}
-
-\item{keyDates}{a vector of times (in timesteps) where to draw vertical lines in the AUDPC graphic. Usually
+\item{keyDates}{a vector of times (in time steps) where to draw vertical lines in the AUDPC graphic. Usually
 used to delimit durabilities of the resistance genes. No line is drawn if keyDates=NULL (default).}
 
 \item{nMapPY}{an integer specifying the number of epidemic maps per year to generate.}
@@ -68,7 +66,7 @@ Generates a video showing the epidemic dynamics on a map representing the croppi
 (requires ffmpeg library).
 }
 \details{
-The left panel shows the year-after-year dynamics of AUDPC, relative to a fully susceptible landscape,
+The left panel shows the year-after-year dynamics of AUDPC,
 for each cultivar as well as the global average. The right panel illustrates the landscape,
 where fields are hatched depending on the cultivated croptype, and coloured depending on the prevalence of the disease.
 Note that up to 9 different croptypes can be represented properly in the right panel.

@@ -75,13 +75,16 @@ plotland <- function(landscape, COL = rep(0, length(landscape)), DENS = rep(0, l
   }
   if (LEGEND1[1] != "") {
     if (TITLE.LEG2 == "") {
-      legend(bounds$xmax / 2.66, -bounds$ymax / 40, legend = LEGEND1, fill = COL.LEG, bty = "n")
+      legend(bounds$xmin + (bounds$xmax-bounds$xmin) / 2.66, bounds$ymin - (bounds$ymax-bounds$ymin) / 40, 
+             # bounds$xmax / 2.66, -bounds$ymax / 40, 
+             # mean(c(bounds$xmin, bounds$xmax)), bounds$ymin,
+             legend = LEGEND1, fill = COL.LEG, bty = "n")
     } else {
-      legend(bounds$xmax / 2.66, -bounds$ymax / 40,
-        legend = LEGEND1, col = "black", density = 2 * DENS.LEG, angle = ANGLE.LEG,
-        bty = "n"
-      )
-      legend(-bounds$xmax / 5, bounds$ymax, legend = LEGEND2, fill = COL.LEG, bty = "n", title = TITLE.LEG2)
+      legend(bounds$xmin + (bounds$xmax - bounds$xmin) / 2.66, bounds$ymin - (bounds$ymax-bounds$ymin) / 40, 
+             # bounds$xmax / 2.66, -bounds$ymax / 40,
+             legend = LEGEND1, col = "black", density = 2 * DENS.LEG, angle = ANGLE.LEG, bty = "n")
+      legend(bounds$xmin - (bounds$xmax-bounds$xmin) / 5, bounds$ymax
+             , legend = LEGEND2, fill = COL.LEG, bty = "n", title = TITLE.LEG2)
     }
   }
 }

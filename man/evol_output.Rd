@@ -69,7 +69,7 @@ For each pathogen genotype, several computations are performed: \itemize{
 \item R_infection: time to first true infection of a resistant host;
 \item R_invasion: time when the number of infections of resistant hosts reaches a threshold above which
 the genotype is unlikely to go extinct.}
-The value Nyears + 1 timestep is used if the genotype never appeared/infected/invaded.
+The value Nyears + 1 time step is used if the genotype never appeared/infected/invaded.
 }
 \examples{
 \dontrun{

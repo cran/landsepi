@@ -62,14 +62,14 @@ simul_params <- createSimulParams(outputDir = getwd())
 
 Then run the experimental design by updating target parameters with the values stored in `myDesign`. 
 Note that some parameters vary jointly (e.g. landscape and dispersal matrix).
-*See tutorial on how to [run a simple simulation](run_simple_simul.html) for details on the different functions.* 
+*See tutorial on how to [run a simple simulation](O1-run_simple_simul.html) for details on the different functions.* 
 ```{r, eval=FALSE}
 for (i in 1:n){  
     print(paste("Running simulation", i, "/", n))
     
     ## Set Nyears and nTSpY
     simul_params <- setTime(simul_params
-                            , Nyears = simul_params@TimeParam$Nyears
+                            , Nyears = 6
                             , nTSpY = myDesign$nTSpY[i])  ## update nTSpY
     
     ## set seed (to run stochastic replicates)

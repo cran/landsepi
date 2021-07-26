@@ -25,7 +25,8 @@ library(landsepi)
 ## General presentation of the package
 
 See `?lansdepi` for a complete description of the model, assumptions and available functions. 
-See also the [detailed list of parameters](list_of_parameters.pdf) for a detailed description of all model parameters.
+See also the [detailed list of parameters](list_of_parameters.pdf) for a detailed description of all model parameters.  
+Take a [quick overview](landsepi_poster.pdf) of what landsepi can do.  
 
 ## Initialisation of simulation parameters
 
@@ -48,7 +49,7 @@ simul_params <- setSeed(simul_params, seed = 1)
 simul_params@Seed
 ```
 
-The number of cropping seasons to simulate (e.g. 10 years) and the number of timesteps per 
+The number of cropping seasons to simulate (e.g. 6 years) and the number of time steps per 
 cropping season (e.g. 120 days/year) can be set using `setTime()`:
 ```{r}
 simul_params <- setTime(simul_params, Nyears = 6, nTSpY = 120)
@@ -113,7 +114,7 @@ length(landscape)
 plot(landscape, main = "Landscape structure")
 ```
 
-*See also tutorial on how to [parameterise landscape and dispersal](landscape_dispersal.html) 
+*See also tutorial on how to [parameterise landscape and dispersal](O3-landscape_dispersal.html) 
 to use your own landscape and compute your own dispersal matrices.*
 
 Dispersal is given by a vectorised matrix giving the probability of dispersal from any field of the 
@@ -181,7 +182,7 @@ cultivars_new <- data.frame(cultivarName = c("Susceptible", "Resistant"),
                             yield_L =           c(0.0, 0.0),
                             yield_I =           c(0.0, 0.0),
                             yield_R =           c(0.0, 0.0),
-                            production_cost =   c(225, 300),
+                            planting_cost =   c(225, 300),
                             market_value =      c(200, 150),
                             stringsAsFactors = FALSE)
 cultivars_new
@@ -267,7 +268,7 @@ With this example of parameterisation:
 - "Resistant3" is a nonhost cultivar  
 - "Forest" is not a crop.  
 Infection is impossible on both "Resistance3" and "Forest", but the former will 
-be considered for host growth, yield, production costs and benefits, whereas the latter won't.
+be considered for host growth, yield and planting costs, whereas the latter won't.
 
 
 ### Allocating cultivars to croptypes
@@ -360,15 +361,16 @@ text files (`writeTXT=TRUE`), graphics (`graphic=TRUE`) and a video (`videoMP4=T
 See `?epid_output` and `?evol_output` for details on the different output variables.  
 
 >Possible epidemiological outputs include:  
-- **"audpc"** : Area Under Disease Progress Curve (average proportion of diseased hosts relative 
-to the carryng capacity)  
-- **"gla_abs"** : Absolute Green Leaf Area (average number of healthy hosts per square meter)  
+- **"audpc"** : Area Under Disease Progress Curve (average number of diseased hosts per square meter)  
+- **"audpc_rel"** : Relative Area Under Disease Progress Curve (average proportion of diseased hosts 
+relative to the total number of existing hosts)  
+- **"gla"** : Green Leaf Area (average number of healthy hosts per square meter)  
 - **"gla_rel"** : Relative Green Leaf Area  (average proportion of healthy hosts relative to the 
 total number of existing hosts)  
-- **"eco_cost"** : total crop costs (in weight or volume units per ha)  
-- **"eco_product"** : total crop production (in monetary units per ha)  
-- **"eco_benefit"** : total crop benefits (in monetary units per ha)  
-- **"eco_grossmargin"** : Gross Margin (benefits - costs, in monetary units per ha)  
+- **"eco_yield"** : total crop yield (in weight or volume units per ha)  
+- **"eco_cost"** : operational crop costs (in monetary units per ha)  
+- **"eco_product"** : total crop products (in monetary units per ha)  
+- **"eco_margin"** : Margin (products - operational costs, in monetary units per ha)  
 - **"HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics"**, etc.: Epidemic dynamics 
 related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only, 
 works only if graphic=TRUE.  
@@ -392,7 +394,7 @@ Then `simul_params` can be updated via `setOutputs()`:
 simul_params <- setOutputs(simul_params, outputlist)
 ```
 
-*See also tutorial on how to [run a numerical experimental design](run_exp_design.html) 
+*See also tutorial on how to [run a numerical experimental design](O2-run_exp_design.html) 
 to compute your own output variables and to run several simulations within an experimental design*
 
 ## Running the simulation

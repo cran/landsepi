@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // model_landsepi
 void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp::NumericMatrix rotation_matrix, Rcpp::NumericMatrix croptypes_cultivars_prop, Rcpp::List dispersal, Rcpp::List inits, int seed, Rcpp::List cultivars_param, Rcpp::List basic_patho_param, Rcpp::List genes_param);
 RcppExport SEXP _landsepi_model_landsepi(SEXP time_paramSEXP, SEXP area_vectorSEXP, SEXP rotation_matrixSEXP, SEXP croptypes_cultivars_propSEXP, SEXP dispersalSEXP, SEXP initsSEXP, SEXP seedSEXP, SEXP cultivars_paramSEXP, SEXP basic_patho_paramSEXP, SEXP genes_paramSEXP) {

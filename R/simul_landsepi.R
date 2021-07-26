@@ -33,18 +33,23 @@
 #' @param cultivars a dataframe of parameters associated with each host genotype (i.e. cultivars)
 #' when cultivated in pure crops. Columns of the dataframe are:\itemize{
 #' \item cultivarName: cultivar names,
-#' \item initial_density: host densities (per square meter) at the beginning of the cropping season,
-#' \item max_density: maximum host densities (per square meter) at the end of the cropping season,
-#' \item growth rate: host growth rates,
+#' \item initial_density: host densities (per square meter) at the beginning of the cropping season 
+#' as if cultivated in pure crop,
+#' \item max_density: maximum host densities (per square meter) at the end of the cropping season 
+#' as if cultivated in pure crop,
+#' \item growth_rate: host growth rates,
 #' \item reproduction rate: host reproduction rates,
-#' \item death rate: host death rates,
-#' \item yield_H: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status H,
-#' \item yield_L: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status L,
-#' \item yield_I: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status I,
-#' \item yield_R: yield (in weight or volume units / ha / cropping season) associated with hosts in sanitary status R,
-#' \item production_cost = overall production costs (in monetary units / ha / cropping season)
-#' including planting costs, amortisation, labour etc.,
-#' \item market_value = market values of the productions (in monetary units / weight or volume unit).
+#' \item death_rate: host death rates,
+#' \item yield_H: theoretical yield (in weight or volume units / ha / cropping season) associated with 
+#' hosts in sanitary status H as if cultivated in pure crop,
+#' \item yield_L: theoretical yield (in weight or volume units / ha / cropping season) associated with 
+#' hosts in sanitary status L as if cultivated in pure crop,
+#' \item yield_I: theoretical yield (in weight or volume units / ha / cropping season) associated with 
+#' hosts in sanitary status I as if cultivated in pure crop,
+#' \item yield_R: theoretical yield (in weight or volume units / ha / cropping season) associated with 
+#' hosts in sanitary status R as if cultivated in pure crop,
+#' \item planting_cost = planting costs (in monetary units / ha / cropping season) as if cultivated in pure crop,
+#' \item market_value = market values of the production (in monetary units / weight or volume unit).
 #' }
 #' @param cultivars_genes_list a list containing, for each host genotype, the indices of carried resistance genes.
 #' @param genes a data.frame of parameters associated with each resistance gene and with the evolution of
@@ -71,7 +76,7 @@
 #' @param basic_patho_param a list of pathogen aggressiveness parameters on a susceptible host
 #' for a pathogen genotype not adapted to resistance: \itemize{
 #' \item infection_rate = maximal expected infection rate of a propagule on a healthy host,
-#' \item propagule_prod_rate = maximal expected effective propagule production rate of an infectious host per timestep,
+#' \item propagule_prod_rate = maximal expected effective propagule production rate of an infectious host per time step,
 #' \item latent_period_exp = minimal expected duration of the latent period,
 #' \item latent_period_var = variance of the latent period duration,
 #' \item infectious_period_exp = maximal expected duration of the infectious period,
@@ -91,15 +96,17 @@
 #' @param epid_outputs a character string (or a vector of character strings if several outputs are to be computed)
 #' specifying the type of epidemiological and economic outputs to generate (see details):  
 #' \itemize{
-#' \item "audpc" : Area Under Disease Progress Curve (average proportion of diseased hosts relative 
-#' to the carryng capacity) 
-#' \item "gla_abs" : Absolute Green Leaf Area (average number of healthy hosts per square meter)
-#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy hosts relative to the 
+#' \item "audpc" : Area Under Disease Progress Curve (average number of diseased host individuals
+#' per time step and square meter) 
+#' \item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of diseased host
+#' individuals relative to the total number of existing hosts)
+#' \item "gla" : Green Leaf Area (average number of healthy host individuals per time step and square meter)
+#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals relative to the 
 #' total number of existing hosts)
-#' \item "eco_cost" : total crop costs (in weight or volume units per ha) 
-#' \item "eco_product" : total crop production(in monetary units per ha) 
-#' \item "eco_benefit" : total crop benefits (in monetary units per ha) 
-#' \item "eco_grossmargin" : Gross Margin (benefits - costs, in monetary units per ha) 
+#' \item "eco_yield" : total crop yield (in weight or volume units per ha) 
+#' \item "eco_cost" : operational crop costs (in monetary units per ha) 
+#' \item "eco_product" : total crop products (in monetary units per ha) 
+#' \item "eco_margin" : Margin (products - operational costs, in monetary units per ha) 
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: Epidemic dynamics
 #' related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only,
 #' works only if graphic=TRUE.
@@ -118,11 +125,11 @@
 #' above which a pathogen genotype is unlikely to go extinct, used to characterise the time to invasion
 #' of resistant hosts (several values are computed if several thresholds are given in a vector).
 #' @param GLAnoDis the absolute Green Leaf Area in absence of disease (used to compute economic outputs).
-#' @param audpc100S the audpc in a fully susceptible landscape (used as reference value for graphics and video).
+#' @param audpc100S the audpc in a fully susceptible landscape (used as reference value for graphics).
 #' @param writeTXT a logical indicating if outputs must be written in text files (TRUE, default) or not (FALSE).
 #' @param graphic a logical indicating if graphics must be generated (TRUE, default) or not (FALSE).
 #' @param videoMP4 a logical indicating if a video must be generated (TRUE) or not (FALSE, default).
-#' Works only if graphic=TRUE and epid_outputs="audpc" (or epid_outputs="all").
+#' Works only if graphic=TRUE and epid_outputs="audpc_rel" (or epid_outputs="all").
 #' @param keepRawResults a logical indicating if binary files must be kept after the end of the simulation (default=FALSE).
 #' Careful, many files may be generated if keepRawResults=TRUE.
 #' @details See ?landsepi for details on the model and assumptions.  
@@ -234,7 +241,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
                            genes, landscape = NULL, area,
                            rotation, basic_patho_param, disp_patho, disp_host, pI0 = 5e-4,
                            epid_outputs = "all", evol_outputs = "all", thres_breakdown = 50000,
-                           GLAnoDis = 1.48315, audpc100S = 0.38,
+                           GLAnoDis = 1.48315, audpc100S = 0.76, #0.38,
                            writeTXT = TRUE, graphic = TRUE, videoMP4 = FALSE, keepRawResults = FALSE) {
 
   # Host parameters
@@ -250,7 +257,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
     sigmoid_plateau_host = 1,
     cultivars_genes_list = cultivars_genes_list
   )
-
+  
   # Evolution parameters
   genes_param <- list(
     name = as.character(genes$geneName),
@@ -272,7 +279,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
       I = as.numeric(cultivars$yield_I),
       R = as.numeric(cultivars$yield_R)
     ),
-    production_cost_perHa = as.numeric(cultivars$production_cost),
+    planting_cost_perHa = as.numeric(cultivars$planting_cost),
     market_value = as.numeric(cultivars$market_value)
   )
 
@@ -321,12 +328,13 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
     ## Limits for graphics
     ylim_param <- list(
       audpc = c(0, audpc100S),
-      gla_abs = c(0, GLAnoDis),
+      audpc_rel = c(0, 1),
+      gla = c(0, GLAnoDis),
       gla_rel = c(0, 1),
       eco_cost = c(0, NA),
+      eco_yield = c(0, NA),
       eco_product = c(0, NA),
-      eco_benefit = c(0, NA),
-      eco_grossmargin = c(NA, NA)
+      eco_margin = c(NA, NA)
     )
     epid_res <- epid_output(epid_outputs, time_param, Npatho, area, rotation, croptypes_cultivars_prop,
       cultivars_param, eco_param,
@@ -338,10 +346,12 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
   }
 
   ## Video
-  if (videoMP4 & !is.null(epid_res[["audpc"]])) {
+  if (videoMP4 & !is.null(epid_res[["audpc_rel"]])) {
     video(
-      epid_res[["audpc"]], time_param, Npatho, landscape, area, rotation, croptypes_cultivars_prop,
-      croptype_names, cultivars_param, audpc100S, evol_res$durability
+      epid_res[["audpc_rel"]], time_param, Npatho, landscape, area, rotation, croptypes_cultivars_prop,
+      croptype_names, cultivars_param
+      # , audpc100S
+      , evol_res$durability
     )
   }
 

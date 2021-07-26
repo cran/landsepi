@@ -21,7 +21,7 @@ if several thresholds are given in a vector).
 \item GLAnoDis = the absolute Green Leaf Area in absence of disease (used to compute
 economic outputs).
 \item audpc100S = the audpc in a fully susceptible landscape (used as reference value
-for graphics and video).
+for graphics).
 }}
 }
 \value{
@@ -35,15 +35,17 @@ Updates a LandsepiParams object with a list of output parameters.
 outputs are to be computed) specifying the type of epidemiological and economic outputs
 to generate:
 \itemize{
-\item "audpc" : Area Under Disease Progress Curve (average proportion of diseased hosts relative
-to the carryng capacity)
-\item "gla_abs" : Absolute Green Leaf Area (average number of healthy hosts per square meter)
-\item "gla_rel" : Relative Green Leaf Area (average proportion of healthy hosts relative to the
+\item "audpc" : Area Under Disease Progress Curve (average number of diseased host individuals
+per time step and square meter)
+\item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of diseased host
+individuals relative to the total number of existing hosts)
+\item "gla" : Green Leaf Area (average number of healthy host individuals per square meter)
+\item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals relative to the
 total number of existing hosts)
-\item "eco_cost" : total crop costs (in weight or volume units per ha)
-\item "eco_product" : total crop production(in monetary units per ha)
-\item "eco_benefit" : total crop benefits (in monetary units per ha)
-\item "eco_grossmargin" : Gross Margin (benefits - costs, in monetary units per ha)
+\item "eco_yield" : total crop yield (in weight or volume units per ha)
+\item "eco_cost" : operational crop costs (in monetary units per ha)
+\item "eco_product" : total crop products (in monetary units per ha)
+\item "eco_margin" : Margin (products - costs, in monetary units per ha)
 \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.:
 Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their
 combinations). Graphics only, works only if graphic=TRUE.

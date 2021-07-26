@@ -86,7 +86,7 @@ cultivars_new <- data.frame(cultivarName = c("Susceptible", "Resistant"),
                             yield_L =           c(0.0, 0.0),
                             yield_I =           c(0.0, 0.0),
                             yield_R =           c(0.0, 0.0),
-                            production_cost =   c(225, 300),
+                            planting_cost =   c(225, 300),
                             market_value =      c(200, 150),
                             stringsAsFactors = FALSE)
 cultivars_new

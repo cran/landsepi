@@ -128,7 +128,7 @@ demo_landsepi <- function(seed = 12345, strat = "MO", Nyears = 20, nTSpY = 120, 
   #                         yield_L =           rep(0.0, 3),
   #                         yield_I =           rep(0.0, 3),
   #                         yield_R =           rep(0.0, 3),
-  #                         production_cost =   rep(225, 3),
+  #                         planting_cost =   rep(225, 3),
   #                         market_value =      rep(200, 3),
   #                         stringsAsFactors = FALSE)
   simul_params <- setCultivars(simul_params, cultivars)

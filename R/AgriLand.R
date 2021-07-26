@@ -42,7 +42,8 @@
 #' "rotation_sequence" are associated with the same level of aggregation.
 #' @param algo the algorithm used for the computation of the variance-covariance matrix of the multivariate
 #' normal distribution: "exp" for exponential function, "periodic" for periodic function,
-#' "random" for random draw (see details of function multiN). If algo="random", the parameter aggreg is not used.
+#' "random" for random draw (see details of function multiN). If algo="random", the parameter aggreg is not used. 
+#' Algorithm "exp" is preferable for big landscapes.
 #' @param croptype_names a vector of croptype names (for legend in graphic).
 #' @param graphic a logical indicating if a graphic of the landscape must be generated (TRUE) or not (FALSE).
 #' @param outputDir a directory to save graphic

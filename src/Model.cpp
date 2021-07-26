@@ -723,6 +723,8 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
     std::vector<int> total_genes_id(0); // Contains all the genes_id used by the cultivars
     for(int i = 0; i < Nhost; i++) {
         const std::vector<int> genes_id = Rcpp::as<std::vector<int>>(cultivars_genes_list[i]);
+      //Rcpp::Rcerr << "host " << i << std::endl;
+      //for(int t=0; t<genes_id.size();t++) Rcpp::Rcerr << "\tGenes " << genes_id[t] << std::endl;
         cultivars.push_back(Cultivar(initial_density[i], max_density[i], growth_rate[i], reproduction_rate[i],
                                      death_rate[i], genes_id));
         total_genes_id.insert(total_genes_id.end(), genes_id.begin(), genes_id.end()); // Appends a vector to another

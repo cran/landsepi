@@ -43,45 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
-<style type="text/css">
-a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
-a.anchor-section::before {content: '#';}
-.hasAnchor:hover a.anchor-section {visibility: visible;}
-</style>
-<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
-document.addEventListener('DOMContentLoaded', function() {
-  // Do nothing if AnchorJS is used
-  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
-    return;
-  }
-
-  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
-  // Do nothing if sections are already anchored
-  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
-    return null;
-  }
-
-  // Use section id when pandoc runs with --section-divs
-  const section_id = function(x) {
-    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
-            ? x.id : '');
-  };
-
-  // Add anchors
-  h.forEach(function(x) {
-    const id = x.id || section_id(x.parentElement);
-    if (id === '') {
-      return null;
-    }
-    let anchor = document.createElement('a');
-    anchor.href = '#' + id;
-    anchor.classList = ['anchor-section'];
-    x.classList.add('hasAnchor');
-    x.appendChild(anchor);
-  });
-});
-</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -93,7 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
     </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
@@ -180,6 +148,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
+
 
 
 
@@ -403,11 +372,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>myDesign &lt;-<span class="st"> </span><span class="kw">cbind</span>(<span class="dt">simul =</span> <span class="dv">1</span><span class="op">:</span>n, <span class="dt">seed =</span> <span class="kw">sample</span>(n<span class="op">*</span><span class="dv">100</span>, n), myDesign)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>myDesign</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="co">#&gt;   simul seed nTSpY   pI0 infection_rate id_landscape aggreg R_efficiency</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="co">#&gt; 1     1  161   120 0e+00            0.5            1   0.07          1.0</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a><span class="co">#&gt; 2     2  432   110 1e-04            0.4            2   0.07          0.9</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a><span class="co">#&gt; 3     3  369   100 5e-04            0.3            3   0.25          0.8</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a><span class="co">#&gt; 4     4  303    90 1e-03            0.2            4  10.00          0.7</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a><span class="co">#&gt; 5     5   16    80 1e-02            0.1            5  10.00          0.6</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="co">#&gt; 1     1  472   120 0e+00            0.5            1   0.07          1.0</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a><span class="co">#&gt; 2     2  334   110 1e-04            0.4            2   0.07          0.9</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a><span class="co">#&gt; 3     3   71   100 5e-04            0.3            3   0.25          0.8</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a><span class="co">#&gt; 4     4  384    90 1e-03            0.2            4  10.00          0.7</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a><span class="co">#&gt; 5     5  315    80 1e-02            0.1            5  10.00          0.6</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a><span class="co">#&gt;   growth_rate durab_MG1 durab_MG2 mean_audpc</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a><span class="co">#&gt; 1         0.1        NA        NA         NA</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a><span class="co">#&gt; 2         0.2        NA        NA         NA</span></span>
@@ -419,13 +388,13 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h2>Run the simulations</h2>
 <p>Create the object <code>simul_params</code> and a repository to store inputs and outputs of the simulations.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>simul_params &lt;-<span class="st"> </span><span class="kw">createSimulParams</span>(<span class="dt">outputDir =</span> <span class="kw">getwd</span>())</span></code></pre></div>
-<p>Then run the experimental design by updating target parameters with the values stored in <code>myDesign</code>. Note that some parameters vary jointly (e.g. landscape and dispersal matrix). <em>See tutorial on how to <a href="run_simple_simul.html">run a simple simulation</a> for details on the different functions.</em></p>
+<p>Then run the experimental design by updating target parameters with the values stored in <code>myDesign</code>. Note that some parameters vary jointly (e.g. landscape and dispersal matrix). <em>See tutorial on how to <a href="O1-run_simple_simul.html">run a simple simulation</a> for details on the different functions.</em></p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n){  </span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>    <span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">&quot;Running simulation&quot;</span>, i, <span class="st">&quot;/&quot;</span>, n))</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>    </span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>    <span class="co">## Set Nyears and nTSpY</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a>    simul_params &lt;-<span class="st"> </span><span class="kw">setTime</span>(simul_params</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a>                            , <span class="dt">Nyears =</span> simul_params<span class="op">@</span>TimeParam<span class="op">$</span>Nyears</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a>                            , <span class="dt">Nyears =</span> <span class="dv">6</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a>                            , <span class="dt">nTSpY =</span> myDesign<span class="op">$</span>nTSpY[i])  <span class="co">## update nTSpY</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a>    </span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a>    <span class="co">## set seed (to run stochastic replicates)</span></span>

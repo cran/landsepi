@@ -10,9 +10,9 @@ runShinyApp <- function() {
     stop("Could not find example directory. Try re-installing `landsepi`.", call. = FALSE)
   }
   
-  needed_packages <- c("shiny","DT", "shinyjs", "gridExtra", "png", "grid", "future", "promises", "tools")
+  needed_packages <- c("shiny", "shinyBS", "shinyalert", "DT", "shinyjs", "gridExtra", "png", "grid", "future", "promises", "tools")
   if( sum(needed_packages %in% utils::installed.packages()[,1] == FALSE) != 0) {
-    stop('Install packages : install.packages(c("shiny","DT", "shinyjs", "gridExtra", "png", "grid", "future", "promises", "tools"))')
+    stop('Install packages : install.packages(c("shiny","shinyBS", "shinyalert", "DT", "shinyjs", "gridExtra", "png", "grid", "future", "promises", "tools"))')
   } 
 
   shiny::runApp(appDir, launch.browser = TRUE, display.mode = "normal")

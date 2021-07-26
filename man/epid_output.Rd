@@ -14,9 +14,9 @@ epid_output(
   cultivars_param,
   eco_param,
   GLAnoDis = cultivars_param$max_density[1],
-  ylim_param = list(audpc = c(0, 0.38), gla_abs = c(0, 1.48), gla_rel = c(0, 1),
-    eco_cost = c(0, NA), eco_product = c(0, NA), eco_benefit = c(0, NA), eco_grossmargin
-    = c(NA, NA)),
+  ylim_param = list(audpc = c(0, 0.76), audpc_rel = c(0, 1), gla = c(0, 1.48), gla_rel
+    = c(0, 1), eco_cost = c(0, NA), eco_yield = c(0, NA), eco_product = c(0, NA),
+    eco_margin = c(NA, NA)),
   writeTXT = TRUE,
   graphic = TRUE,
   path = getwd()
@@ -26,12 +26,13 @@ epid_output(
 \item{types}{a character string (or a vector of character strings if several outputs are to be computed)
 specifying the type of outputs to generate (see details):\itemize{
 \item "audpc": Area Under Disease Progress Curve
-\item "gla_abs": Absolute Green Leaf Area
+\item "audpc_rel": Relative Area Under Disease Progress Curve
+\item "gla": Green Leaf Area
 \item "gla_rel": Relative Green Leaf Area
-\item "eco_product": Crop production
-\item "eco_cost": Crop costs
-\item "eco_benefit": Crop benefits
-\item "eco_grossmargin": Gross Margin (benefits - costs)
+\item "eco_yield": Total crop yield
+\item "eco_cost": Operational crop costs
+\item "eco_product": Crop products
+\item "eco_margin": Margin (products - operational costs)
 \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: Epidemic dynamics
 related to the specified sanitary status (H, L, I or R and all their combinations).
 Graphics only, works only if graphic=TRUE.
@@ -57,23 +58,25 @@ of simulated years.}
 \item{cultivars_param}{list of parameters associated with each host genotype (i.e. cultivars):
 \itemize{
 \item name = vector of cultivar names,
-\item initial_density = vector of host densities (per square meter) at the beginning of the cropping season,
-\item max_density = vector of maximum host densities (per square meter) at the end of the cropping season,
+\item initial_density = vector of host densities (per square meter) at the beginning of the cropping season
+as if cultivated in pure crop,
+\item max_density = vector of maximum host densities (per square meter) at the end of the cropping season
+as if cultivated in pure crop,
 \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes.
 }}
 
 \item{eco_param}{a list of economic parameters for each host genotype as if cultivated in pure crop:\itemize{
-\item yield_perHa = a dataframe of 4 columns for the yield associated with hosts in sanitary status H, L, I and R,
-and one row per host genotype (yields are expressed in weight or volume units / ha / cropping season),
-\item production_cost_perHa = a vector of overall production costs (in monetary units / ha / cropping season)
-including planting costs, amortisation, labour etc.,
-\item market_value = a vector of market values of the productions (in monetary units / weight or volume unit).
+\item yield_perHa = a dataframe of 4 columns for the theoretical yield associated with hosts in sanitary status H, L, I and R,
+as if cultivated in pure crops, and one row per host genotype
+(yields are expressed in weight or volume units / ha / cropping season),
+\item planting_cost_perHa = a vector of planting costs (in monetary units / ha / cropping season),
+\item market_value = a vector of market values of the production (in monetary units / weight or volume unit).
 }}
 
 \item{GLAnoDis}{the value of absolute GLA in absence of disease (required to compute economic outputs).}
 
 \item{ylim_param}{a list of graphical parameters for each required output: bounds for y-axes for
-audpc, gla_abs, gla_rel, eco_cost, eco_product, eco_benefit, eco_grossmargin.}
+audpc, gla, gla_rel, eco_cost, eco_yield, eco_product, eco_margin.}
 
 \item{writeTXT}{a logical indicating if the output is written in a text file (TRUE) or not (FALSE).}
 
@@ -93,22 +96,24 @@ Generates epidemiological and economic outputs from model simulations.
 Outputs are computed every year for every cultivar as well as for the whole landscape. \describe{
 \item{\strong{Epidemiological outputs.}}{
 The epidemiological impact of pathogen spread can be evaluated by different measures: \enumerate{
-\item Area Under Disease Progress Curve (AUDPC): average proportion of diseased hosts (status I + R)
-relative to the carrying capacity (i.e. disease severity).
-\item Absolute Green Leaf Area (GLAa): average number of healthy hosts (status H) per time step and per square meter.
-\item Relative Green Leaf Area (GLAr): average proportion of healthy hosts (status H) relative to the total number
+\item Area Under Disease Progress Curve (AUDPC): average number of diseased host individuals (status I + R)
+per time step and square meter.
+\item Relative Area Under Disease Progress Curve (AUDPCr): average proportion of diseased host individuals
+(status I + R) relative to the total number of existing hosts (H+L+I+R).
+\item Green Leaf Area (GLA): average number of healthy host individuals (status H) per time step and per square meter.
+\item Relative Green Leaf Area (GLAr): average proportion of healthy host individuals (status H) relative to the total number
 of existing hosts (H+L+I+R).
 }
 }
 \item{\strong{Economic outputs.}}{
 The economic outcome of a simulation can be evaluated using: \enumerate{
-\item Crop production: yearly crop production (e.g. grains, fruits, wine) in weight (or volume) units
-per hectare (depends on the number of productive hosts and associated yield).
-\item Crop benefits: yearly benefits generated from product sales, in monetary units per hectare
-(depends on crop production and market value of the product).
-\item Crop costs: yearly costs associated with crop production (including planting, amortisation, labour, ...)
-in monetary units per hectare (depends on initial host density and production cost).
-\item Crop gross margin, i.e. benefits - costs, in monetary units per hectare.
+\item Crop yield: yearly crop yield (e.g. grains, fruits, wine) in weight (or volume) units
+per hectare (depends on the number of productive hosts and associated theoretical yield).
+\item Crop products: yearly product generated from sales, in monetary units per hectare
+(depends on crop yield and market value).
+\item Operational crop costs: yearly costs associated with crop planting in monetary units per hectare
+(depends on initial host density and planting cost).
+\item Crop margin, i.e. products - operational costs, in monetary units per hectare.
 }
 }
 }

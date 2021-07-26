@@ -1,0 +1,8 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{5 - Poster}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\includepdf[pages=1, fitpaper=true, rotateoversize]{landsepiposter.pdf}
+\end{document}

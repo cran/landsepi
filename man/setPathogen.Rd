@@ -13,7 +13,7 @@ setPathogen(params, patho_params)
 for a pathogen genotype not adapted to resistance: \itemize{
 \item infection_rate = maximal expected infection rate of a propagule on a healthy host,
 \item propagule_prod_rate = maximal expected effective propagule production rate of an
-infectious host per timestep,
+infectious host per time step,
 \item latent_period_exp = minimal expected duration of the latent period,
 \item latent_period_var = variance of the latent period duration,
 \item infectious_period_exp = maximal expected duration of the infectious period,

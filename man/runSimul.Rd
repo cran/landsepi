@@ -24,7 +24,7 @@ or not (FALSE).}
 or not (FALSE).}
 
 \item{videoMP4}{a logical indicating if a video must be generated (TRUE) or not (FALSE, default).
-Works only if graphic=TRUE and audpc is computed.}
+Works only if graphic=TRUE and audpc_rel is computed.}
 
 \item{keepRawResults}{a logical indicating if binary files must be kept after the end of
 the simulation (default=FALSE). Careful, many files may be generated if keepRawResults=TRUE.}

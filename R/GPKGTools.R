@@ -128,7 +128,7 @@ GPKGAddTables <- function(gpkgfile) {
                                                      yield_L REAL NOT NULL CHECK(yield_L >= 0),
                                                      yield_I REAL NOT NULL CHECK(yield_I >= 0),
                                                      yield_R REAL NOT NULL CHECK(yield_R >= 0),
-                                                     production_cost REAL NOT NULL CHECK(production_cost >= 0),
+                                                     planting_cost REAL NOT NULL CHECK(planting_cost >= 0),
                                                      market_value REAL NOT NULL CHECK(market_value >= 0));"
   )
 

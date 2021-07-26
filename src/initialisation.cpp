@@ -126,8 +126,17 @@ Vector2D<int> Model::intro_H(const int& year) {
 void Model::intro_I(Vector2D<int>& H, Vector3D<int>& I, Vector4D<int>& I2R, const Vector2D<int>& activeR) {
     const int patho = 0; // Introduced pathotype is 0
     const std::vector<int> aggr = switch_patho_to_aggr(patho);
-    const int host = 0; // Introduction on cultivar 0
+    int host = 0; // Introduction on cultivar 0
     const int t = 0; // Introduction at t=0
+    
+    // select susceptible host id
+    for(int s=0; s<this->cultivars.size(); s++) {
+        if(this->cultivars[s].genes_id.size() == 0) {
+            host = s;
+            break;
+        }    
+    }
+    Rcpp::Rcerr << "Susceptible Host index : " << host <<std::endl;
 
     for(int poly = 0; poly < this->Npoly; poly++) {
         /* Infection */

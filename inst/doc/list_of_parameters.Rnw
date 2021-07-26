@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage{pdfpages}
-%\VignetteIndexEntry{list of parameters}
+%\VignetteIndexEntry{4 - list of parameters}
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}

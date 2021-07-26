@@ -118,7 +118,7 @@
 #'              L = as.numeric(cultivars$yield_L),
 #'              I = as.numeric(cultivars$yield_I),
 #'              R = as.numeric(cultivars$yield_R)),
-#'              production_cost_perHa = as.numeric(cultivars$production_cost),
+#'              planting_cost_perHa = as.numeric(cultivars$planting_cost),
 #'              market_value = as.numeric(cultivars$market_value))
 #'             
 #' evol_res <- evol_output(, time_param, Npoly, cultivars, genes)

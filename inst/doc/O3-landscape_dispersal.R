@@ -125,5 +125,5 @@ knitr::opts_chunk$set(
 #  intvls_disp <- findInterval(dispToPlot, intvls)
 #  
 #  ## Plot
-#  plot(land, col = col_disp[intvls_disp], main=paste("Dispersal from polygon", poly))
+#  plot(landscape, col = col_disp[intvls_disp], main=paste("Dispersal from polygon", poly))
 

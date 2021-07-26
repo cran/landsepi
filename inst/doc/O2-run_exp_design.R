@@ -34,7 +34,7 @@ myDesign
 #  
 #      ## Set Nyears and nTSpY
 #      simul_params <- setTime(simul_params
-#                              , Nyears = simul_params@TimeParam$Nyears
+#                              , Nyears = 6
 #                              , nTSpY = myDesign$nTSpY[i])  ## update nTSpY
 #  
 #      ## set seed (to run stochastic replicates)

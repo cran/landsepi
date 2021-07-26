@@ -22,7 +22,7 @@
 .croptypesColNames <- c("croptypeID", "croptypeName")
 .cultivarsColNames <- c("cultivarName", "initial_density", "max_density", "growth_rate"
                         , "reproduction_rate", "death_rate", "yield_H", "yield_L", "yield_I"
-                        , "yield_R", "production_cost", "market_value")
+                        , "yield_R", "planting_cost", "market_value")
 .cultivarsGenesColNames <- c()
 .geneColNames <- c("geneName", "efficiency", "time_to_activ_exp", "time_to_activ_var"
                    , "mutation_prob", "Nlevels_aggressiveness", "fitness_cost"
@@ -465,7 +465,7 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' @param writeTXT a logical indicating if outputs must be written in text files (TRUE, default) 
 #' or not (FALSE).
 #' @param videoMP4 a logical indicating if a video must be generated (TRUE) or not (FALSE, default).
-#' Works only if graphic=TRUE and audpc is computed.
+#' Works only if graphic=TRUE and audpc_rel is computed.
 #' @param keepRawResults a logical indicating if binary files must be kept after the end of 
 #' the simulation (default=FALSE). Careful, many files may be generated if keepRawResults=TRUE.
 #' @details See ?landsepi for details on the model, assumptions and outputs, and our vignettes 
@@ -559,8 +559,24 @@ runSimul <- function(params, graphic=TRUE, writeTXT=TRUE, videoMP4=FALSE, keepRa
   initPath <- getwd()
   setwd(params@OutputDir)
 
+  ## remove genes not used from CultivarsGenes and Genes
+  if(ncol(params@CultivarsGenes) >= 1) {
+    drop_genes <- lapply(1:ncol(params@CultivarsGenes), FUN = function(c) {
+      if(sum(params@CultivarsGenes[,c]) == 0) return(c);
+    })
+    drop_genes <- which(!sapply(drop_genes,is.null))
+  } else { drop_genes <- NULL }
+
+  if( !is.null(drop_genes) && length(drop_genes) > 0){
+    print(paste0("Genes not affected ",params@Genes[drop_genes,1]))
+    cultivarsGenes_tmp <- params@CultivarsGenes[,-drop_genes]  
+    Genes_tmp <- params@Genes[-drop_genes,]
+  } else {
+    cultivarsGenes_tmp <- params@CultivarsGenes
+    Genes_tmp <- params@Genes 
+  }
   cultivars_genes_list <- lapply(1:nrow(params@Cultivars), FUN = function(i) {
-    return(which(params@CultivarsGenes[i, ] == 1) - 1)
+    return(which(cultivarsGenes_tmp[i, ] == 1) - 1)
   })
 
   cdf <- as.data.frame(params@Landscape)
@@ -576,7 +592,7 @@ runSimul <- function(params, graphic=TRUE, writeTXT=TRUE, videoMP4=FALSE, keepRa
     croptype_names = params@Croptypes$croptypeName,
     cultivars = params@Cultivars,
     cultivars_genes_list = cultivars_genes_list,
-    genes = params@Genes,
+    genes = Genes_tmp,
     landscape = as_Spatial(st_geometry(params@Landscape)),
     area = as.vector(params@Landscape$area[, 1]),
     rotation = rotation,
@@ -723,7 +739,8 @@ setLandscape <- function(params, land) {
   params@Landscape$area <- data.frame(area = st_area(params@Landscape))
   
   ## Initialise host and pathogen dispersal with diagonal matrices
-  if (length(params@DispHost) == 0){
+  if (length(params@DispHost) == 0 |
+      length(params@DispHost) != (nrow(params@Landscape))^2){
     disp_host <- loadDispersalHost(params, type = "no")
     params <- setDispersalHost(params, disp_host)
   }
@@ -1007,7 +1024,8 @@ checkDispersalHost <- function(params) {
 #' @param algo the algorithm used for the computation of the variance-covariance matrix 
 #' of the multivariate normal distribution: "exp" for exponential function, "periodic" 
 #' for periodic function, "random" for random draw (see details of function multiN). 
-#' If algo="random", the parameter aggreg is not used.
+#' If algo="random", the parameter aggreg is not used. 
+#' Algorithm "exp" is preferable for big landscapes.
 #' @param graphic a logical indicating if graphics must be generated (TRUE) or not (FALSE).
 #' @details An algorithm based on latent Gaussian fields is used to allocate two different croptypes 
 #' across the simulated landscapes (e.g. a susceptible and a resistant cultivar, denoted as 
@@ -1143,7 +1161,7 @@ loadPathogen <- function(disease = "rust") {
 #' for a pathogen genotype not adapted to resistance: \itemize{
 #' \item infection_rate = maximal expected infection rate of a propagule on a healthy host,
 #' \item propagule_prod_rate = maximal expected effective propagule production rate of an 
-#' infectious host per timestep,
+#' infectious host per time step,
 #' \item latent_period_exp = minimal expected duration of the latent period,
 #' \item latent_period_var = variance of the latent period duration,
 #' \item infectious_period_exp = maximal expected duration of the infectious period,
@@ -1508,7 +1526,7 @@ loadCultivar <- function(name, type = "growingHost") {
       "yield_L" = 0.0,
       "yield_I" = 0.0,
       "yield_R" = 0.0,
-      "production_cost" = 225,
+      "planting_cost" = 225,
       "market_value" = 200
     ),
     "nongrowingHost" = list(
@@ -1522,7 +1540,7 @@ loadCultivar <- function(name, type = "growingHost") {
       "yield_L" = 0.0,
       "yield_I" = 0.0,
       "yield_R" = 0.0,
-      "production_cost" = 225,
+      "planting_cost" = 225,
       "market_value" = 200
     ),
     "nonCrop" = list(
@@ -1536,7 +1554,7 @@ loadCultivar <- function(name, type = "growingHost") {
       "yield_L" = 0.0,
       "yield_I" = 0.0,
       "yield_R" = 0.0,
-      "production_cost" = 0,
+      "planting_cost" = 0,
       "market_value" = 0
     ),
     list()
@@ -1565,31 +1583,32 @@ loadCultivar <- function(name, type = "growingHost") {
 #' @details dfCultivars is a dataframe of parameters associated with each host genotype 
 #' (i.e. cultivars, lines) when cultivated in pure crops. Columns of the dataframe are:\itemize{
 #' \item cultivarName: cultivar names (cannot accept space),
-#' \item initial_density: host densities (per square meter) at the beginning of the cropping season,
-#' \item max_density: maximum host densities (per square meter) at the end of the cropping season,
+#' \item initial_density: host densities (per square meter) at the beginning of the cropping season 
+#' as if cultivated in pure crop,
+#' \item max_density: maximum host densities (per square meter) at the end of the cropping season 
+#' as if cultivated in pure crop,
 #' \item growth rate: host growth rates,
 #' \item reproduction rate: host reproduction rates,
 #' \item death rate: host death rates,
-#' \item yield_H: yield (in weight or volume units / ha / cropping season) 
-#' associated with hosts in sanitary status H,
-#' \item yield_L: yield (in weight or volume units / ha / cropping season) 
-#' associated with hosts in sanitary status L,
-#' \item yield_I: yield (in weight or volume units / ha / cropping season) 
-#' associated with hosts in sanitary status I,
-#' \item yield_R: yield (in weight or volume units / ha / cropping season) 
-#' associated with hosts in sanitary status R,
-#' \item production_cost = overall production costs (in monetary units / ha / cropping season)
-#' including planting costs, amortisation, labour etc.,
-#' \item market_value = market values of the productions (in monetary units / weight or volume unit).
+#' \item yield_H: theoretical yield (in weight or volume units / ha / cropping season) 
+#' associated with hosts in sanitary status H as if cultivated in pure crop,
+#' \item yield_L: theoretical yield (in weight or volume units / ha / cropping season) 
+#' associated with hosts in sanitary status L as if cultivated in pure crop,
+#' \item yield_I: theoretical yield (in weight or volume units / ha / cropping season) 
+#' associated with hosts in sanitary status I as if cultivated in pure crop,
+#' \item yield_R: theoretical yield (in weight or volume units / ha / cropping season) 
+#' associated with hosts in sanitary status R as if cultivated in pure crop,
+#' \item planting_cost = planting costs (in monetary units / ha / cropping season) as if cultivated in pure crop,
+#' \item market_value = market values of the production (in monetary units / weight or volume unit).
 #' }
 #' 
 #' The data.frame must be defined as follow (example):
 #' 
-#' | cultivarName | initial_density | max_density | growth_rate | reproduction_rate | death_rate | yield_H | yield_L | yield_I |yield_R | production_cost | market_value |
-#' | ------------ | --------------- | ----------- | ----------- | ----------------- | ---------- | ------- | ------- | ------- | ------ | --------------- | ------------ |
-#' | Susceptible  | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225             | 200          |
-#' | Resistant1   | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225             | 200          |
-#' | Resistant2   | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225             | 200          |
+#' | cultivarName | initial_density | max_density | growth_rate | reproduction_rate | death_rate | yield_H | yield_L | yield_I |yield_R | planting_cost | market_value |
+#' | ------------ | --------------- | ----------- | ----------- | ----------------- | ---------- | ------- | ------- | ------- | ------ | ------------- | ------------ |
+#' | Susceptible  | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
+#' | Resistant1   | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
+#' | Resistant2   | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
 #'
 #' @return a LandsepiParams object
 #' @seealso \link{loadCultivar}
@@ -1659,7 +1678,7 @@ checkCultivars <- function(params) {
      !is.numeric(params@Cultivars$yield_L) ||
      !is.numeric(params@Cultivars$yield_I) ||
      !is.numeric(params@Cultivars$yield_R) ||
-     !is.numeric(params@Cultivars$production_cost) ||
+     !is.numeric(params@Cultivars$planting_cost) ||
      !is.numeric(params@Cultivars$market_value) ||
      
      sum( !is.positive(params@Cultivars$initial_density) ) > 0 ||
@@ -1667,9 +1686,9 @@ checkCultivars <- function(params) {
      sum( !is.positive(params@Cultivars$yield_L) ) > 0 ||
      sum( !is.positive(params@Cultivars$yield_I) ) > 0 ||
      sum( !is.positive(params@Cultivars$yield_R) ) > 0 ||
-     sum( !is.positive( params@Cultivars$production_cost) ) > 0 ||
+     sum( !is.positive( params@Cultivars$planting_cost) ) > 0 ||
      sum( !is.positive(params@Cultivars$market_value) ) > 0 ){
-    warning("initial_density, yield, production_cost and market_value must be >= 0")
+    warning("initial_density, yield, planting_cost and market_value must be >= 0")
     ret <- FALSE
   }
   
@@ -2029,15 +2048,17 @@ checkInoculum <- function(params) {
 #' @param epid_outputs a character string (or a vector of character strings if several outputs 
 #' are to be computed) specifying the type of epidemiological and economic outputs to generate 
 #' (see details):\itemize{
-#' \item "audpc" : Area Under Disease Progress Curve (average proportion of diseased hosts relative 
-#' to the carryng capacity) 
-#' \item "gla_abs" : Absolute Green Leaf Area (average number of healthy hosts per square meter)
-#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy hosts relative to the 
+#' \item "audpc" : Area Under Disease Progress Curve (average number of diseased host individuals
+#' per time step and square meter) 
+#' \item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of diseased host
+#' individuals relative to the total number of existing hosts)
+#' \item "gla" : Green Leaf Area (average number of healthy host individuals per time step and square meter)
+#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals relative to the 
 #' total number of existing hosts)
-#' \item "eco_cost" : total crop costs (in weight or volume units per ha) 
-#' \item "eco_product" : total crop production (in monetary units per ha) 
-#' \item "eco_benefit" : total crop benefits (in monetary units per ha) 
-#' \item "eco_grossmargin" : Gross Margin (benefits - costs, in monetary units per ha) 
+#' \item "eco_yield" : total crop yield (in weight or volume units per ha) 
+#' \item "eco_cost" : operational crop costs (in monetary units per ha) 
+#' \item "eco_product" : total crop products (in monetary units per ha) 
+#' \item "eco_margin" : Margin (products - operational costs, in monetary units per ha) 
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: 
 #' Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their 
 #' combinations). Graphics only, works only if graphic=TRUE.
@@ -2063,7 +2084,7 @@ loadOutputs <- function(epid_outputs = "all", evol_outputs = "all"){
                      , evol_outputs = evol_outputs
                      , thres_breakdown = 50000
                      , GLAnoDis = 1.48315
-                     , audpc100S = 0.38)
+                     , audpc100S = 0.76)
   return(outputList)
 }
 
@@ -2084,21 +2105,23 @@ loadOutputs <- function(epid_outputs = "all", evol_outputs = "all"){
 #' \item GLAnoDis = the absolute Green Leaf Area in absence of disease (used to compute 
 #' economic outputs).
 #' \item audpc100S = the audpc in a fully susceptible landscape (used as reference value 
-#' for graphics and video).
+#' for graphics).
 #' }
 #' @details "epid_outputs" is a character string (or a vector of character strings if several 
 #' outputs are to be computed) specifying the type of epidemiological and economic outputs 
 #' to generate:  
 #' \itemize{
-#' \item "audpc" : Area Under Disease Progress Curve (average proportion of diseased hosts relative 
-#' to the carryng capacity) 
-#' \item "gla_abs" : Absolute Green Leaf Area (average number of healthy hosts per square meter)
-#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy hosts relative to the 
+#' \item "audpc" : Area Under Disease Progress Curve (average number of diseased host individuals
+#' per time step and square meter) 
+#' \item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of diseased host
+#' individuals relative to the total number of existing hosts)
+#' \item "gla" : Green Leaf Area (average number of healthy host individuals per square meter)
+#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals relative to the 
 #' total number of existing hosts)
-#' \item "eco_cost" : total crop costs (in weight or volume units per ha) 
-#' \item "eco_product" : total crop production(in monetary units per ha) 
-#' \item "eco_benefit" : total crop benefits (in monetary units per ha) 
-#' \item "eco_grossmargin" : Gross Margin (benefits - costs, in monetary units per ha) 
+#' \item "eco_yield" : total crop yield (in weight or volume units per ha) 
+#' \item "eco_cost" : operational crop costs (in monetary units per ha) 
+#' \item "eco_product" : total crop products (in monetary units per ha) 
+#' \item "eco_margin" : Margin (products - costs, in monetary units per ha) 
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: 
 #' Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their 
 #' combinations). Graphics only, works only if graphic=TRUE.

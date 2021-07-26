@@ -16,8 +16,8 @@ resistance deployment strategies.
 \tabular{ll}{
 Package: \tab landsepi\cr
 Type: \tab Package\cr
-Version: \tab 1.0.2\cr
-Date: \tab 2020-11-26\cr
+Version: \tab 1.1.0\cr
+Date: \tab 2021-07-26\cr
 License: \tab GPL (>=2)\cr
 }
 
@@ -31,7 +31,8 @@ evolution of a pathogen in a heterogeneous cropping landscape, across cropping s
 potential bottlenecks to the pathogen.
 
 The lansdcape is represented by a set of polygons where the pathogen can disperse
-(the basic spatial unit is an individual field). \emph{landsepi} includes built-in simulated landscapes
+(the basic spatial unit is an individual polygon; an agricultural field may be composed of a single
+or several polygons). \emph{landsepi} includes built-in simulated landscapes
 (and associated dispersal matrices for rust pathogens, see below), but is it possible
 to use your own landscape (in shapefile format) and dispersal matrix.
 
@@ -77,9 +78,10 @@ for details on how to use landsepi.
 \describe{
 \item{\strong{Assumptions} (in bold those that can be relaxed with appropriate parameterization): }{
 \enumerate{
-\item The spatial unit is the field, i.e. a piece of land delimited by boundaries and possibly cultivated with a crop.
-Such crop may be host or non-host, and the field is considered a homogeneous mixture of individuals (i.e. there is no
-intra-field structuration).
+\item The spatial unit is a polygon, i.e. a piece of land delimited by boundaries and possibly
+cultivated with a crop. Such crop may be host or non-host, and the polygon is considered a homogeneous
+mixture of host individuals (i.e. there is no intra-polygon structuration). A field may be composed
+of a single or several polygons..
 \item Host individuals are in one of these four categories: H (healthy),
 E (latent, i.e. infected but not infectious nor symptomatic), I (infectious and symptomatic),
 or R (removed, i.e. epidemiologically inactive).
@@ -95,6 +97,9 @@ only healthy hosts (state H) contribute to plant growth (castrating pathogen).
 susceptible to disease from the first to the last day of every cropping season.
 \item Crop yield depends on the average amount of producing host individuals during the cropping season
 and does not depend on the time of epidemic peak. \strong{Only healthy individuals (state H) contribute to crop yield.}
+\item Components of a mixture are independent each other (i.e. there is neither plant-plant interaction
+nor competition for space, and harvests are segregated).
+\item The pathogen is haploid.
 \item Initially, the pathogen is not adapted to any source of resistance, and is only present on
 susceptible hosts (at state I).
 \item \strong{Pathogen dispersal is isotropic (i.e. equally probable in every direction).}
@@ -108,18 +113,21 @@ the one targeted by the resistance gene.
 \item When there is a delay for activation of a given resistance gene (APR), the time to activation is the same for
 all hosts carrying this gene and located in the same field.
 \item Variances of the durations of the latent and the infectious periods of the pathogen are not affected by plant resistance.
-\item If there is sexual reproduction (or gene recombination), it occurs only between parental infections located in the same field
-and the same host genotype. The propagule production rate of a couple is the sum of the propagule production rates of the parents.
-The genotype of each daughter propagule is issued from random loci segregation between parental loci.
+\item If there is sexual reproduction (or gene recombination), it occurs only between parental infections located
+in the same polygon and the same host genotype. The host population is panmictic (i.e. all pairs of parents have
+the same probability to occur). The propagule production rate of a couple is the sum of the propagule production
+rates of the parents. The genotype of each daughter propagule is issued from random loci segregation between parental loci.
 }
 }
 \item{\strong{Epidemiological outputs}}{
 The epidemiological outcome of a deployment strategy is evaluated using: \enumerate{
 \item the area under the disease progress curve (AUDPC) to measure disease severity
-(i.e. the average proportion of diseased hosts -status I and R- relative to the carrying capacity),
-\item the absolute Green Leaf Area (GLAa) to measure the average amount of healthy tissue (status H),
+(i.e. the average number of diseased plant tissue -status I and R- per time step and square meter),
+\item the relative area under the disease progress curve (AUDPCr) to measure the average proportion
+of diseased tissue (status I and R) relative to the total number of existing host individuals (H+L+I+R).
+\item the Green Leaf Area (GLA) to measure the average amount of healthy plant tissue (status H) per time step and square meter,
 \item the relative Green Leaf Area (GLAr) to measure the average proportion of healthy tissue (status H)
-relative to the total number of existing hosts (H+L+I+R).
+relative to the total number of existing host individuals (H+L+I+R).
 }
 A set of graphics and a video showing epidemic dynamics can also be generated.
 }
@@ -135,13 +143,13 @@ steps to adapt to plant resistance: (1) first appearance of adapted mutants,
 }
 \item{\strong{Economic outputs}}{
 The economic outcome of a simulation can be evaluated using: \enumerate{
-\item the crop production: yearly crop production (e.g. grains, fruits, wine) in weight (or volume) units
-per hectare (depends on the number of productive hosts and associated yield),
-\item the crop benefits: yearly benefits generated from product sales, in monetary units per hectare
-(depends on crop production and market value of the product),
-\item the crop costs: yearly costs associated with crop production (including planting, amortisation, labour, ...)
-in monetary units per hectare (depends on initial host density and production cost),
-\item the gross margin, i.e. benefits - costs, in monetary units per hectare.
+\item the crop yield: yearly crop production (e.g. grains, fruits, wine) in weight (or volume) units
+per hectare (depends on the number of productive hosts and associated theoretical yield),
+\item the crop products: yearly products generated from sales, in monetary units per hectare
+(depends on crop yield and market value),
+\item the crop operational costs: yearly costs associated with crop planting,
+in monetary units per hectare (depends on initial host density and planting cost),
+\item the margin, i.e. products - operational costs, in monetary units per hectare.
 }
 }
 }
@@ -202,6 +210,7 @@ url: https://cran.r-project.org/package=landsepi.
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://csiro-inra.pages.biosp.inrae.fr/landsepi/}
   \item \url{https://gitlab.paca.inrae.fr/CSIRO-INRA/landsepi}
   \item Report bugs at \url{https://gitlab.paca.inrae.fr/CSIRO-INRA/landsepi/-/issues}
 }
