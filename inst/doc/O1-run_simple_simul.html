@@ -358,15 +358,15 @@ Take a <a href="landsepi_poster.pdf">quick overview</a> of what landsepi can do.
 <h2>Initialisation of simulation parameters</h2>
 <p>The function <code>createSimulParams()</code> will create a directory to store simulation outputs, and return an object of class <code>LandsepiParams</code> that will further contain all simulation parameters.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a>simul_params &lt;-<span class="st"> </span><span class="kw">createSimulParams</span>(<span class="dt">outputDir =</span> <span class="kw">getwd</span>())</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="co">#&gt; Created output directory : /tmp/Rtmp6aUA6V/Rbuild29f5b575c47/landsepi/vignettes/simul_landsepi_2021-07-26_17-11-05</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="co">#&gt; Seed for RGN set to : 1627312265</span></span></code></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="co">#&gt; Created output directory : /tmp/Rtmpu28JpW/Rbuild29f3e564b6e/landsepi/vignettes/simul_landsepi_2021-10-05_11-51-21</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="co">#&gt; Seed for RGN set to : 1633427481</span></span></code></pre></div>
 <p>In the following, the object <code>simul_params</code> is to be updated with all simulation parameters using <code>set*()</code> functions. To help parameterisation, built-in parameters are available and may be loaded via <code>load*()</code> functions.</p>
 </div>
 <div id="setting-the-seed-and-time-parameters" class="section level2">
 <h2>Setting the seed and time parameters</h2>
 <p>A seed (for random number generator) is randomly generated when <code>simul_params</code> is initialised by <code>createSimulParams()</code>. If a specific seed is required, it can be set using the function <code>setSeed()</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>simul_params<span class="op">@</span>Seed</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="co">#&gt; [1] 1627312265</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="co">#&gt; [1] 1633427481</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>simul_params &lt;-<span class="st"> </span><span class="kw">setSeed</span>(simul_params, <span class="dt">seed =</span> <span class="dv">1</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="co">#&gt; Seed for RGN set to : 1</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a>simul_params<span class="op">@</span>Seed</span>

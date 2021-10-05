@@ -11,13 +11,13 @@ dnl -----------------------------------------------
 dnl Package name and version number (user defined)
 dnl -----------------------------------------------
 define([THE_PACKAGE_NAME],    [landsepi])
-define([THE_PACKAGE_VERSION], [1.1.0])
+define([THE_PACKAGE_VERSION], [1.1.1])
 define([THE_PACKAGE_MAINTAINER],  [jean-francois.rey@inrae.fr])
 
 dnl --------------------------------
 dnl Initialization macros.
 dnl --------------------------------
-AC_INIT(THE_PACKAGE_NAME, THE_PACKAGE_VERSION, THE_PACKAGE_MAINTAINER)
+AC_INIT([THE_PACKAGE_NAME],[THE_PACKAGE_VERSION],[THE_PACKAGE_MAINTAINER])
 
 dnl -----------------------------------------------
 dnl Checks for programs.
@@ -43,7 +43,7 @@ AC_LANG(C++)
 
 ## debug mode for compiler code 
 AC_MSG_CHECKING([whether to build debug version])
-AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [build debug version (default=no)]))
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],[build debug version (default=no)]))
 
 if test "$enable_debug" != "yes" && test "$DEBUG" != TRUE ; then
   AC_MSG_RESULT(no)
