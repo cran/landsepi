@@ -370,7 +370,8 @@ total number of existing hosts)
 - **"eco_yield"** : total crop yield (in weight or volume units per ha)  
 - **"eco_cost"** : operational crop costs (in monetary units per ha)  
 - **"eco_product"** : total crop products (in monetary units per ha)  
-- **"eco_margin"** : Margin (products - operational costs, in monetary units per ha)  
+- **"eco_margin"** : Margin (products - operational costs, in monetary units per ha) 
+- **"contrib"**: contribution of pathogen genotypes to LIR dynamics
 - **"HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics"**, etc.: Epidemic dynamics 
 related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only, 
 works only if graphic=TRUE.  

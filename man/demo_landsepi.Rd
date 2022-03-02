@@ -5,9 +5,9 @@
 \title{Package demonstration}
 \usage{
 demo_landsepi(
-  seed = 12345,
+  seed = 5,
   strat = "MO",
-  Nyears = 20,
+  Nyears = 10,
   nTSpY = 120,
   videoMP4 = TRUE
 )
@@ -44,7 +44,7 @@ to one of the following strategies:\itemize{
 }
 \examples{
 \dontrun{
-## Run demonstrations (in 20-year simulations) for different deployment strategies:
+## Run demonstrations (in 10-year simulations) for different deployment strategies:
 demo_landsepi(strat = "MO") ## for a mosaic of cultivars
 demo_landsepi(strat = "MI") ## for a mixture of cultivars
 demo_landsepi(strat = "RO") ## for a rotation of cultivars

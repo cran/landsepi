@@ -507,7 +507,7 @@ Each file indicates for every time-step the number of individuals in each field,
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="co">##  retrieve parameters from the object simul_params</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>path &lt;-<span class="st"> </span>simul_params<span class="op">@</span>OutputDir</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a>Nyears &lt;-<span class="st"> </span>simul_params<span class="op">@</span>TimeParam<span class="op">$</span>Nyears</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a>nTSpY &lt;-<span class="st"> </span>simul_params<span class="op">$</span>nTSpY</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a>nTSpY &lt;-<span class="st"> </span>simul_params<span class="op">@</span>TimeParam<span class="op">$</span>nTSpY</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a>nTS &lt;-<span class="st"> </span>Nyears <span class="op">*</span><span class="st"> </span>nTSpY     <span class="co">## Total number of time-steps</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a>Npoly &lt;-<span class="st"> </span><span class="kw">nrow</span>(simul_params<span class="op">@</span>Landscape)</span>

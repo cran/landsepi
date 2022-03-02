@@ -1494,7 +1494,7 @@ checkCroptypes <- function(params) {
 #' @title Load a cultivar
 #' @description create a data.frame containing cultivar parameters depending of his type
 #' @param name a character string (without space) specifying the cultivar name.
-#' @param type the cultivar type: "growingHost", "nongrowingHost" or "nonhost" 
+#' @param type the cultivar type: "growingHost", "nongrowingHost" or "nonCrop" 
 #' (default = "nonhost").
 #' @details 
 #' * "growingHost" is adapted to situations where the infection unit is a piece of leaf 
@@ -1510,7 +1510,7 @@ checkCroptypes <- function(params) {
 #' @examples
 #' c1 <- loadCultivar("winterWheat", type = "growingHost")
 #' c1
-#' c2 <- loadCultivar("forest", type = "nonhost")
+#' c2 <- loadCultivar("forest", type = "nonCrop")
 #' c2
 #' @export
 loadCultivar <- function(name, type = "growingHost") {
@@ -2059,6 +2059,7 @@ checkInoculum <- function(params) {
 #' \item "eco_cost" : operational crop costs (in monetary units per ha) 
 #' \item "eco_product" : total crop products (in monetary units per ha) 
 #' \item "eco_margin" : Margin (products - operational costs, in monetary units per ha) 
+#' \item "contrib": contribution of pathogen genotypes to LIR dynamics
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: 
 #' Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their 
 #' combinations). Graphics only, works only if graphic=TRUE.
@@ -2122,6 +2123,7 @@ loadOutputs <- function(epid_outputs = "all", evol_outputs = "all"){
 #' \item "eco_cost" : operational crop costs (in monetary units per ha) 
 #' \item "eco_product" : total crop products (in monetary units per ha) 
 #' \item "eco_margin" : Margin (products - costs, in monetary units per ha) 
+#' \item "contrib": contribution of pathogen genotypes to LIR dynamics
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: 
 #' Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their 
 #' combinations). Graphics only, works only if graphic=TRUE.

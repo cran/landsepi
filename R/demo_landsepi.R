@@ -40,7 +40,7 @@
 #' @seealso \link{runSimul}, \link{runShinyApp}
 #' @examples 
 #' \dontrun{
-#' ## Run demonstrations (in 20-year simulations) for different deployment strategies:
+#' ## Run demonstrations (in 10-year simulations) for different deployment strategies:
 #' demo_landsepi(strat = "MO") ## for a mosaic of cultivars
 #' demo_landsepi(strat = "MI") ## for a mixture of cultivars
 #' demo_landsepi(strat = "RO") ## for a rotation of cultivars
@@ -48,7 +48,7 @@
 #' }
 #' @include Methods-LandsepiParams.R RcppExports.R
 #' @export
-demo_landsepi <- function(seed = 12345, strat = "MO", Nyears = 20, nTSpY = 120, videoMP4 = TRUE) {
+demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, videoMP4 = TRUE) {
   # seed = 1; strat="MO"; Nyears = 5; nTSpY = 120; videoMP4 = FALSE  ## for debugging
   initPath <- getwd()
 

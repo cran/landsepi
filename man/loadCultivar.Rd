@@ -9,7 +9,7 @@ loadCultivar(name, type = "growingHost")
 \arguments{
 \item{name}{a character string (without space) specifying the cultivar name.}
 
-\item{type}{the cultivar type: "growingHost", "nongrowingHost" or "nonhost"
+\item{type}{the cultivar type: "growingHost", "nongrowingHost" or "nonCrop"
 (default = "nonhost").}
 }
 \value{
@@ -33,7 +33,7 @@ increasing during the season due to plant growth.
 \examples{
 c1 <- loadCultivar("winterWheat", type = "growingHost")
 c1
-c2 <- loadCultivar("forest", type = "nonhost")
+c2 <- loadCultivar("forest", type = "nonCrop")
 c2
 }
 \seealso{

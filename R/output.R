@@ -30,6 +30,7 @@
 #' \item "eco_cost": Operational crop costs
 #' \item "eco_product": Crop products
 #' \item "eco_margin": Margin (products - operational costs)
+#' \item "contrib": contribution of pathogen genotypes to LIR dynamics
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: Epidemic dynamics
 #' related to the specified sanitary status (H, L, I or R and all their combinations). 
 #' Graphics only, works only if graphic=TRUE.
@@ -64,7 +65,7 @@
 #' }
 #' @param GLAnoDis the value of absolute GLA in absence of disease (required to compute economic outputs).
 #' @param ylim_param a list of graphical parameters for each required output: bounds for y-axes for
-#' audpc, gla, gla_rel, eco_cost, eco_yield, eco_product, eco_margin.
+#' audpc, gla, gla_rel, eco_cost, eco_yield, eco_product, eco_margin, contrib.
 #' @param writeTXT a logical indicating if the output is written in a text file (TRUE) or not (FALSE).
 #' @param graphic a logical indicating if a tiff graphic of the output is generated (only if more than one year is simulated).
 #' @param path path of text file (if writeTXT = TRUE) and tiff graphic (if graphic = TRUE) to be generated.
@@ -78,6 +79,8 @@
 #' \item Green Leaf Area (GLA): average number of healthy host individuals (status H) per time step and per square meter.
 #' \item Relative Green Leaf Area (GLAr): average proportion of healthy host individuals (status H) relative to the total number
 #' of existing hosts (H+L+I+R).
+#' \item Contribution of pathogen genotypes: for every year and every host (as well as for the whole landscape and the whole 
+#' simulation duration), fraction of cumulative LIR infections attributed to each pathogen genotype.
 #' }
 #'  }
 #' \item{\strong{Economic outputs.}}{
@@ -117,28 +120,29 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
                           eco_cost = c(0, NA),
                           eco_yield = c(0, NA),
                           eco_product = c(0, NA),
-                          eco_margin = c(NA, NA)
+                          eco_margin = c(NA, NA),
+                          contrib = c(0,1)
                         ),
                         writeTXT = TRUE, graphic = TRUE, path = getwd()) {
-  valid_outputs <- c("audpc", "audpc_rel", "gla", "gla_rel", "eco_yield", "eco_product", "eco_cost", "eco_margin", "HLIR_dynamics")
+  valid_outputs <- c("audpc", "audpc_rel", "gla", "gla_rel", "eco_yield", "eco_product", "eco_cost", "eco_margin", "HLIR_dynamics", "contrib")
   if (types[1] == "all") {
     types <- valid_outputs
   }
-  valid_outputs <- c(valid_outputs, paste0(c("H", "L", "I", "R", "HL", "HI", "HR", "LI", "LR", "IR", "HLI", "HLR", "HIR", "LIR", "HLIR"), "_dynamics"))
+  valid_outputs <- c(valid_outputs, paste0(c("H", "L", "I", "R", "HL", "HI", "HR", "LI", "LR", "IR", "HLI", "HLR", "HIR", "LIR"), "_dynamics"))
   if (is.na(sum(match(types, valid_outputs)))) {
     stop(paste("Error: valid types of outputs are", paste(valid_outputs, collapse = ", ")))
   }
-
+  
   ## Time parameters
   Nyears <- time_param$Nyears
   nTSpY <- time_param$nTSpY
   nTS <- Nyears * nTSpY ## Total number of time-steps
-
+  
   ## Landscape
   rotation <- data.frame(rotation)
   areaTot <- sum(area)
   Npoly <- length(area)
-
+  
   ## Host parameters
   cultivar_names <- cultivars_param$name
   initial_density <- cultivars_param$initial_density
@@ -148,8 +152,8 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
   planting_cost_perIndiv <- eco_param$planting_cost_perHa * 1E-4 / initial_density
   market_value <- eco_param$market_value
   Nhost <- length(initial_density)
-
-
+  
+  
   ## Calculation of the carrying capacity and number of exisiting hosts
   K <- array(dim = c(Npoly, Nhost, Nyears)) ## for audpc
   C <- array(dim = c(Npoly, Nhost, Nyears)) ## for cost
@@ -161,7 +165,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
       index_year <- y
     }
     ts_year <- ((y - 1) * nTSpY + 1):(y * nTSpY)
-
+    
     for (poly in 1:Npoly) {
       indices_croptype <- grep(rotation[poly, index_year], croptypes$croptypeID)
       for (i in indices_croptype) {
@@ -177,7 +181,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
   C_host <- apply(C, c(2, 3), sum, na.rm = TRUE)
   C_host[C_host == 0] <- NA
   area_host[, Nhost + 1] <- areaTot
-
+  
   ## IMPORTATION OF THE SIMULATION OUTPUT (only those required depending on parameter "types" --> not necessary any more)
   # requireH <- sum(is.element(substr(types, 1, 3), c("gla", "eco"))) > 0
   # requireL <- sum(is.element(types, c("audpc_rel", "gla_rel", "eco_yield", "eco_product", "eco_cost", "eco_margin"))) > 0
@@ -194,14 +198,14 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
   I <- as.list(1:nTS)
   R <- as.list(1:nTS)
   index <- 0
-
+  
   # print("Reading binary files to compute epidemiological model outputs")
   for (year in 1:Nyears) {
     # print(paste("year", year, "/", Nyears))
     # if (requireH) {
-      binfileH <- file(paste(path, sprintf("/H-%02d", year), ".bin", sep = ""), "rb")
-      H.tmp <- readBin(con = binfileH, what = "int", n = Npoly * Nhost * nTSpY, size = 4, signed = T, endian = "little")
-      close(binfileH)
+    binfileH <- file(paste(path, sprintf("/H-%02d", year), ".bin", sep = ""), "rb")
+    H.tmp <- readBin(con = binfileH, what = "int", n = Npoly * Nhost * nTSpY, size = 4, signed = T, endian = "little")
+    close(binfileH)
     # }
     # binfileHjuv = file(paste(path, sprintf("/Hjuv-%02d", year), ".bin",sep=""), "rb")
     #  Hjuv.tmp <- readBin(con=binfileHjuv, what="int", n=Npoly*Nhost*nTSpY, size = 4, signed=T,endian="little")
@@ -215,75 +219,70 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
     #                  endian = "little")
     # close(binfileP)
     # if (requireL) {
-      binfileL <- file(paste(path, sprintf("/L-%02d", year), ".bin", sep = ""), "rb")
-      L.tmp <- readBin(con = binfileL, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
-      close(binfileL)
+    binfileL <- file(paste(path, sprintf("/L-%02d", year), ".bin", sep = ""), "rb")
+    L.tmp <- readBin(con = binfileL, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
+    close(binfileL)
     # }
     # if (requireIR) {
-      binfileI <- file(paste(path, sprintf("/I-%02d", year), ".bin", sep = ""), "rb")
-      I.tmp <- readBin(con = binfileI, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
-      close(binfileI)
-
-      binfileR <- file(paste(path, sprintf("/R-%02d", year), ".bin", sep = ""), "rb")
-      R.tmp <- readBin(con = binfileR, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
-      close(binfileR)
+    binfileI <- file(paste(path, sprintf("/I-%02d", year), ".bin", sep = ""), "rb")
+    I.tmp <- readBin(con = binfileI, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
+    close(binfileI)
+    
+    binfileR <- file(paste(path, sprintf("/R-%02d", year), ".bin", sep = ""), "rb")
+    R.tmp <- readBin(con = binfileR, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
+    close(binfileR)
     # }
-
+    
     for (t in 1:nTSpY) {
       # if (requireH) {
-        H[[t + index]] <- matrix(H.tmp[((Nhost * Npoly) * (t - 1) + 1):(t * (Nhost * Npoly))], ncol = Nhost, byrow = T)
+      H[[t + index]] <- matrix(H.tmp[((Nhost * Npoly) * (t - 1) + 1):(t * (Nhost * Npoly))], ncol = Nhost, byrow = T)
       # }
       # Hjuv[[t + index]] <- matrix(Hjuv.tmp[((Nhost*Npoly)*(t-1)+1):(t*(Nhost*Npoly))],ncol=Nhost,byrow=T)
       # P[[t + index]] <- matrix(P.tmp[((Npatho * Npoly) * (t - 1) + 1):(t * (Npatho * Npoly))], ncol = Npatho, byrow = T)
       # if (requireL) {
-        L[[t + index]] <- array(
-          data = L.tmp[((Npatho * Npoly * Nhost) * (t - 1) + 1):(t * (Npatho * Npoly * Nhost))],
-          dim = c(Nhost, Npatho, Npoly)
-        )
+      L[[t + index]] <- array(
+        data = L.tmp[((Npatho * Npoly * Nhost) * (t - 1) + 1):(t * (Npatho * Npoly * Nhost))],
+        dim = c(Nhost, Npatho, Npoly)
+      )
       # }
       # if (requireIR) {
-        I[[t + index]] <- array(
-          data = I.tmp[((Npatho * Npoly * Nhost) * (t - 1) + 1):(t * (Npatho * Npoly * Nhost))],
-          dim = c(Nhost, Npatho, Npoly)
-        )
-        R[[t + index]] <- array(
-          data = R.tmp[((Npatho * Npoly * Nhost) * (t - 1) + 1):(t * (Npatho * Npoly * Nhost))],
-          dim = c(Nhost, Npatho, Npoly)
-        )
+      I[[t + index]] <- array(
+        data = I.tmp[((Npatho * Npoly * Nhost) * (t - 1) + 1):(t * (Npatho * Npoly * Nhost))],
+        dim = c(Nhost, Npatho, Npoly)
+      )
+      R[[t + index]] <- array(
+        data = R.tmp[((Npatho * Npoly * Nhost) * (t - 1) + 1):(t * (Npatho * Npoly * Nhost))],
+        dim = c(Nhost, Npatho, Npoly)
+      )
       # }
     } ## for t
-
+    
     index <- index + nTSpY
   } ## for year
-
+  
   #### HLIR DYNAMIC
   H_host <- NULL
   L_host <- NULL
   I_host <- NULL
   R_host <- NULL
-  # if (requireH) {
-    for (t in 1:nTS) {
-      H_host <- cbind(H_host, apply(H[[t]], 2, sum))
-    }
-  # }
-  # if (requireL) {
-    for (t in 1:nTS) {
-      L_host <- cbind(L_host, apply(L[[t]], 1, sum))
-    }
-  # }
-  # if (requireIR) {
-    for (t in 1:nTS) {
-      I_host <- cbind(I_host, apply(I[[t]], 1, sum))
-      R_host <- cbind(R_host, apply(R[[t]], 1, sum))
-    }
-  # }
+  LIR_host_patho <- array(NA, dim=c(Nhost+1, Npatho, nTS))
+  for (t in 1:nTS) {
+    H_host <- cbind(H_host, apply(H[[t]], 2, sum))
+    L_host <- cbind(L_host, apply(L[[t]], 1, sum))
+    I_host <- cbind(I_host, apply(I[[t]], 1, sum))
+    R_host <- cbind(R_host, apply(R[[t]], 1, sum))
+    LIR_host_patho[1:Nhost,,t] <- apply(L[[t]] + I[[t]] + R[[t]], c(1,2), sum)
+    ## metric for whole landscape
+    LIR_host_patho[Nhost+1,,t] <- apply(L[[t]] + I[[t]] + R[[t]], 2, sum)
+  }
+  
   N_host <- H_host + L_host + I_host + R_host
-
-
+  
+  
   #####       COMPUTATION OF OUTPUTS
   ## as.numeric to allow memory allocation of long integer
   res <- list()
-
+  
   ## Colours (+1 to avoid picking white)
   # COL <- c("#FF5555","#4F94CD","darkolivegreen4","#CD950C","black") ## colors: red, blue, green, orange, black
   grad_red <- colorRampPalette(c("#FF5555", "white"))
@@ -293,24 +292,26 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
   grad_green <- colorRampPalette(c("darkolivegreen4", "white"))
   GREEN <- grad_green(Nhost + 1)
   grad_grey <- colorRampPalette(c("black", "white")) # "gray30"
-  GRAY <- grad_grey(Nhost + 1)
-
+  GRAY_host <- grad_grey(Nhost + 1)
+  GRAY_patho <- grad_grey(Npatho + 1)
+  
+  
   for (type in types) {
-
+    
     ## Epidemic dynamics (H, L, I, R)
     if (graphic & substr(type, nchar(type) - 7, nchar(type)) == "dynamics") {
       varToPlot <- strsplit(type, "_")[[1]][1]
       varToLegend <- strsplit(varToPlot, "")[[1]]
-
+      
       tiff(
         filename = paste(path, "/", type, ".tiff", sep = ""),
         width = 180, height = 110, units = "mm", compression = "lzw", res = 300
       )
       par(xpd = NA, cex = .9, mar = c(4, 4.3, 3, 9))
-
+      
       plot(0, 0,
-        type = "n", xaxt = "n", yaxt = "n", bty = "n", xlim = c(1, nTS), ylim = c(0, 1), main = "Epidemic dynamics",
-        ylab = "Proportion of hosts relative to carrying capacity", xlab = ""
+           type = "n", xaxt = "n", yaxt = "n", bty = "n", xlim = c(1, nTS), ylim = c(0, 1), main = "Epidemic dynamics",
+           ylab = "Proportion of hosts relative to carrying capacity", xlab = ""
       )
       for (host in 1:Nhost) {
         if (grepl("H", varToPlot)) {
@@ -323,7 +324,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
           lines(1:nTS, I_host[host, ] / rep(K_host[host, ], each = nTSpY), col = RED[host], lty = host)
         }
         if (grepl("R", varToPlot)) {
-          lines(1:nTS, R_host[host, ] / rep(K_host[host, ], each = nTSpY), col = GRAY[host], lty = host)
+          lines(1:nTS, R_host[host, ] / rep(K_host[host, ], each = nTSpY), col = GRAY_host[host], lty = host)
         }
       }
       if (Nyears == 1) {
@@ -335,112 +336,166 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
       }
       axis(2, at = seq(0, 1, .2), las = 1)
       legend(nTS * 1.05, .8,
-        title.adj = -.01, bty = "n", title = "Status:", legend = varToLegend, border = NA,
-        fill = c(GREEN[1], BLUE[1], RED[1], GRAY[1])[is.element(c("H", "L", "I", "R"), varToLegend)], cex = 0.9
+             title.adj = -.01, bty = "n", title = "Status:", legend = varToLegend, border = NA,
+             fill = c(GREEN[1], BLUE[1], RED[1], GRAY_host[1])[is.element(c("H", "L", "I", "R"), varToLegend)], cex = 0.9
       )
       legend(nTS * 1.05, .3,
-        title.adj = -.01, bty = "n", title = "Cultivar:", legend = cultivar_names,
-        lty = 1:Nhost, lwd = 2, col = GRAY[1:Nhost], cex = 0.9
+             title.adj = -.01, bty = "n", title = "Cultivar:", legend = cultivar_names,
+             lty = 1:Nhost, lwd = 2, col = GRAY_host[1:Nhost], cex = 0.9
       )
       dev.off()
+      
     } else { ## Other epidemiological outputs
 
-      output_matrix <- data.frame(matrix(NA, ncol = Nhost + 1, nrow = Nyears))
-      rownames(output_matrix) <- paste("year_", 1:Nyears, sep = "")
-      colnames(output_matrix) <- c(cultivar_names, "total")
-
-      for (y in 1:Nyears) {
-        ts_year <- ((y - 1) * nTSpY + 1):(y * nTSpY)
-        ## metrics for each host
-        for (host in 1:Nhost) {
+      if (type != "contrib"){
+        output_matrix <- data.frame(matrix(NA, ncol = Nhost + 1, nrow = Nyears))
+        rownames(output_matrix) <- paste("year_", 1:Nyears, sep = "")
+        colnames(output_matrix) <- c(cultivar_names, "total")
+        
+        for (y in 1:Nyears) {
+          ts_year <- ((y - 1) * nTSpY + 1):(y * nTSpY)
+          ## metrics for each host
+          for (host in 1:Nhost) {
+            switch(type,
+                   "audpc" = {
+                     numerator <- sum(as.numeric(I_host[host, ts_year]), as.numeric(R_host[host, ts_year]))
+                     denominator <- nTSpY * areaTot   ## sum(as.numeric(K_host[host, y] * length(ts_year)))
+                   },
+                   "audpc_rel" = {
+                     numerator <- sum(as.numeric(I_host[host, ts_year]), as.numeric(R_host[host, ts_year]))
+                     denominator <- sum(as.numeric(N_host[host, ts_year]))
+                   },
+                   "gla" = {
+                     numerator <- sum(as.numeric(H_host[host, ts_year]))
+                     denominator <- nTSpY * areaTot
+                   },
+                   "gla_rel" = {
+                     numerator <- sum(as.numeric(H_host[host, ts_year]))
+                     denominator <- sum(as.numeric(N_host[host, ts_year]))
+                   },
+                   { ## Default instructions (i.e. if substr(type,1,3)=="eco")
+                     numerator <- sum(
+                       yield_perIndivPerTS[host, "H"] * as.numeric(H_host[host, ts_year]),
+                       yield_perIndivPerTS[host, "L"] * as.numeric(L_host[host, ts_year]),
+                       yield_perIndivPerTS[host, "I"] * as.numeric(I_host[host, ts_year]),
+                       yield_perIndivPerTS[host, "R"] * as.numeric(R_host[host, ts_year])
+                     )
+                     denominator <- 1
+                   }
+            )
+            
+            if (denominator > 0 & K_host[host, y] > 0) {
+              output_matrix[y, host] <- numerator / denominator
+            } ## if >0
+          } ## for host
+          
+          ## metrics for all landscape
           switch(type,
-            "audpc" = {
-              numerator <- sum(as.numeric(I_host[host, ts_year]), as.numeric(R_host[host, ts_year]))
-              denominator <- nTSpY * areaTot   ## sum(as.numeric(K_host[host, y] * length(ts_year)))
-            },
-            "audpc_rel" = {
-              numerator <- sum(as.numeric(I_host[host, ts_year]), as.numeric(R_host[host, ts_year]))
-              denominator <- sum(as.numeric(N_host[host, ts_year]))
-            },
-            "gla" = {
-              numerator <- sum(as.numeric(H_host[host, ts_year]))
-              denominator <- nTSpY * areaTot
-            },
-            "gla_rel" = {
-              numerator <- sum(as.numeric(H_host[host, ts_year]))
-              denominator <- sum(as.numeric(N_host[host, ts_year]))
-            },
-            { ## Default instructions (i.e. if substr(type,1,3)=="eco")
-              numerator <- sum(
-                yield_perIndivPerTS[host, "H"] * as.numeric(H_host[host, ts_year]),
-                yield_perIndivPerTS[host, "L"] * as.numeric(L_host[host, ts_year]),
-                yield_perIndivPerTS[host, "I"] * as.numeric(I_host[host, ts_year]),
-                yield_perIndivPerTS[host, "R"] * as.numeric(R_host[host, ts_year])
-              )
-              denominator <- 1
-            }
+                 # "audpc" = {
+                 #   numerator_tot <- sum(as.numeric(I_host[, ts_year]), as.numeric(R_host[, ts_year]))
+                 #   denominator_tot <- sum(as.numeric(K_host[, y] * length(ts_year)))
+                 #   if (denominator_tot > 0) {
+                 #     output_matrix[y, "total"] <- numerator_tot / denominator_tot
+                 #   }
+                 # },
+                 "audpc_rel" = {
+                   numerator_tot <- sum(as.numeric(I_host[, ts_year]), as.numeric(R_host[, ts_year]))
+                   denominator_tot <- sum(as.numeric(N_host[, ts_year]))
+                   if (denominator_tot > 0) {
+                     output_matrix[y, "total"] <- numerator_tot / denominator_tot
+                   }
+                 },
+                 "gla_rel" = {
+                   numerator_tot <- sum(as.numeric(H_host[, ts_year]))
+                   denominator_tot <- sum(as.numeric(N_host[, ts_year]))
+                   if (denominator_tot > 0) {
+                     output_matrix[y, "total"] <- numerator_tot / denominator_tot
+                   }
+                 },
+                 { ## i.e. if audpc | gla | substr(type,1,3)=="eco"
+                   output_matrix[y, "total"] <- sum(output_matrix[y, 1:Nhost], na.rm = TRUE)
+                 }
           )
-
-          if (denominator > 0 & K_host[host, y] > 0) {
-            output_matrix[y, host] <- numerator / denominator
-          } ## if >0
+        } ## for y
+        
+        ## Economic outputs
+        if (substr(type, 1, 3) == "eco") {
+          eco <- list(eco_yield = output_matrix)
+          eco[["eco_product"]] <- data.frame(rep(market_value, each = Nyears) * eco[["eco_yield"]][, 1:Nhost])
+          ## data.frame to avoid pb when Nhost=1
+          colnames(eco[["eco_product"]]) <- cultivar_names ## useful if Nhost=1
+          eco[["eco_product"]]$total <- apply(eco[["eco_product"]], 1, sum, na.rm = TRUE)
+          eco[["eco_cost"]] <- data.frame(rep(planting_cost_perIndiv, each = Nyears) * t(C_host))
+          colnames(eco[["eco_cost"]]) <- cultivar_names ## useful if Nhost=1
+          eco[["eco_cost"]]$total <- apply(eco[["eco_cost"]], 1, sum, na.rm = TRUE)
+          eco[["eco_margin"]] <- eco[["eco_product"]] - eco[["eco_cost"]]
+          
+          output_matrix <- eco[[type]] / (area_host * 1E-4) ## normalization by area in Ha
+        }
+        # product <- t(output_matrix[,1:Nhost])
+        # benefit <- market_value %*% product
+        # cost <- planting_cost_perIndiv %*% C_host
+        # margin <- benefit - cost
+        
+        if (writeTXT)
+          write.table(output_matrix, file = paste(path, "/", type, ".txt", sep = ""), sep = ",")
+        
+      } else if (type=="contrib" & Npatho > 1){
+        
+        ## Contribution of each genotype to L+I+R every year (+ whole simulation) on every cultivar (+ whole landscape)
+        contrib <- array(NA, dim=c(Nhost+1, Npatho, Nyears+1))
+        for (y in 1:Nyears) {
+          ts_year <- ((y - 1) * nTSpY + 1):(y * nTSpY)
+          numerator <- apply(LIR_host_patho[,,ts_year], c(1,2), sum)
+          denominator <- apply(LIR_host_patho[,,ts_year], c(1), sum)
+          for (host in 1:nrow(contrib)){
+            if (denominator[host] > 0) {
+              contrib[host,,y] <- numerator[host,] / denominator[host]
+            }else{
+              ## no crop: contrib <- NA ; no pathogen: contrib <- 0
+              if (host <= Nhost){
+                if (sum(as.numeric(H_host[host, ts_year])) > 0){
+                  contrib[host,,y] <- 0
+                } ## if H>0 
+              } ## if host<=Nhost
+            } ## else denominator==0
+          } ## for host
+        }
+        ## Whole simulation run
+        numerator <- apply(LIR_host_patho, c(1,2), sum)
+        denominator <- apply(LIR_host_patho, c(1), sum)
+        for (host in 1:nrow(contrib)){
+          if (denominator[host] > 0) {
+            contrib[host,,Nyears+1] <- numerator[host,] / denominator[host]
+          }else{
+            ## no crop: contrib <- NA ; no pathogen: contrib <- 0
+            if (host <= Nhost){
+              if (sum(as.numeric(H_host[host,])) > 0){
+                contrib[host,,Nyears+1] <- 0
+              } ## if H>0
+            } ## if host<=Nhost
+          } ## else denominator==0
         } ## for host
-
-        ## metrics for all landscape
-        switch(type,
-          # "audpc" = {
-          #   numerator_tot <- sum(as.numeric(I_host[, ts_year]), as.numeric(R_host[, ts_year]))
-          #   denominator_tot <- sum(as.numeric(K_host[, y] * length(ts_year)))
-          #   if (denominator_tot > 0) {
-          #     output_matrix[y, "total"] <- numerator_tot / denominator_tot
-          #   }
-          # },
-          "audpc_rel" = {
-            numerator_tot <- sum(as.numeric(I_host[, ts_year]), as.numeric(R_host[, ts_year]))
-            denominator_tot <- sum(as.numeric(N_host[, ts_year]))
-            if (denominator_tot > 0) {
-              output_matrix[y, "total"] <- numerator_tot / denominator_tot
-            }
-          },
-          "gla_rel" = {
-            numerator_tot <- sum(as.numeric(H_host[, ts_year]))
-            denominator_tot <- sum(as.numeric(N_host[, ts_year]))
-            if (denominator_tot > 0) {
-              output_matrix[y, "total"] <- numerator_tot / denominator_tot
-            }
-          },
-          { ## i.e. if audpc | gla | substr(type,1,3)=="eco"
-            output_matrix[y, "total"] <- sum(output_matrix[y, 1:Nhost], na.rm = TRUE)
-          }
+        dimnames(contrib) <- list(c(cultivar_names, "Whole landscape")
+                                  , colnames(contrib) <- paste("patho",1:Npatho)
+                                  , c(paste("year",1:Nyears), "Whole simulation")
         )
-      } ## for y
+        # rownames(contrib) <- c(cultivar_names, "Whole landscape")
+        # colnames(contrib) <- paste("patho",1:Npatho)
+        
+        if (writeTXT) {
+          for (host in 1:nrow(contrib)) {
+            write.table(contrib[host,,], file = paste(path, "/", "contrib_", rownames(contrib)[host], ".txt", sep = ""), sep = ",")
+          }
+        }
+        
+      } ## else type==contrib
 
-      ## Economic outputs
-      if (substr(type, 1, 3) == "eco") {
-        eco <- list(eco_yield = output_matrix)
-        eco[["eco_product"]] <- data.frame(rep(market_value, each = Nyears) * eco[["eco_yield"]][, 1:Nhost])
-        ## data.frame to avoid pb when Nhost=1
-        colnames(eco[["eco_product"]]) <- cultivar_names ## useful if Nhost=1
-        eco[["eco_product"]]$total <- apply(eco[["eco_product"]], 1, sum, na.rm = TRUE)
-        eco[["eco_cost"]] <- data.frame(rep(planting_cost_perIndiv, each = Nyears) * t(C_host))
-        colnames(eco[["eco_cost"]]) <- cultivar_names ## useful if Nhost=1
-        eco[["eco_cost"]]$total <- apply(eco[["eco_cost"]], 1, sum, na.rm = TRUE)
-        eco[["eco_margin"]] <- eco[["eco_product"]] - eco[["eco_cost"]]
-
-        output_matrix <- eco[[type]] / (area_host * 1E-4) ## normalization by area in Ha
-      }
-      # product <- t(output_matrix[,1:Nhost])
-      # benefit <- market_value %*% product
-      # cost <- planting_cost_perIndiv %*% C_host
-      # margin <- benefit - cost
-
-      if (writeTXT) {
-        write.table(output_matrix, file = paste(path, "/", type, ".txt", sep = ""), sep = ",")
-      }
-
+      
       if (graphic & Nyears > 1) {
         ## Graphical parameters
-        PCH <- 15:(15 + Nhost - 1)
+        PCH_host <- 15:(15 + Nhost - 1)
+        PCH_patho <- 15:(15 + Npatho - 1) 
         PCH.tot <- 0
         LTY.tot <- 1
         COL.tot <- RED[1]
@@ -477,6 +532,10 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
           main_output <- "Margin"
           ylab_output <- "Monetary units / ha"
           round_ylab_output <- 0
+        }, "contrib" = {
+          main_output <- "Contribution"
+          ylab_output <- "Contribution to LIR dynamics"
+          round_ylab_output <- 2
         })
         ymin_output <- ylim_param[[type]][1]
         ymax_output <- ylim_param[[type]][2]
@@ -486,43 +545,86 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
         if (is.na(ymax_output)) {
           ymax_output <- ceiling(max(output_matrix, na.rm = TRUE))
         }
-        output_mean_host <- apply(output_matrix, 2, mean, na.rm = TRUE) ## Average output per cultivar
+        
+        
+        if (type != "contrib"){
+          
+          output_mean_host <- apply(output_matrix, 2, mean, na.rm = TRUE) ## Average output per cultivar
+          
+          graphics.off()
+          tiff(
+            filename = paste(path, "/", type, ".tiff", sep = ""),
+            width = 180, height = 110, units = "mm", compression = "lzw", res = 300
+          )
+          # m <- matrix(c(rep(1,5),2),6,1)    # matrix(c(rep(1,5),3,rep(2,5),3),6,2)
+          # layout(m)
+          # par(xpd=F, cex=.9,mar=c(5,4.1,4.1,2.1))
+          par(xpd = NA, cex = .9, mar = c(4, 4.3, 3, 9))
+          plot(0, 0,
+               type = "n", bty = "n", xaxt = "n", yaxt = "n", xlim = c(1, Nyears), ylim = c(ymin_output, ymax_output),
+               main = main_output, xlab = "Years", ylab = ylab_output
+          )
+          axis(1, at = seq(1, Nyears, by = (Nyears - 1) %/% 10 + 1))
+          axis(2, at = round(seq(ymin_output, ymax_output, length.out = 5), round_ylab_output), las = 1)
+          for (host in 1:Nhost) {
+            lines(1:Nyears, output_matrix[, host], type = "o", lwd = 2, lty = host, pch = PCH_host[host], col = GRAY_host[host])
+            points(par("usr")[1], output_mean_host[host], pch = PCH_host[host], col = GRAY_host[host], xpd = TRUE)
+          }
+          lines(1:Nyears, output_matrix[, "total"], type = "o", lwd = 2, lty = LTY.tot, pch = PCH.tot, col = COL.tot)
+          points(par("usr")[1], output_mean_host["total"], pch = PCH.tot, col = COL.tot, cex = 1, xpd = TRUE)
+          
+          if (ymin_output < 0) {
+            abline(h = 0, lwd = 1, lty = 3, col = BLUE[1], xpd = FALSE)
+          }
+          
+          legend(Nyears * 1.05, .5 * ymax_output,
+                 title.adj = -.01, bty = "n", title = "Cultivar:",
+                 legend = c(cultivar_names, "Whole landscape"), cex = 0.9, lty = c(1:Nhost, LTY.tot),
+                 lwd = 2, pch = c(PCH_host, PCH.tot), pt.cex = c(rep(1, Nhost), 1), col = c(GRAY_host[1:Nhost], COL.tot), seg.len = 2.5
+          )
+          dev.off()
+          
+        } else if (type=="contrib" & Npatho>1) {
+          
+          for (host in 1:nrow(contrib)){
+            output_mean_patho <- contrib[host,,Nyears+1] ## output for whole simulation run
+            
+            graphics.off()
+            tiff(
+              filename = paste(path, "/", "contrib_", rownames(contrib)[host], ".tiff", sep = ""),
+              width = 180, height = 110, units = "mm", compression = "lzw", res = 300
+            )
+            # m <- matrix(c(rep(1,5),2),6,1)    # matrix(c(rep(1,5),3,rep(2,5),3),6,2)
+            # layout(m)
+            # par(xpd=F, cex=.9,mar=c(5,4.1,4.1,2.1))
+            par(xpd = NA, cex = .9, mar = c(4, 4.3, 3, 9))
+            plot(0, 0,
+                 type = "n", bty = "n", xaxt = "n", yaxt = "n", xlim = c(1, Nyears), ylim = c(ymin_output, ymax_output),
+                 main = paste(main_output, "on", rownames(contrib)[host]), xlab = "Years", ylab = ylab_output
+            )
+            axis(1, at = seq(1, Nyears, by = (Nyears - 1) %/% 10 + 1))
+            axis(2, at = round(seq(ymin_output, ymax_output, length.out = 5), round_ylab_output), las = 1)
+            for (patho in 1:Npatho) {
+              lines(1:Nyears, contrib[host,patho,1:Nyears], type = "o", lwd = 2, lty = patho, pch = PCH_patho[patho], col = GRAY_patho[patho])
+              points(par("usr")[1], output_mean_patho[patho], pch = PCH_patho[patho], col = GRAY_patho[patho], xpd = TRUE)
+            }
+            
+            legend(Nyears * 1.05, .5 * ymax_output,
+                   title.adj = -.01, bty = "n", title = "Pathogen genotype:",
+                   legend = 1:Npatho, lty = 1:Npatho, lwd = 2, col = GRAY_patho[1:Npatho]#1:Npatho
+                   , cex = 0.9, pch = PCH_patho, seg.len = 2.5)
+            dev.off()
+          } # for host
+        } ## if type
+        
+      } ## if graphic
 
-        graphics.off()
-        tiff(
-          filename = paste(path, "/", type, ".tiff", sep = ""),
-          width = 180, height = 110, units = "mm", compression = "lzw", res = 300
-        )
-        # m <- matrix(c(rep(1,5),2),6,1)    # matrix(c(rep(1,5),3,rep(2,5),3),6,2)
-        # layout(m)
-        # par(xpd=F, cex=.9,mar=c(5,4.1,4.1,2.1))
-        par(xpd = NA, cex = .9, mar = c(4, 4.3, 3, 9))
-        plot(0, 0,
-          type = "n", bty = "n", xaxt = "n", yaxt = "n", xlim = c(1, Nyears), ylim = c(ymin_output, ymax_output),
-          main = main_output, xlab = "Years", ylab = ylab_output
-        )
-        axis(1, at = seq(1, Nyears, by = (Nyears - 1) %/% 10 + 1))
-        axis(2, at = round(seq(ymin_output, ymax_output, length.out = 5), round_ylab_output), las = 1)
-        for (host in 1:Nhost) {
-          lines(1:Nyears, output_matrix[, host], type = "o", lwd = 2, lty = host, pch = PCH[host], col = GRAY[host])
-          points(par("usr")[1], output_mean_host[host], pch = PCH[host], col = GRAY[host], xpd = TRUE)
-        }
-        lines(1:Nyears, output_matrix[, "total"], type = "o", lwd = 2, lty = LTY.tot, pch = PCH.tot, col = COL.tot)
-        points(par("usr")[1], output_mean_host["total"], pch = PCH.tot, col = COL.tot, cex = 1, xpd = TRUE)
-
-        if (ymin_output < 0) {
-          abline(h = 0, lwd = 1, lty = 3, col = BLUE[1], xpd = FALSE)
-        }
-
-        legend(Nyears * 1.05, .5 * ymax_output,
-          title.adj = -.01, bty = "n", title = "Cultivar:",
-          legend = c(cultivar_names, "Whole landscape"), cex = 0.9, lty = c(1:Nhost, LTY.tot),
-          lwd = 2, pch = c(PCH, PCH.tot), pt.cex = c(rep(1, Nhost), 1), col = c(GRAY[1:Nhost], COL.tot), seg.len = 2.5
-        )
-        dev.off()
+      if (type != "contrib"){
+        res[[type]] <- output_matrix
+      }else if (type=="contrib" & Npatho>1){
+        res[[type]] <- contrib
       }
-
-      res[[type]] <- output_matrix
+      
     } ## for type
   } ## else if output != HLIR_dynamics
 
@@ -996,7 +1098,7 @@ video <- function(audpc, time_param, Npatho, landscape, area, rotation, croptype
   RED <- "#FF5555"
   BLUE <- "#4F94CD"
   grad_grey <- colorRampPalette(c("black", "white"))
-  GRAY <- grad_grey(Nhost + 1)
+  GRAY_host <- grad_grey(Nhost + 1)
 
   ## Colour palette for prevalence
   nCol <- 21
@@ -1058,8 +1160,8 @@ video <- function(audpc, time_param, Npatho, landscape, area, rotation, croptype
       title(xlab = "Years", mgp = c(2, 1, 0))
       title(ylab = "Proportion of diseased hosts: (I+R)/(H+L+I+R)", mgp = c(3.5, 1, 0))
       for (host in 1:Nhost) {
-        # lines(1:y, audpc[1:y, host] / audpc100S, type = "o", lwd = 2, lty = host, pch = PCH[host], col = GRAY[host])
-        lines(1:y, audpc[1:y, host], type = "o", lwd = 2, lty = host, pch = PCH[host], col = GRAY[host])
+        # lines(1:y, audpc[1:y, host] / audpc100S, type = "o", lwd = 2, lty = host, pch = PCH[host], col = GRAY_host[host])
+        lines(1:y, audpc[1:y, host], type = "o", lwd = 2, lty = host, pch = PCH[host], col = GRAY_host[host])
       }
       # lines(1:y, audpc[1:y, "total"] / audpc100S, type = "o", lwd = 2, lty = LTY.tot, pch = PCH.tot, col = COL.tot)
       lines(1:y, audpc[1:y, "total"], type = "o", lwd = 2, lty = LTY.tot, pch = PCH.tot, col = COL.tot)
@@ -1076,7 +1178,7 @@ video <- function(audpc, time_param, Npatho, landscape, area, rotation, croptype
       legend(Nyears / 3, -1 / 5,
         bty = "n", legend = c(cultivar_names, "Whole landscape"),
         cex = 1, lty = c(1:Nhost, LTY.tot), lwd = 2, pch = c(PCH, PCH.tot), pt.cex = c(rep(1, Nhost), 1),
-        col = c(GRAY[1:Nhost], COL.tot), seg.len = 2.5
+        col = c(GRAY_host[1:Nhost], COL.tot), seg.len = 2.5
       )
 
       ## Map dynamic of diseased hosts

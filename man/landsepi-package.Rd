@@ -16,8 +16,8 @@ resistance deployment strategies.
 \tabular{ll}{
 Package: \tab landsepi\cr
 Type: \tab Package\cr
-Version: \tab 1.1.1\cr
-Date: \tab 2021-10-5\cr
+Version: \tab 1.1.2\cr
+Date: \tab 2022-03-01\cr
 License: \tab GPL (>=2)\cr
 }
 
@@ -128,6 +128,7 @@ of diseased tissue (status I and R) relative to the total number of existing hos
 \item the Green Leaf Area (GLA) to measure the average amount of healthy plant tissue (status H) per time step and square meter,
 \item the relative Green Leaf Area (GLAr) to measure the average proportion of healthy tissue (status H)
 relative to the total number of existing host individuals (H+L+I+R).
+\item the yearly contribution of pathogen genotypes to LIR dynamics on every host as well as the whole landscape.
 }
 A set of graphics and a video showing epidemic dynamics can also be generated.
 }

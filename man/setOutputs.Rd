@@ -46,6 +46,7 @@ total number of existing hosts)
 \item "eco_cost" : operational crop costs (in monetary units per ha)
 \item "eco_product" : total crop products (in monetary units per ha)
 \item "eco_margin" : Margin (products - costs, in monetary units per ha)
+\item "contrib": contribution of pathogen genotypes to LIR dynamics
 \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.:
 Epidemic dynamics related to the specified sanitary status (H, L, I or R and all their
 combinations). Graphics only, works only if graphic=TRUE.

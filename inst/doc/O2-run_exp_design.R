@@ -136,7 +136,7 @@ myDesign
 #  ##  retrieve parameters from the object simul_params
 #  path <- simul_params@OutputDir
 #  Nyears <- simul_params@TimeParam$Nyears
-#  nTSpY <- simul_params$nTSpY
+#  nTSpY <- simul_params@TimeParam$nTSpY
 #  nTS <- Nyears * nTSpY     ## Total number of time-steps
 #  
 #  Npoly <- nrow(simul_params@Landscape)

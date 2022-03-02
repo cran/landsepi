@@ -16,7 +16,7 @@ epid_output(
   GLAnoDis = cultivars_param$max_density[1],
   ylim_param = list(audpc = c(0, 0.76), audpc_rel = c(0, 1), gla = c(0, 1.48), gla_rel
     = c(0, 1), eco_cost = c(0, NA), eco_yield = c(0, NA), eco_product = c(0, NA),
-    eco_margin = c(NA, NA)),
+    eco_margin = c(NA, NA), contrib = c(0, 1)),
   writeTXT = TRUE,
   graphic = TRUE,
   path = getwd()
@@ -33,6 +33,7 @@ specifying the type of outputs to generate (see details):\itemize{
 \item "eco_cost": Operational crop costs
 \item "eco_product": Crop products
 \item "eco_margin": Margin (products - operational costs)
+\item "contrib": contribution of pathogen genotypes to LIR dynamics
 \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: Epidemic dynamics
 related to the specified sanitary status (H, L, I or R and all their combinations).
 Graphics only, works only if graphic=TRUE.
@@ -76,7 +77,7 @@ as if cultivated in pure crops, and one row per host genotype
 \item{GLAnoDis}{the value of absolute GLA in absence of disease (required to compute economic outputs).}
 
 \item{ylim_param}{a list of graphical parameters for each required output: bounds for y-axes for
-audpc, gla, gla_rel, eco_cost, eco_yield, eco_product, eco_margin.}
+audpc, gla, gla_rel, eco_cost, eco_yield, eco_product, eco_margin, contrib.}
 
 \item{writeTXT}{a logical indicating if the output is written in a text file (TRUE) or not (FALSE).}
 
@@ -103,6 +104,8 @@ per time step and square meter.
 \item Green Leaf Area (GLA): average number of healthy host individuals (status H) per time step and per square meter.
 \item Relative Green Leaf Area (GLAr): average proportion of healthy host individuals (status H) relative to the total number
 of existing hosts (H+L+I+R).
+\item Contribution of pathogen genotypes: for every year and every host (as well as for the whole landscape and the whole
+simulation duration), fraction of cumulative LIR infections attributed to each pathogen genotype.
 }
 }
 \item{\strong{Economic outputs.}}{

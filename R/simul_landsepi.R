@@ -107,6 +107,7 @@
 #' \item "eco_cost" : operational crop costs (in monetary units per ha) 
 #' \item "eco_product" : total crop products (in monetary units per ha) 
 #' \item "eco_margin" : Margin (products - operational costs, in monetary units per ha) 
+#' \item "contrib": contribution of pathogen genotypes to LIR dynamics
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: Epidemic dynamics
 #' related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only,
 #' works only if graphic=TRUE.
@@ -334,7 +335,8 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
       eco_cost = c(0, NA),
       eco_yield = c(0, NA),
       eco_product = c(0, NA),
-      eco_margin = c(NA, NA)
+      eco_margin = c(NA, NA), 
+      contrib = c(0,1)
     )
     epid_res <- epid_output(epid_outputs, time_param, Npatho, area, rotation, croptypes_cultivars_prop,
       cultivars_param, eco_param,
