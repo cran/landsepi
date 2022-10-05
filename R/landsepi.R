@@ -39,7 +39,7 @@
 #' @details \tabular{ll}{
 #'          Package: \tab landsepi\cr
 #'          Type: \tab Package\cr
-#'          Version: \tab 1.2.0\cr
+#'          Version: \tab 1.2.1\cr
 #'          Date: \tab 2022-10-05\cr
 #'          License: \tab GPL (>=2)\cr
 #'          }
@@ -272,10 +272,10 @@
 # @description Displays some information about the package
 # @importFrom utils packageVersion
 getInfo <- function() {
-  message("Package: LandepiDev | Landscape Epidemiology and Evolution")
+  message("Package: landsepi | Landscape Epidemiology and Evolution")
   message("Version: ", appendLF = FALSE)
   message(utils::packageVersion("landsepi"))
-  message("License: GPLV2")
+  message("License: GPL (>= 2)")
 }
 
 # @title Things to do at package attach

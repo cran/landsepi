@@ -30,7 +30,7 @@
 
 
 #' @title LandsepiParams
-#' @description Creates and initialises a LandespiParams object with default parameters.
+#' @description Creates and initialises a LandsepiParams object with default parameters.
 #' @param .Object a LandsepiParam object. 
 #' @param Landscape a landscape as sf object.
 #' @param Croptypes a dataframe with three columns named 'croptypeID' for croptype index,
@@ -139,7 +139,7 @@ setMethod(
 
 #' @name print
 #' @title print
-#' @description Prints a LandespiParams object.
+#' @description Prints a LandsepiParams object.
 #' @param x a LandsepiParams object
 #' @param ... print options
 #' @rdname print-methods
@@ -189,7 +189,7 @@ setMethod("print", "LandsepiParams", function(x, ...) {
 
 #' @name summary
 #' @title summary
-#' @description Prints the summary of a LandespiParams object.
+#' @description Prints the summary of a LandsepiParams object.
 #' @param object a LandsepiParams object.
 #' @rdname summary-methods
 #' @aliases summary,LandsepiParams-method
@@ -279,7 +279,7 @@ setMethod("summary", "LandsepiParams", function(object) {
 
 #' @name show
 #' @title show
-#' @description Shows a LandespiParams object.
+#' @description Shows a LandsepiParams object.
 #' @param object a LandsepiParams object
 #' @rdname show-methods
 #' @aliases show,LandsepiParams-method

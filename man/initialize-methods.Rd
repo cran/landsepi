@@ -88,5 +88,5 @@ deployment strategy}
 \item{...}{more options}
 }
 \description{
-Creates and initialises a LandespiParams object with default parameters.
+Creates and initialises a LandsepiParams object with default parameters.
 }

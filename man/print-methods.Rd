@@ -13,5 +13,5 @@
 \item{...}{print options}
 }
 \description{
-Prints a LandespiParams object.
+Prints a LandsepiParams object.
 }

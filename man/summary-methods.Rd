@@ -11,5 +11,5 @@
 \item{object}{a LandsepiParams object.}
 }
 \description{
-Prints the summary of a LandespiParams object.
+Prints the summary of a LandsepiParams object.
 }
