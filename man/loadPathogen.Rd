@@ -7,10 +7,10 @@
 loadPathogen(disease = "rust")
 }
 \arguments{
-\item{disease}{a disease name (default: "rust")}
+\item{disease}{a disease name, among "rust" (default), "mildew" and "no pathogen"}
 }
 \value{
-a list of pathogen aggressiveness parameters on a susceptible host
+a list of pathogen parameters on a susceptible host
 for a pathogen genotype not adapted to resistance
 }
 \description{
@@ -19,7 +19,9 @@ Loads default pathogen parameters for a specific disease
 \details{
 Available diseases:
 \itemize{
+\item "no pathogen"
 \item "rust"
+\item "mildew"
 }
 }
 \examples{

@@ -21,23 +21,47 @@
 
 #include "Gene.hpp"
 
-/* Initialisation of mutation matrix (only called by Gene constructor) */
+/* Initialisation of mutation matrix (only called by Gene constructor) 
+ values outside the bounds 0-1 are associated to class 0 and Nlevelaggressiveness-1, respectively
+ mutation_prob is the probability to mutate at once from the first to the last class of aggressiveness
+ */
+
 Vector2D<double> Gene::init_mutkernel(const double& mutation_prob) {
-    /* Mutation matrix for pathogen genes */
-    Vector2D<double> mutkernel(Nlevels_aggressiveness, std::vector<double>(Nlevels_aggressiveness));
-    for(int i = 0; i < Nlevels_aggressiveness; i++) {
-        mutkernel[i][i] = 1 - mutation_prob; // Diagonal
+  //Mutation matrix for pathogen genes 
+  Vector2D<double> mutkernel(Nlevels_aggressiveness, std::vector<double>(Nlevels_aggressiveness));
+  std::vector<double> level_aggress_extremes(Nlevels_aggressiveness+1);
+  std::vector<double> mean_level_aggress(Nlevels_aggressiveness);
+  level_aggress_extremes[0] = 0.0;
+  for(int i = 1; i < Nlevels_aggressiveness+1; i++) {
+    level_aggress_extremes[i] = level_aggress_extremes[i-1] + 1.0/Nlevels_aggressiveness;
+  }
+  
+  for(int i = 0; i < Nlevels_aggressiveness; i++) {
+    mean_level_aggress[i] = (level_aggress_extremes[i] + level_aggress_extremes[i+1])/2.0;
+  }
+  
+  double sigma = abs(1/sqrt(2)*(level_aggress_extremes[Nlevels_aggressiveness-1] - mean_level_aggress[0])/(erfinv(2*(1-mutation_prob)-1)));
+  
+  for(int r = 0; r < Nlevels_aggressiveness; r++){
+    double mu = mean_level_aggress[r];
+    for(int c = 0; c < Nlevels_aggressiveness; c++){
+      double z_inf = level_aggress_extremes[c];
+      double z_sup = level_aggress_extremes[c+1];
+      const double x_inf = z_inf - mu;
+      const double x_sup = z_sup - mu;
+      if(c == 0){
+        mutkernel[r][c] = cdf_gaussian_P(x_sup,sigma);
+      } else if (c == Nlevels_aggressiveness-1){
+        mutkernel[r][c] = 1-cdf_gaussian_P(x_inf,sigma);
+      } else {
+        mutkernel[r][c] = cdf_gaussian_P(x_sup,sigma) - cdf_gaussian_P(x_inf,sigma);
+      }
+      
     }
-    if(Nlevels_aggressiveness > 1) {
-        mutkernel[0][1] = mutation_prob; // Because only one possible direction for mutation
-        mutkernel[Nlevels_aggressiveness - 1][Nlevels_aggressiveness - 2] = mutation_prob;
-        for(int i = 1; i < Nlevels_aggressiveness - 1; i++) { // Two possible directions
-            mutkernel[i][i + 1] = mutation_prob / 2;
-            mutkernel[i][i - 1] = mutation_prob / 2;
-        }
-    }
-    return mutkernel;
+  }
+  return mutkernel;
 }
+
 
 /* Initialisation of aggressiveness matrix (only called by Gene constructor) */
 Vector2D<double> Gene::init_aggressiveness_matrix(const double& efficiency, const double& fitness_cost,
@@ -64,31 +88,34 @@ Vector2D<double> Gene::init_aggressiveness_matrix(const double& efficiency, cons
 
 // Default constructor
 Gene::Gene()
-    : time_to_activ_exp(0.0),
+    : time_to_activ_mean(0.0),
       time_to_activ_var(0.0),
       Nlevels_aggressiveness(0),
       target_trait(""),
       mutkernel(Vector2D<double>()),
-      aggressiveness_matrix(Vector2D<double>()) {}
+      aggressiveness_matrix(Vector2D<double>()),
+      recombination_sd(0.0){}
 
 // Constructor
-Gene::Gene(const double& time_to_activ_exp, const double& time_to_activ_var, const int& Nlevels_aggressiveness,
+Gene::Gene(const double& time_to_activ_mean, const double& time_to_activ_var, const int& Nlevels_aggressiveness,
            const std::string& target_trait, const double& mutation_prob, const double& efficiency,
-           const double& fitness_cost, const double& tradeoff_strength)
-    : time_to_activ_exp(time_to_activ_exp),
+           const double& fitness_cost, const double& tradeoff_strength, const double& recombination_sd)
+    : time_to_activ_mean(time_to_activ_mean),
       time_to_activ_var(time_to_activ_var),
       Nlevels_aggressiveness(Nlevels_aggressiveness),
       target_trait(target_trait),
       mutkernel(init_mutkernel(mutation_prob)),
-      aggressiveness_matrix(init_aggressiveness_matrix(efficiency, fitness_cost, tradeoff_strength)) {}
+      aggressiveness_matrix(init_aggressiveness_matrix(efficiency, fitness_cost, tradeoff_strength)),
+      recombination_sd(recombination_sd){}
 
 // Transform Gene attributs to string
 std::string Gene::to_string() const {
     std::string str("");
-    str += "  time_to_activ_exp:      " + std::to_string(this->time_to_activ_exp) + "\n";
+    str += "  time_to_activ_mean:      " + std::to_string(this->time_to_activ_mean) + "\n";
     str += "  time_to_activ_var:      " + std::to_string(this->time_to_activ_var) + "\n";
     str += "  Nlevels_aggressiveness: " + std::to_string(this->Nlevels_aggressiveness) + "\n";
     str += "  target_trait:           " + this->target_trait + "\n";
+    str += "  recombination_sd:           " + std::to_string(this->recombination_sd) + "\n";
     str += "  mutkernel:\n";
     for(int i = 0; i < this->Nlevels_aggressiveness; i++) {
         str += "    " + std::to_string(i) + ": ";

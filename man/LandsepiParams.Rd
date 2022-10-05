@@ -29,8 +29,11 @@ See \code{\link{allocateCultivarGenes}}}
 \item{\code{Genes}}{a data.frame of parameters associated with each resistance gene and with the evolution of
 each corresponding pathogenicity gene. See \code{\link{loadGene}} and \code{\link{setGenes}}}
 
-\item{\code{Pathogen}}{a list of pathogen aggressiveness parameters on a susceptible host
-for a pathogen genotype not adapted to resistance. See \code{\link{loadPathogen}} and \code{\link{setPathogen}}}
+\item{\code{Pathogen}}{a list of i. pathogen aggressiveness parameters on a susceptible host
+for a pathogen genotype not adapted to resistance and ii. germination of sexual spores parameters. See \code{\link{loadPathogen}} and \code{\link{setPathogen}}}
+
+\item{\code{ReproSexProb}}{a vector of size TimeParam$nTSpY +1(end of season) of the probabilities for an infectious host to reproduce via sex rather
+than via cloning at each step (days).}
 
 \item{\code{PI0}}{initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
 at the beginning of the simulation. Must be between 0 and 1. See \code{\link{setInoculum}}}
@@ -40,6 +43,11 @@ from any field of the landscape to any other field. See \code{\link{loadDispersa
 
 \item{\code{DispPatho}}{a vectorized matrix giving the probability of pathogen dispersal
 from any field of the landscape to any other field. See \code{\link{loadDispersalPathogen}} and \code{\link{setDispersalPathogen}}}
+
+\item{\code{DispPathoSex}}{a vectorized matrix giving the probability of pathogen dispersal
+from any field of the landscape to any other field (sexual spore). See \code{\link{loadDispersalPathogen}} and \code{\link{setDispersalPathogen}}}
+
+\item{\code{Treatment}}{a list of parameters to simulate the effect of chemical treatments on the pathogen}
 
 \item{\code{OutputDir}}{the directory for simulation outputs}
 

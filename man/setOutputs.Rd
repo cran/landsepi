@@ -18,8 +18,6 @@ is composed of:\itemize{
 (i.e. number of infections) above which a pathogen genotype is unlikely to go extinct,
 used to characterise the time to invasion of resistant hosts (several values are computed
 if several thresholds are given in a vector).
-\item GLAnoDis = the absolute Green Leaf Area in absence of disease (used to compute
-economic outputs).
 \item audpc100S = the audpc in a fully susceptible landscape (used as reference value
 for graphics).
 }}

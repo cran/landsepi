@@ -27,6 +27,10 @@
 #include <math.h> // pow...
 #include <array>
 #include <vector>
+#include <gsl/gsl_cdf.h> // for cumulativee distribution
+#include <gsl/gsl_matrix.h> // for matrix
+#include <gsl/gsl_vector.h> // for vector
+#include <gsl/gsl_linalg.h> // CHolesky decomposition
 
 // Multi-dimensions vector
 template <typename T>
@@ -47,6 +51,23 @@ using Vector8D = std::vector<Vector7D<T> >;
 // Matrix
 template <typename T, int size>
 using Matrix = std::array<std::array<T, size>, size>;
+
+// check into vector of vector that contain a value diff from zero
+bool all_is_zero(int i);
+
+template <typename T>
+bool all_is_zero(T t)
+{
+    bool find_all_zero = true;
+    //for(typename T::iterator it = std::begin(t); it != std::end(t) && !find1; ++it) {
+    for(auto it = std::begin(t); it != std::end(t) && find_all_zero; ++it) {
+      find_all_zero &= all_is_zero(*it);
+    }
+    //Rcpp::Rcerr<< "is zero "<< find_not_zero<<std::endl;
+    return find_all_zero;
+}
+
+
 
 /****************************************************************/
 /*                         functions.c                          */
@@ -100,6 +121,15 @@ double sigmoid(const double& plateau, const double& kappa, const double& sigma, 
 /* Trade-off function on aggressiveness traits (cf Debarre et al. JEB 2010) */
 std::vector<double> tradeoff(const std::vector<double>& x, const double& strength);
 
+double cdf_gaussian_P(const double& x, const double& sigma);
+
+/*-------------------------------------------------------------------------------------*/
+/*  Function to perform the multiple sample from a multivariate normal distribution    */
+/*-------------------------------------------------------------------------------------*/
+std::vector<double> mu_transformation(const std::vector<double>& mu_old, const int& n_propagule);
+std::vector<std::vector<double>> cov_transformation(std::vector<std::vector<double>>& cov_old, const int& n_propagule);
+//std::vector<std::vector<double>> reshape(const std::vector<double>& flat_vec, std::size_t ncols );
+
 /*--------------------------*/
 /*     Sample functions     */
 /*--------------------------*/
@@ -107,5 +137,11 @@ std::vector<double> tradeoff(const std::vector<double>& x, const double& strengt
 int sample_multinomial_once(const gsl_rng* gen, const std::vector<double>& cumProb);
 /* Samples an integer array without replacement until entire array has been sampled once */
 std::vector<int> sample(const gsl_rng* gen, const std::vector<int>& inArray);
+
+/*--------------------------*/
+/*     erfinv function      */
+/*--------------------------*/
+/* erfinv(X) computes the inverse error function of X.  */
+double erfinv(const double x);
 
 #endif

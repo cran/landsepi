@@ -27,8 +27,8 @@
 #' @param Nyears number of cropping seasons (years) to simulate.
 #' @param nTSpY number of time-steps (days) per cropping season.
 #' @param videoMP4 a logical indicating if a video must be generated (TRUE, default) or not (FALSE).
-#' @details In these examples, 2 completely efficient resistance sources (typical of major 
-#' resistance genes) are deployed in the landscape according 
+#' @details In these examples on rust fungi of cereal crops, 2 completely efficient resistance sources 
+#' (typical of major resistance genes) are deployed in the landscape according 
 #' to one of the following strategies:\itemize{
 #' \item Mosaic: 3 pure crops (S + R1 + R2) with very high spatial aggregation.
 #' \item Mixture: 1 pure susceptible crop + 1 mixture of two resistant cultivars, with high aggregation.
@@ -48,66 +48,70 @@
 #' }
 #' @include Methods-LandsepiParams.R RcppExports.R
 #' @export
-demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, videoMP4 = TRUE) {
+demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, videoMP4 = FALSE) {
   # seed = 1; strat="MO"; Nyears = 5; nTSpY = 120; videoMP4 = FALSE  ## for debugging
   initPath <- getwd()
+  
 
   ## Simulation parameters
   simul_params <- createSimulParams(outputDir = getwd())
   
+  
   ## Seed
   simul_params <- setSeed(simul_params, seed)
+  
   
   ## Time parameters
   simul_params <- setTime(simul_params, Nyears, nTSpY)
 
+  
   ## Pathogen parameters
   basic_patho_param <- loadPathogen("rust")
-  # basic_patho_param <- list(infection_rate = 0.4, latent_period_exp = 10, latent_period_var = 9
-  #                           , propagule_prod_rate = 3.125, infectious_period_exp = 24, infectious_period_var = 105
+  # basic_patho_param <- list(infection_rate = 0.4, latent_period_mean = 10, latent_period_var = 9
+  #                           , propagule_prod_rate = 3.125, infectious_period_mean = 24, infectious_period_var = 105
   #                           , survival_prob = 1e-4, repro_sex_prob = 0
-  #                           , sigmoid_kappa = 5.333, sigmoid_sigma = 3, sigmoid_plateau = 1)
+  #                           , sigmoid_kappa = 5.333, sigmoid_sigma = 3, sigmoid_plateau = 1
+  #                           , sex_propagule_viability_limit = 1, sex_propagule_release_mean = 1, clonal_propagule_gradual_release = 0)
   simul_params <- setPathogen(simul_params, basic_patho_param)
-
+  
 
   ## Initial conditions
-  simul_params <- setInoculum(simul_params, 5e-4)
+  simul_params <- setInoculum(simul_params, 5e-4) 
 
 
-  ## Landscape parameters
+  ## Landscape and dispersal parameters
   id_landscape <- 1
   landscape <- loadLandscape(id_landscape)
-  # landscape <- get("landscapeTEST1")
   simul_params <- setLandscape(simul_params, landscape)
-
-
+  
+  
   ## Dispersal parameters
   disp_patho <- loadDispersalPathogen(id_landscape)
-  # disp_patho <- get("dispP_1")
-  simul_params <- setDispersalPathogen(simul_params, disp_patho)
-
-
+  disp_patho_asex <- disp_patho[[1]]
+  disp_patho_sex <- disp_patho[[2]]
+  simul_params <- setDispersalPathogen(simul_params, disp_patho_asex)#, disp_patho_sex)
+  
   ## Genes
   gene1 <- loadGene(name = "MG 1", type = "majorGene")
   gene2 <- loadGene(name = "MG 2", type = "majorGene")
-  if (strat == "PY") {
-    gene1$mutation_prob <- 1E-4
-    gene2$mutation_prob <- 1E-4
-  }
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   # genes <- data.frame(geneName =               c("MG1", "MG2"),
   #                     efficiency =             c(1.0  , 1.0  ),
-  #                     time_to_activ_exp =      c(0.0  , 0.0  ),
+  #                     time_to_activ_mean =      c(0.0  , 0.0  ),
   #                     time_to_activ_var =      c(0.0  , 0.0  ),
   #                     mutation_prob =          c(1E-7 , 1E-7 ),
   #                     Nlevels_aggressiveness = c(2    , 2    ),
   #                     fitness_cost =           c(0.5  , 0.5  ),
   #                     tradeoff_strength =      c(1.0  , 1.0  ),
   #                     target_trait =           c("IR" , "IR"  ),
+  #                     var_sex_recombination =  c(0.0  , 0.0),
   #                     stringsAsFactors = FALSE)
+  if (strat == "PY") {
+    genes$mutation_prob <- 1e-4
+  }
   simul_params <- setGenes(simul_params, genes)
 
-
+  
   ## Cultivars
   cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
   if (strat == "PY") { ## 1 susceptible cultivar + 1 resistant cultivar
@@ -132,8 +136,8 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   #                         market_value =      rep(200, 3),
   #                         stringsAsFactors = FALSE)
   simul_params <- setCultivars(simul_params, cultivars)
-
-
+  
+  
   ## Allocate genes to cultivars
   if (strat == "PY") { ## 2 genes for 1 cultivar
     simul_params <- allocateCultivarGenes(simul_params, "Resistant", c("MG 1", "MG 2"))
@@ -141,8 +145,8 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
     simul_params <- allocateCultivarGenes(simul_params, "Resistant1", c("MG 1"))
     simul_params <- allocateCultivarGenes(simul_params, "Resistant2", c("MG 2"))
   }
-
-
+  
+  
   ## Allocate cultivars to croptypes
   switch(strat,
     "MO" = { ## 3 pure crops, very high aggregation
@@ -152,10 +156,9 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
       croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 2", "Resistant2")
       simul_params <- setCroptypes(simul_params, croptypes)
 
-
       rotation_sequence <- croptypes$croptypeID ## No rotation -> 1 rotation_sequence element
       rotation_period <- 0 ## same croptypes every years
-      prop <- c(1 / 3, 1 / 3, 1 / 3) ## croptypes proportions
+      prop <- c(1/3,1/3,1/3) ## croptypes proportions
       aggreg <- 10 ## aggregated landscape
     },
     "MI" = { ## 1 pure crop + 1 balanced mixture, high aggregation
@@ -201,18 +204,16 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
       #                         , stringsAsFactors = FALSE)
       simul_params <- setCroptypes(simul_params, croptypes)
 
-
       rotation_sequence <- croptypes$croptypeID
       rotation_period <- 0
-      prop <- c(1 / 2, 1 / 2)
+      prop <- c(1/2, 1/2)
       aggreg <- 0.07
     },
     {
       stop('Unknown strategy. Possible values for argument "strat" are: "MO", "MI"", "RO", "PY"')
     }
   )
-
-
+  
   ## Allocate croptypes to landscape
   simul_params <- allocateLandscapeCroptypes(simul_params,
     rotation_period = rotation_period,
@@ -222,6 +223,7 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
     aggreg = aggreg
   )
 
+  
   ## list of outputs to be generated
   outputlist <- loadOutputs()
   simul_params <- setOutputs(simul_params, outputlist)
@@ -230,7 +232,7 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   checkSimulParams(simul_params)
 
   ## Save deployment strategy into GPKG file
-  simul_params <- saveDeploymentStrategy(simul_params)
+  # simul_params <- saveDeploymentStrategy(simul_params)
 
   ## Run simulation
   runSimul(simul_params, graphic = TRUE, videoMP4 = videoMP4)
@@ -238,3 +240,4 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   ## Set back the path to the initial repository
   setwd(initPath)
 }
+

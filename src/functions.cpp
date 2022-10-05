@@ -22,6 +22,13 @@
 #include "functions.hpp"
 #include "Model.hpp"
 
+
+// int i not equal to 0
+bool all_is_zero(int i)
+{
+  return i==0;
+}
+
 /****************************************************************/
 /*                         functions.c                          */
 /****************************************************************/
@@ -79,6 +86,10 @@ std::vector<double> tradeoff(const std::vector<double>& x, const double& strengt
     return y;
 }
 
+double cdf_gaussian_P(const double& x, const double& sigma) {
+    return gsl_cdf_gaussian_P(x,sigma);
+}
+
 /*--------------------------*/
 /*     Sample functions     */
 /*--------------------------*/
@@ -127,25 +138,55 @@ std::vector<int> sample(const gsl_rng* gen, const std::vector<int>& inArray) {
     return outArray;
 }
 
-double Model::rng_uniform() {
-    return gsl_rng_uniform(this->random_generator);
+
+
+std::vector<double> mu_transformation(const std::vector<double>& mu_old, const int& n_propagule) {
+  
+  std::vector<double> mu_trans;
+  for (unsigned int i=0; i<mu_old.size(); i++ ){
+      mu_trans.insert(mu_trans.end(), n_propagule, mu_old[i]);
+  }
+  return mu_trans;
 }
 
-int Model::ran_poisson(const double& mu) {
-    return gsl_ran_poisson(this->random_generator, mu);
+std::vector<std::vector<double>> cov_transformation(std::vector<std::vector<double>>& cov_old, const int& n_propagule) {
+  std::vector<std::vector<double>> cov_trans(n_propagule*cov_old.size(),std::vector<double>(n_propagule*cov_old.size(),0.0));
+  for(unsigned int r=0; r < cov_old.size(); r++){
+    for(unsigned int c=0; c < cov_old.size(); c++){
+      for(int p=0; p < n_propagule; p++){
+        cov_trans[n_propagule*r+p][n_propagule*c+p] = cov_old[r][c];
+      }
+    }
+  }
+  return cov_trans;
 }
+/*
+std::vector<std::vector<double>> reshape(const std::vector<double>& flat_vec, std::size_t ncols )
+{ //reshape a 1d vector into a matrix with ncols  
+  // sanity check
+  if( ncols == 0 || flat_vec.size()%ncols != 0 ) throw std::domain_error( "bad #cols" ) ;
+  
+  const auto nrows = flat_vec.size() / ncols ;
+  
+  std::vector<std::vector<double>> mtx ;
+  const auto begin = std::begin(flat_vec) ;
+  for( std::size_t row = 0 ; row < nrows ; ++row ){
+    for(std::size_t col = 0 ; col < ncols ; ++col ){
+    //mtx.push_back( { begin + row*ncols, begin + (row+1)*ncols } ) ;
+    mtx.push_back( flat_vec[begin + (row+nrows)*col]) ;
+    }
+  }
+  return mtx ;
+}
+*/
 
-double Model::ran_gamma(const double& a, const double& b) {
-    return gsl_ran_gamma(this->random_generator, a, b);
-}
+/*--------------------------*/
+/*     erfinv function      */
+/*--------------------------*/
+/* erfinv(X) computes the inverse error function of X.  */
 
-int Model::ran_binomial(const double& p, const int& n) {
-    return gsl_ran_binomial(this->random_generator, p, n);
-}
+  double erfinv(double x) {
+    return( gsl_cdf_ugaussian_Pinv((1+x)/2) / sqrt(2) );
+  }
 
-std::vector<int> Model::ran_multinomial(const int& N, const std::vector<double>& p) {
-    const unsigned int K = p.size();
-    std::vector<int> res(K);
-    gsl_ran_multinomial(this->random_generator, K, N, p.data(), (unsigned int*)res.data());
-    return res;
-}
+

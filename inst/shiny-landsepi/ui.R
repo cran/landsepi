@@ -26,7 +26,7 @@ landscapeTab <- {
           selected = 1,
         )
       ),
-      shinyBS::bsTooltip("landscape",title="Landscape Shapefile", placement = "top", trigger="hover"),
+      shinyBS::bsTooltip("landscape", title = "Landscape Shapefile", placement = "top", trigger = "hover"),
       column(
         width = 6,
         shiny::selectInput(
@@ -41,12 +41,13 @@ landscapeTab <- {
         )
       )
     ),
-    shinyBS::bsTooltip("aggregLevel",title="Level of spatial aggregation of the landscape", placement = "top", trigger="hover"),
+    shinyBS::bsTooltip("aggregLevel", title = "Level of spatial aggregation of the landscape", placement = "top", trigger = "hover"),
     hr(),
     shiny::fluidRow(
-      tags$div(lang="en",
-                 h3("Croptypes"),
-                 editableDTUI(id = "croptypes")
+      tags$div(
+        lang = "en",
+        h3("Croptypes"),
+        editableDTUI(id = "croptypes")
       ),
       hr(),
       column(
@@ -58,12 +59,12 @@ landscapeTab <- {
           max = VALUEMAX
         )
       ),
-      shinyBS::bsTooltip("rotationPeriod",title=ROTATION_PERIOD, placement = "bottom", trigger="hover"),
+      shinyBS::bsTooltip("rotationPeriod", title = ROTATION_PERIOD, placement = "bottom", trigger = "hover"),
       column(
         width = 8,
         align = "left",
         htmlOutput("rotationText")
-        )
+      )
     ),
     hr(),
     shiny::fluidRow(
@@ -76,7 +77,7 @@ landscapeTab <- {
           max = 50
         )
       ),
-      shinyBS::bsTooltip("nYear",title="Number of cropping seasons (e.g. years)", placement = "bottom", trigger="hover"),
+      shinyBS::bsTooltip("nYear", title = "Number of cropping seasons (e.g. years)", placement = "bottom", trigger = "hover"),
       column(
         width = 4,
         IntegerInput(
@@ -86,7 +87,7 @@ landscapeTab <- {
           max = 365
         )
       ),
-      shinyBS::bsTooltip("nTSpY",title="Number of time steps per cropping season (e.g. days)", placement = "bottom", trigger="hover"),
+      shinyBS::bsTooltip("nTSpY", title = "Number of time steps per cropping season (e.g. days)", placement = "bottom", trigger = "hover"),
       column(
         width = 4,
         IntegerInput(
@@ -96,7 +97,7 @@ landscapeTab <- {
           max = 99999
         )
       ),
-      shinyBS::bsTooltip("seed",title="Seed value for Random Number Generator", placement = "bottom", trigger="hover"),
+      shinyBS::bsTooltip("seed", title = "Seed value for Random Number Generator", placement = "bottom", trigger = "hover"),
     )
   )
 }
@@ -122,22 +123,25 @@ pathogenTab <- {
         inputId = "defaultPathogen",
         label = "Default Pathogen",
         choices = list(
-          "Rust" = "Rust"
+          "Rust" = "Rust",
+          "Mildew" = "Mildew",
+          "No Pathogen" = "No Pathogen"
         ),
         width = "25%"
       ),
-      align = "center"
+      align = "center",
+      shinyBS::bsTooltip("defaultPathogen", title = "Select a Pathogen <br><b>!!! That will reload all simulation parameters in normal Mode !!!</b>", placement = "top", trigger = "hover"),
     ),
     shiny::fluidRow(
       shiny::numericInput(
         inputId = "inoculum",
         label = "Initial probability of infection for the first susceptible host",
-        value = 0.0001,
+        value = 0.0005,
         min = 0.0,
         max = 1.0,
         step = 0.0001
       ),
-      shinyBS::bsTooltip("inoculum",title=INOCULUM, placement = "bottom", trigger="hover"),
+      shinyBS::bsTooltip("inoculum", title = INOCULUM, placement = "bottom", trigger = "hover"),
     ),
     shiny::fluidRow(
       column(
@@ -150,10 +154,10 @@ pathogenTab <- {
           max = 1.0,
           step = 0.0001
         ),
-        shinyBS::bsTooltip("patho_survival_prob",title=SURVIVAL_PROB, placement = "right", trigger="hover"),
+        shinyBS::bsTooltip("patho_survival_prob", title = SURVIVAL_PROB, placement = "right", trigger = "hover"),
         # shiny::numericInput(
         #   inputId = "patho_repro_sex_prob",
-        #   label = "Prob. for an infectious host to reporduce via sex rather than clonal",
+        #   label = "Prob. for an infectious host to reproduce via sex rather than clonal",
         #   value = 0,
         #   min = 0.0,
         #   max = 1.0,
@@ -167,7 +171,7 @@ pathogenTab <- {
           max = 2.0,
           step = 0.1
         ),
-        shinyBS::bsTooltip("patho_infection_rate",title=INFECTION_RATE, placement = "right", trigger="hover"),
+        shinyBS::bsTooltip("patho_infection_rate", title = INFECTION_RATE, placement = "right", trigger = "hover"),
         shiny::numericInput(
           inputId = "patho_propagule_prod_rate",
           label = "Reproduction rate (clonal)",
@@ -175,19 +179,19 @@ pathogenTab <- {
           min = 0.0,
           step = 0.4
         ),
-        shinyBS::bsTooltip("patho_propagule_prod_rate",title=PROPAGULE_PROD_RATE, placement = "right", trigger="hover")
+        shinyBS::bsTooltip("patho_propagule_prod_rate", title = PROPAGULE_PROD_RATE, placement = "right", trigger = "hover")
       ),
       column(
         width = 4,
         shiny::numericInput(
-          inputId = "patho_latent_period_exp",
+          inputId = "patho_latent_period_mean",
           label = "Latent period duration",
           value = 10,
           min = 0,
           max = 100,
           step = 1
         ),
-        shinyBS::bsTooltip("patho_latent_period_exp",title=LATENT_PERIOD_EXP, placement = "left", trigger="hover"),
+        shinyBS::bsTooltip("patho_latent_period_mean", title =  LATENT_PERIOD_MEAN, placement = "left", trigger = "hover"),
         shiny::numericInput(
           inputId = "patho_latent_period_var",
           label = "Variance of the latent period duration",
@@ -196,16 +200,16 @@ pathogenTab <- {
           max = 100,
           step = 1
         ),
-        shinyBS::bsTooltip("patho_latent_period_var",title=LATENT_PERIOD_VAR, placement = "left", trigger="hover"),
+        shinyBS::bsTooltip("patho_latent_period_var", title = LATENT_PERIOD_VAR, placement = "left", trigger = "hover"),
         shiny::numericInput(
-          inputId = "patho_infectious_period_exp",
+          inputId = "patho_infectious_period_mean",
           label = "Infectious period duration",
           value = 24,
           min = 0,
           max = 365,
           step = 1
         ),
-        shinyBS::bsTooltip("patho_infectious_period_exp",title=INFECTIOUS_PERIOD_EXP, placement = "left", trigger="hover"),
+        shinyBS::bsTooltip("patho_infectious_period_mean", title = INFECTIOUS_PERIOD_MEAN, placement = "left", trigger = "hover"),
         shiny::numericInput(
           inputId = "patho_infectious_period_var",
           label = "Variance of the infectious period duration",
@@ -213,7 +217,7 @@ pathogenTab <- {
           min = 0,
           step = 1
         ),
-        shinyBS::bsTooltip("patho_infectious_period_var",title=INFECTIOUS_PERIOD_VAR, placement = "left", trigger="hover")
+        shinyBS::bsTooltip("patho_infectious_period_var", title = INFECTIOUS_PERIOD_VAR, placement = "left", trigger = "hover")
       ),
       column(
         width = 4,
@@ -225,7 +229,7 @@ pathogenTab <- {
           max = 10,
           step = 0.01
         ),
-        shinyBS::bsTooltip("patho_sigmoid_kappa",title=SIGMOID_KAPPA, placement = "left", trigger="hover"),
+        shinyBS::bsTooltip("patho_sigmoid_kappa", title = SIGMOID_KAPPA, placement = "left", trigger = "hover"),
         shiny::numericInput(
           inputId = "patho_sigmoid_sigma",
           label = "Contamination function: Sigma",
@@ -234,8 +238,8 @@ pathogenTab <- {
           max = 100,
           step = 1
         ),
-        shinyBS::bsTooltip("patho_sigmoid_sigma",title=SIGMOID_SIGMA, placement = "left", trigger="hover")
-        #,
+        shinyBS::bsTooltip("patho_sigmoid_sigma", title = SIGMOID_SIGMA, placement = "left", trigger = "hover"),
+        # ,
         # shiny::numericInput(
         #   inputId = "patho_sigmoid_plateau",
         #   label = "Plateau parameter of the sigmoid contamination function",
@@ -245,10 +249,114 @@ pathogenTab <- {
         #   step = 1
         # )
       )
+    ),
+    shiny::fluidRow(
+      shiny::column(
+        width = 4,
+        shiny::checkboxInput("patho_repro_sex_active", "Active Sexual Reproduction", value = FALSE),
+        shinyBS::bsTooltip("patho_repro_sex_active", title = "Active sexual reproduction at the end of the season", placement = "top", trigger = "hover"),
+      ),
+      column(
+        width = 4,
+        shiny::numericInput(
+          inputId = "patho_sex_propagule_release_mean",
+          label = "Average number of seasons before oospore",
+          value = 1.0,
+          min = 1.0,
+          step = 1.0
+        ),
+        shinyBS::bsTooltip("patho_sex_propagule_release_mean", title = SEX_PROPAGULE_RELEASE_MEAN, placement = "left", trigger = "hover")
+      ),
+      column(
+        width = 4,
+        shiny::numericInput(
+          inputId = "patho_sex_propagule_viability_limit",
+          label = "Oospore dormancy limit: nb of seasons (years)",
+          value = 5,
+          min = 1,
+          step = 1
+        ),
+        shinyBS::bsTooltip("patho_sex_propagule_viability_limit", title = SEX_PROPAGULE_VIABILITY_LIMIT, placement = "left", trigger = "hover"),
+      )
     )
   )
 }
 
+######################################################################################
+treatmentTab <- {
+  shiny::tabPanel(
+    "Treatment",
+    shiny::br(),
+    shiny::fluidRow(
+      column(12,
+        align = "center",
+        shiny::checkboxInput("treatment_active", "Active Cultivars Treatment", value = FALSE),
+        shinyBS::bsTooltip("treatment_active", title = "Active cultivars treatment", placement = "top", trigger = "hover"),
+      )
+    ),
+    shiny::fluidRow(
+      column(
+        width = 4,
+        align = "center",
+        shiny::numericInput(
+          inputId = "treatment_day_start",
+          label = "First Day of treatment",
+          value = 1,
+          min = 1,
+          step = 1
+        ),
+        shinyBS::bsTooltip("treatment_day_start", title = "First day of treatment", placement = "top", trigger = "hover"),
+        shiny::numericInput(
+          inputId = "treatment_days_interval",
+          label = "Days (step) between treatment",
+          value = 14,
+          min = 1,
+          step = 1
+        ),
+        shinyBS::bsTooltip("treatment_days_interval", title = "Step between treatment", placement = "top", trigger = "hover"),
+      ),
+      column(
+        width = 4,
+        align = "center",
+      selectInput("treatment_cultivars_select", "Cultivars to Treat", c(NULL),
+                  multiple = TRUE,
+                  selectize = TRUE
+      ),
+      shinyBS::bsTooltip("treatment_cultivars_select", title = "Select cultivars to treat", placement = "top", trigger = "hover")#,
+      # shiny::numericInput(
+      #     inputId = "treatment_cost",
+      #     label = "Treatment cost",
+      #     value = 0.0,
+      #     min = 0.0,
+      #     max = 1000,
+      #     step = 0.1
+      # ),
+      # shinyBS::bsTooltip("treatment_cost", title = "cost of a single treatments (monetary units/ha)", placement = "top", trigger = "hover"),
+      ),
+      column(
+        width = 4,
+        align = "center",
+        shiny::numericInput(
+          inputId = "treatment_reduction_rate",
+          label = "Treatment reduction rate",
+          value = 0.1,
+          min = 0.01,
+          step = 0.1
+        ),
+        shinyBS::bsTooltip("treatment_reduction_rate", title = "Reduction per time step of treatment concentration. 0.10 for protectant fungicides, 0.07 for locally systemic fungicides, and 0.06 to 0.05 for systemic fungicides.", placement = "top", trigger = "hover"),
+        shiny::numericInput(
+          inputId = "treatment_efficiency",
+          label = "Treatment efficacy",
+          value = 0.0,
+          min = 0.0,
+          max = 1.0,
+          step = 0.1
+        ),
+        shinyBS::bsTooltip("treatment_efficiency", title = "Maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection at the application date) => (0, null efficacy, 1, total efficacy)", placement = "top", trigger = "hover"),
+      )
+      )
+  )
+}
 
 ######################################################################################
 inputUi <- {
@@ -269,8 +377,8 @@ inputUi <- {
       ),
       align = "center"
     ),
-    shinyBS::bsTooltip("demo",title="Load existing parameters or click Advanced Mode", placement = "top", trigger="hover"),
-    shiny::tabsetPanel(id = "inputtabpanel", landscapeTab, cultivarTab, pathogenTab),
+    shinyBS::bsTooltip("demo", title = "Load existing parameters or click Advanced Mode", placement = "top", trigger = "hover"),
+    shiny::tabsetPanel(id = "inputtabpanel", landscapeTab, cultivarTab, pathogenTab, treatmentTab),
     width = 12,
     align = "center"
   )
@@ -289,66 +397,67 @@ outputUi <- {
 ######################################################################################
 ui <- {
   shiny::fluidPage(
-    tags$html(lang="en"),
+    tags$html(lang = "en"),
     title = "Landsepi Demo",
     shinyjs::useShinyjs(),
-    useShinyalert(),
+    useShinyalert(force=TRUE),
     tags$head(
       tags$link(href = "style.css", rel = "stylesheet"),
       tags$script(src = "script.js"),
-      tags$meta(name = "description", content = "A stochastic, spatially-explicit, demo-genetic model 
-                simulating the spread and evolution of a plant pathogen in a heterogeneous landscape 
-                to assess resistance deployment strategies. It is based on a spatial geometry for describing 
-                the landscape and allocation of different cultivars, a dispersal kernel for the 
-                dissemination of the pathogen, and a SEIR ('Susceptible-Exposed-Infectious-Removed’) 
-                structure with a discrete time step. It provides a useful tool to assess the performance 
-                of a wide range of deployment options with respect to their epidemiological, 
+      tags$meta(name = "description", content = "A stochastic, spatially-explicit, demo-genetic model
+                simulating the spread and evolution of a plant pathogen in a heterogeneous landscape
+                to assess resistance deployment strategies. It is based on a spatial geometry for describing
+                the landscape and allocation of different cultivars, a dispersal kernel for the
+                dissemination of the pathogen, and a SEIR ('Susceptible-Exposed-Infectious-Removed’)
+                structure with a discrete time step. It provides a useful tool to assess the performance
+                of a wide range of deployment options with respect to their epidemiological,
                 evolutionary and economic outcomes."),
       tags$meta(name = "title", content = "Landsepi: Landscape Epidemiology and Evolution"),
       tags$meta(name = "author", content = "Jean-François Rey"),
       tags$meta(name = "keywords", content = "R, Shiny, INRAE, landscape, epidemiology, strategies, deployment, hosts, pathogens, stochastic, spatio-temporal, demonstration")
     ),
     fluidRow(
-      titlePanel(div(img(src="landsepi-logo.png", width="60" ), "Landsepi : Landscape Epidemiology and Evolution")),
+      titlePanel(div(img(src = "landsepi-logo.png", width = "60"), "Landsepi : Landscape Epidemiology and Evolution")),
       actionButton("About", "About"),
-      actionButton("Mode", "Advanced Mode On/Off", icon = icon("exchange-alt")),
-      shinyBS::bsTooltip("Mode",title="Edit all input parameters", placement = "top", trigger="hover"),
-      align="center"),
+      actionButton("Mode", "Advanced Mode On/Off", icon = icon("arrow-right-arrow-left", lib = "font-awesome")),
+      shinyBS::bsTooltip("Mode", title = "Edit all input parameters", placement = "top", trigger = "hover"),
+      align = "center"
+    ),
     shiny::br(),
     fluidRow(
       actionButton("showInputside", label = "", icon = icon("wpforms")),
-      shinyBS::bsTooltip("showInputside",title="Only show input parameters", placement = "bottom", trigger="hover"),
-      actionButton("showBothside", label = "", icon = icon("columns")),
-      shinyBS::bsTooltip("showBothside",title="Show both,  input parameters and output", placement = "bottom", trigger="hover"),
-      actionButton("showOutputside", label = "", icon = icon("chart-line") ),
-      shinyBS::bsTooltip("showOutputside",title="Only show output", placement = "bottom", trigger="hover"),
-      align="center"
+      shinyBS::bsTooltip("showInputside", title = "Only show input parameters", placement = "bottom", trigger = "hover"),
+      actionButton("showBothside", label = "", icon = icon("table-columns", lib = "font-awesome")),
+      shinyBS::bsTooltip("showBothside", title = "Show both,  input parameters and output", placement = "bottom", trigger = "hover"),
+      actionButton("showOutputside", label = "", icon = icon("chart-line")),
+      shinyBS::bsTooltip("showOutputside", title = "Only show output", placement = "bottom", trigger = "hover"),
+      align = "center"
     ),
     shiny::br(),
     shiny::fluidRow(
       column(6, id = "inputside", inputUi),
       column(6, id = "outputside", outputUi)
     ),
-    #shiny::sidebarLayout(inputUi, outputUi),
+    # shiny::sidebarLayout(inputUi, outputUi),
     shiny::fluidRow(shiny::div(
       shiny::actionButton(inputId = "generateLandscape", label = "Generate the landscape"),
       align = "center"
     )),
-    shinyBS::bsTooltip("generateLandscape",title=GENERATE_LANDSCAPE, placement = "top", trigger="hover"),
+    shinyBS::bsTooltip("generateLandscape", title = GENERATE_LANDSCAPE, placement = "top", trigger = "hover"),
     shiny::br(),
     shiny::fluidRow(shiny::div(
       shiny::actionButton(inputId = "runSimulation", label = "Run simulation"),
       shiny::actionButton(inputId = "stopSimulation", label = "Stop simulation"),
       align = "center"
     )),
-    shinyBS::bsTooltip("runSimulation",title=RUN_SIMULATION, placement = "top", trigger="hover"),
-    shinyBS::bsTooltip("stopSimulation",title=STOP_SIMULATION, placement = "top", trigger="hover"),
+    shinyBS::bsTooltip("runSimulation", title = RUN_SIMULATION, placement = "top", trigger = "hover"),
+    shinyBS::bsTooltip("stopSimulation", title = STOP_SIMULATION, placement = "top", trigger = "hover"),
     shiny::br(),
     shiny::fluidRow(shiny::div(
-      shiny::downloadButton(outputId = "export", label = "Export simulation"),
+      shiny::downloadButton(outputId = "export", label = "Download simulation parameters"),
       align = "center"
     )),
-    shinyBS::bsTooltip("export",title=EXPORT_SIMULATION, placement = "top", trigger="hover"),
+    shinyBS::bsTooltip("export", title = EXPORT_SIMULATION, placement = "top", trigger = "hover"),
     shiny::br()
   )
 }

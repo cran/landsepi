@@ -34,14 +34,19 @@
 #' See \code{\link{allocateCultivarGenes}}
 #' @slot Genes a data.frame of parameters associated with each resistance gene and with the evolution of
 #' each corresponding pathogenicity gene. See \code{\link{loadGene}} and \code{\link{setGenes}}
-#' @slot Pathogen a list of pathogen aggressiveness parameters on a susceptible host
-#' for a pathogen genotype not adapted to resistance. See \code{\link{loadPathogen}} and \code{\link{setPathogen}}
+#' @slot Pathogen a list of i. pathogen aggressiveness parameters on a susceptible host
+#' for a pathogen genotype not adapted to resistance and ii. germination of sexual spores parameters. See \code{\link{loadPathogen}} and \code{\link{setPathogen}}
+#' @slot ReproSexProb a vector of size TimeParam$nTSpY +1(end of season) of the probabilities for an infectious host to reproduce via sex rather 
+#' than via cloning at each step (days).
 #' @slot PI0 initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
 #' at the beginning of the simulation. Must be between 0 and 1. See \code{\link{setInoculum}}
 #' @slot DispHost a vectorized matrix giving the probability of host dispersal
 #' from any field of the landscape to any other field. See \code{\link{loadDispersalHost}} and \code{\link{setDispersalHost}}
 #' @slot DispPatho a vectorized matrix giving the probability of pathogen dispersal
 #' from any field of the landscape to any other field. See \code{\link{loadDispersalPathogen}} and \code{\link{setDispersalPathogen}}
+#' @slot DispPathoSex a vectorized matrix giving the probability of pathogen dispersal
+#' from any field of the landscape to any other field (sexual spore). See \code{\link{loadDispersalPathogen}} and \code{\link{setDispersalPathogen}}
+#' @slot Treatment a list of parameters to simulate the effect of chemical treatments on the pathogen
 #' @slot OutputDir the directory for simulation outputs 
 #' @slot OutputGPKG the name of the output GPKG file containing parameters of the deployment strategy
 #' @slot Outputs a list of outputs parameters. See \code{\link{setOutputs}}
@@ -59,9 +64,12 @@ setClass(
     CultivarsGenes = "data.frame",
     Genes = "data.frame",
     Pathogen = "list",
+    ReproSexProb = "vector",
     PI0 = "numeric",
     DispHost = "vector",
     DispPatho = "vector",
+    DispPathoSex = "vector",
+    Treatment = "list",
     OutputDir = "character",
     OutputGPKG = "character",
     Outputs = "list",

@@ -55,11 +55,13 @@ for tutorials (\code{browseVignettes("landsepi")}). The function runs the model 
 a LandsepiParams object.
 Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an
 individual field), based on a SEIR (‘susceptible-exposed-infectious-removed’, renamed HLIR
-for 'healthy-latent-infectious-removed' to avoid confusions
-with 'susceptible host') structure with a discrete time step. It simulates the spread and
-evolution of a pathogen in a heterogeneous cropping landscape, across cropping seasons split
+for 'healthy-latent-infectious-removed' to avoid confusions with 'susceptible host')
+structure with a discrete time step. It simulates the spread and
+evolution (via mutation, recombination through sexual reproduction, selection and drift)
+of a pathogen in a heterogeneous cropping landscape, across cropping seasons split
 by host harvests which impose potential bottlenecks to the pathogen. A wide array of
-resistance deployment strategies can be simulated and evaluated using several possible
+resistance deployment strategies (possibly including chemical treatments)
+can be simulated and evaluated using several possible
 outputs to assess the epidemiological, evolutionary and economic performance
 of deployment strategies.
 }
@@ -77,7 +79,7 @@ simul_params <- setPathogen(simul_params, loadPathogen("rust"))
 simul_params <- setInoculum(simul_params, 5e-4)
 ## Landscape & dispersal
 simul_params <- setLandscape(simul_params, loadLandscape(1))
-simul_params <- setDispersalPathogen(simul_params, loadDispersalPathogen(1))
+simul_params <- setDispersalPathogen(simul_params, loadDispersalPathogen[[1]])
 ## Genes
 gene1 <- loadGene(name = "MG 1", type = "majorGene")
 gene2 <- loadGene(name = "MG 2", type = "majorGene")

@@ -9,8 +9,7 @@ loadCultivar(name, type = "growingHost")
 \arguments{
 \item{name}{a character string (without space) specifying the cultivar name.}
 
-\item{type}{the cultivar type: "growingHost", "nongrowingHost" or "nonCrop"
-(default = "nonhost").}
+\item{type}{the cultivar type, among: "growingHost" (default), "nongrowingHost" or "nonCrop".}
 }
 \value{
 a dataframe of parameters associated with each host genotype
@@ -23,9 +22,10 @@ create a data.frame containing cultivar parameters depending of his type
 \itemize{
 \item "growingHost" is adapted to situations where the infection unit is a piece of leaf
 (e.g. where a fungal lesion can develop); the number of available infection units
-increasing during the season due to plant growth.
+increasing during the season due to plant growth (as typified by cereal crops).
 \item "nongrowingHost" corresponds to situations where the infection unit is the whole plant
 (e.g. for viral systemic infection); thus the number of infection units is constant.
+\item "grapevine" corresponds to parameters for grapevine (including host growth).
 \item "nonCrop" is not planted, does not cost anything and does not yield anything
 (e.g. forest, fallow).
 }

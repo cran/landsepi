@@ -11,20 +11,26 @@
   Cultivars = data.frame(matrix(ncol = length(.cultivarsColNames), nrow = 0, dimnames =
     list(NULL, .cultivarsColNames))),
   CultivarsGenes = data.frame(),
-  Genes = data.frame(matrix(ncol = length(.geneColNames), nrow = 0, dimnames =
-    list(NULL, .geneColNames))),
+  Genes = data.frame(matrix(ncol = length(.geneColNames), nrow = 0, dimnames = list(NULL,
+    .geneColNames))),
   Pathogen = list(name = "no pathogen", survival_prob = 0, repro_sex_prob = 0,
-    infection_rate = 0, propagule_prod_rate = 0, latent_period_exp = 0, latent_period_var
-    = 0, infectious_period_exp = 0, infectious_period_var = 0, sigmoid_kappa = 0,
-    sigmoid_sigma = 0, sigmoid_plateau = 1),
+    infection_rate = 0, propagule_prod_rate = 0, latent_period_mean = 0,
+    latent_period_var = 0, infectious_period_mean = 0, infectious_period_var = 0,
+    sigmoid_kappa = 0, sigmoid_sigma = 0, sigmoid_plateau = 1,
+    sex_propagule_viability_limit = 0, sex_propagule_release_mean = 0,
+    clonal_propagule_gradual_release = 0),
+  ReproSexProb = vector(),
   PI0 = 0,
   DispHost = vector(),
   DispPatho = vector(),
+  DispPathoSex = vector(),
+  Treatment = list(treatment_reduction_rate = 0.1, treatment_efficiency = 0,
+    treatment_timesteps = vector(), treatment_cultivars = vector(), treatment_cost = 0),
   OutputDir = normalizePath(character(getwd())),
   OutputGPKG = "landsepi_landscape.gpkg",
-  Outputs = list(epid_outputs = "", evol_outputs = "", thres_breakdown = NA, GLAnoDis =
-    NA, audpc100S = NA),
-  TimeParam = list(),
+  Outputs = list(epid_outputs = "", evol_outputs = "", thres_breakdown = NA, audpc100S =
+    NA),
+  TimeParam = list(Nyears = 0, nTSpY = 0),
   Seed = NULL,
   ...
 )
@@ -39,8 +45,7 @@
 within the croptype.}
 
 \item{Cultivars}{a dataframe of parameters associated with each host genotype
-(i.e. cultivars, lines)
-when cultivated in pure crops.}
+(i.e. cultivars, lines) when cultivated in pure crops.}
 
 \item{CultivarsGenes}{a list containing, for each host genotype, the indices of
 carried resistance genes.}
@@ -51,6 +56,9 @@ the evolution of each corresponding pathogenicity gene.}
 \item{Pathogen}{a list of pathogen aggressiveness parameters on a susceptible host
 for a pathogen genotype not adapted to resistance.}
 
+\item{ReproSexProb}{a vector of size TimeParam$nTSpY +1 (end of season) of the probabilities for an infectious host to reproduce via sex rather
+than via cloning at each timestep (days).}
+
 \item{PI0}{initial probability for the first host (whose index is 0) to be infectious
 (i.e. state I) at the beginning of the simulation. Must be between 0 and 1.}
 
@@ -59,6 +67,12 @@ from any field of the landscape to any other field}
 
 \item{DispPatho}{a vectorized matrix giving the probability of pathogen dispersal
 from any field of the landscape to any other field.}
+
+\item{DispPathoSex}{a vectorized matrix giving the probability of pathogen dispersal
+from any field of the landscape to any other field (sexual spore).}
+
+\item{Treatment}{a list of chemical treatment parameters (indices of treated cultivars, times of application,
+efficiency and reduction rate)}
 
 \item{OutputDir}{the directory for simulation outputs}
 

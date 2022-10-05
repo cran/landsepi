@@ -41,6 +41,7 @@ myDesign
 #      simul_params <- setSeed(simul_params, myDesign$seed[i])  ## update seed
 #  
 #      ## Pathogen parameters
+#      simul_params@ReproSexProb <- logical(0) ## initialize vector of sexual probability (one for each time step)
 #      basic_patho_param <- loadPathogen("rust")
 #      basic_patho_param$infection_rate <- myDesign$infection_rate[i]  ## update inf. rate
 #      simul_params <- setPathogen(simul_params, basic_patho_param)
@@ -53,12 +54,14 @@ myDesign
 #      simul_params <- setLandscape(simul_params, landscape)
 #  
 #      ## Dispersal parameters
-#      disp_patho <- loadDispersalPathogen(myDesign$id_landscape[i])  ## update dispersal
+#      disp_patho <- loadDispersalPathogen(myDesign$id_landscape[i])[[1]]  ## update dispersal
 #      simul_params <- setDispersalPathogen(simul_params, disp_patho)
 #  
 #      ## Genes
 #      gene1 <- loadGene(name = "MG 1", type = "majorGene")
+#      gene1$mutation_prob<-1e-4
 #      gene2 <- loadGene(name = "MG 2", type = "majorGene")
+#      gene2$mutation_prob<-1e-4
 #      genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #      genes$efficiency <- myDesign$R_efficiency[i]  ## update resistance efficiency
 #      simul_params <- setGenes(simul_params, genes)

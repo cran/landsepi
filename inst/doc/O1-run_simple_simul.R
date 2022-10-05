@@ -30,21 +30,26 @@ basic_patho_param
 
 ## -----------------------------------------------------------------------------
 basic_patho_param <- list(infection_rate = 0.4
-                          , latent_period_exp = 10
+                          , latent_period_mean = 10
                           , latent_period_var = 9
                           , propagule_prod_rate = 3.125
-                          , infectious_period_exp = 24
+                          , infectious_period_mean = 24
                           , infectious_period_var = 105
                           , survival_prob = 1e-4
                           , repro_sex_prob = 0
-                          , sigmoid_kappa = 5.333, sigmoid_sigma = 3, sigmoid_plateau = 1)
+                          , sigmoid_kappa = 5.333
+                          , sigmoid_sigma = 3
+                          , sigmoid_plateau = 1
+                          , sex_propagule_viability_limit = 1
+                          , sex_propagule_release_mean = 1
+                          , clonal_propagule_gradual_release = 0)
 
 ## -----------------------------------------------------------------------------
 simul_params <- setPathogen(simul_params, patho_params = basic_patho_param)
 simul_params@Pathogen
 
 ## -----------------------------------------------------------------------------
-simul_params <- setInoculum(simul_params, val = 5e-4)
+simul_params <- setInoculum(simul_params, val = 5e-4) 
 simul_params@PI0
 
 ## -----------------------------------------------------------------------------
@@ -53,7 +58,7 @@ length(landscape)
 plot(landscape, main = "Landscape structure")
 
 ## -----------------------------------------------------------------------------
-disp_patho <- loadDispersalPathogen(id = 1)
+disp_patho <- loadDispersalPathogen(id = 1)[[1]]
 head(disp_patho)
 length(landscape)^2 == length(disp_patho)
 
@@ -106,13 +111,14 @@ genes
 ## -----------------------------------------------------------------------------
 genes_new <- data.frame(geneName =               c("MG1", "MG2"),
                         efficiency =             c(1.0  , 0.8  ),
-                        time_to_activ_exp =      c(0.0  , 0.0  ),
+                        time_to_activ_mean =      c(0.0  , 0.0  ),
                         time_to_activ_var =      c(0.0  , 0.0  ),
                         mutation_prob =          c(1E-7 , 1E-4),
                         Nlevels_aggressiveness = c(2    , 2    ),
                         fitness_cost =           c(0.50 , 0.75 ),
                         tradeoff_strength =      c(1.0  , 1.0  ),
                         target_trait =           c("IR" , "LAT"),
+                        recombination_sd =       c(1.0,1.0),
                         stringsAsFactors = FALSE)
 genes_new
 
@@ -179,14 +185,14 @@ simul_params <- setCroptypes(simul_params, croptypes)
 # croptypeIDs cultivated in each element of the rotation sequence:
 rotation_sequence <- list(c(0,1,3), c(0,2,3))
 rotation_period <- 2  # number of years before rotation of the landscape
-prop <- list(rep(1/3, 3), rep(1/3, 3))  # proportion (in surface) of each croptype
-aggreg <- 1    # level of spatial aggregation
+prop <- list(rep(1/3, 3), rep(1/3, 3)) # proportion (in surface) of each croptype 
+aggreg <-1 # level of spatial aggregation
 simul_params <- allocateLandscapeCroptypes(simul_params
                                            , rotation_period = rotation_period
                                            , rotation_sequence = rotation_sequence
                                            , prop = prop
                                            , aggreg = aggreg
-                                           , graphic = FALSE)
+                                           , graphic = TRUE)
 # plot(simul_params@Landscape)
 
 ## -----------------------------------------------------------------------------

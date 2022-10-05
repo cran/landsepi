@@ -32,14 +32,19 @@ basic_patho_param <- list(
   repro_sex_prob = 0, ## probability for an infection that its reproduction is sexual rather than clonal.
   infection_rate = 0.4,
   propagule_prod_rate = 3.125,
-  latent_period_exp = 10,
+  latent_period_mean = 10,
   latent_period_var = 9,
-  infectious_period_exp = 24,
+  infectious_period_mean = 24,
   infectious_period_var = 105,
   sigmoid_kappa = 5.333,
   sigmoid_sigma = 3,
-  sigmoid_plateau = 1
+  sigmoid_plateau = 1,
+  sex_propagule_viability_limit = 5,
+  sex_propagule_release_mean = 0.5,
+  clonal_propagule_gradual_release = 0
 )
+
+params@ReproSexProb = rep(0,121)
 
 test_that("Default values", {
   expect_equal(normalizePath(dirname(params@OutputDir)), normalizePath(test_path()))
@@ -219,10 +224,11 @@ test_that("CultivarGene-Check", {
 })
 
 test_that("Pathogen-Check", {
-  params_tmp <- params
+  params_tmp <- setPathogen(params, loadPathogen())
 
   expect_true(checkPathogen(params_tmp))
 
   params_tmp@Pathogen <- basic_patho_param
   expect_true(checkPathogen(params_tmp))
 })
+

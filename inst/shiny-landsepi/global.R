@@ -12,12 +12,16 @@ library(promises)
 library(tools)
 library(shinyalert)
 
+## Video directory
+if(!dir.exists("./www/tmp/")) dir.create("./www/tmp/")
+addResourcePath("video", "./www/tmp/")
+
 # Active debug level
 # 0 : no print
 # 1 : warning
 # 2 : error
 # 3 : all
-ACTIVE_DEBUG <- 3
+ACTIVE_DEBUG <- 0
 
 library("landsepi")
 data(package = "landsepi")
@@ -32,7 +36,7 @@ cleanDir <- function(path) {
   files <- dir(path, full.names=TRUE, no..=TRUE)
   lapply(files, FUN = function(file){
       if( dir.exists(file) ) cleanDir(file)
-      file.remove(file)
+      file.remove(file, recursive=TRUE)
     })
 }
 
@@ -59,6 +63,12 @@ simul_params_cultivarsgenes <- shiny::reactiveVal()
 simul_params_genes <- shiny::reactiveVal()
 default_gene <- c()
 
+## Pathogens name reactive value
+simul_pathogen <-  shiny::reactiveVal("rust")
+
+## Treatment is active
+treatment_is_active <- shiny::reactiveVal(FALSE)
+
 ##################################################################
 # Functions
 ##################################################################
@@ -67,6 +77,8 @@ default_gene <- c()
 # msg : message to print
 # level : level of output (0 no output, 3 all output)
 printVerbose <- function(msg, level=ACTIVE_DEBUG) {
+  if(ACTIVE_DEBUG < 1 || level < 1) return()
+  if(level == 1) warnings(msg)
   if(level == 2) print(msg)
   if(level >= 3) cat(file=stderr(),"### DEBUG ",msg,"\n")
 }
@@ -235,12 +247,12 @@ checkGenesTable <- function(data){
   if( sum(data[,- which(colnames(data) %in% c("genesName","target_trait"))] < 0) != 0 ) {
     
     showErrorMessage(id = "GenesNegatifError", selectorafter= "#generateLandscape",
-                     message = "Values in the 'Genes' table should be > 0")
+                     message = "Values in the 'Genes' table should be >= 0")
     isok <- FALSE
   }
   
   shiny::removeUI(selector = "#GenesValueMaxError")
-  if( sum(data[, c("time_to_activ_exp", "time_to_activ_var", "Nlevels_aggressiveness", "tradeoff_strength")] > VALUEMAX) != 0 ) {
+  if( sum(data[, c("time_to_activ_mean", "time_to_activ_var", "Nlevels_aggressiveness", "tradeoff_strength")] > VALUEMAX) != 0 ) {
 
     showErrorMessage(id = "GenesValueMaxError", selectorafter= "#generateLandscape",
                      message = paste0("Values in the 'Genes' table should be lower than ",VALUEMAX))
@@ -256,9 +268,17 @@ checkGenesTable <- function(data){
   }
   
   shiny::removeUI(selector = "#GenesUpper1Error")
-  if( sum(data[, c("efficiency", "mutation_prob", "fitness_cost")] > 1) != 0) {
+  if( sum(data[, c("efficiency", "mutation_prob", "fitness_cost", "recombination_sd")] > 1) != 0) {
     showErrorMessage(id = "GenesUpper1Error", selectorafter= "#generateLandscape",
-                     message = paste0("Gene 'efficiency' / 'mutation_prob' / 'fitness_cost' values should lower than 1"))
+                     message = paste0("Gene 'efficiency' / 'mutation_prob' / 'fitness_cost' / 'recombination_sd' values should lower than 1"))
+    isok <- FALSE
+  }
+  
+  shiny::removeUI(selector = "#GenesZeroError")
+  if( sum(data[, c("recombination_sd")] < 0) != 0 ) {
+    
+    showErrorMessage(id = "GenesZeroError", selectorafter= "#generateLandscape",
+                     message = paste0("Gene 'recombination_sd' values should be greater or equal to 0"))
     isok <- FALSE
   }
   
@@ -289,17 +309,49 @@ checkAllTables <- function(){
   return(isok)
 }
 
+#
+# Select cultivar type depending the pathogen name
+cultivarTypeDisease2type <- function(disease="no pathogen", type="growingHost"){
+    if(disease == "no pathogen"){
+        type <- switch( type,
+                       "growingHost" = "growingHost",
+                       "nongrowingHost" = "nongrowingHost",
+                       "nonCrop" = "nonCrop"
+                       )
+        return(type)
+    }
+    
+    if(disease == "rust"){
+        type <- switch( type,
+                "growingHost" = "growingHost",
+                "nongrowingHost" = "nongrowingHost",
+                "nonCrop" = "nonCrop"
+        )
+        return(type)
+    }
+    
+    if(disease == "mildew"){
+        type <- switch( type,
+                "growingHost" = "grapevine",
+                "nongrowingHost" = "nongrowingHost",
+                "nonCrop" = "nonCrop"
+        )
+        return(type)
+    }
+    
+    return("")
+}
 
-loadDemoMO <- function(params){
+loadDemoMO <- function(params, disease){
   gene1 <- loadGene(name="MG 1", type="majorGene")
   gene2 <- loadGene(name="MG 2", type="majorGene")
     
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type="growingHost")
-  cultivar2 <- loadCultivar(name="Resistant1", type="growingHost")
-  cultivar3 <- loadCultivar(name="Resistant2", type="growingHost")
+  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar2 <- loadCultivar(name="Resistant1", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar3 <- loadCultivar(name="Resistant2", type=cultivarTypeDisease2type(disease, "growingHost"))
   cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
@@ -316,16 +368,16 @@ loadDemoMO <- function(params){
   return(params)
 }
 
-loadDemoMI <- function(params){
+loadDemoMI <- function(params,disease){
   gene1 <- loadGene(name="MG 1", type="majorGene")
   gene2 <- loadGene(name="MG 2", type="majorGene")
   
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type="growingHost")
-  cultivar2 <- loadCultivar(name="Resistant1", type="growingHost")
-  cultivar3 <- loadCultivar(name="Resistant2", type="growingHost")
+  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar2 <- loadCultivar(name="Resistant1", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar3 <- loadCultivar(name="Resistant2", type=cultivarTypeDisease2type(disease, "growingHost"))
   cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
@@ -341,16 +393,16 @@ loadDemoMI <- function(params){
   return(params)
 }
 
-loadDemoRO <- function(params){
+loadDemoRO <- function(params,disease){
   gene1 <- loadGene(name="MG 1", type="majorGene")
   gene2 <- loadGene(name="MG 2", type="majorGene")
   
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type="growingHost")
-  cultivar2 <- loadCultivar(name="Resistant1", type="growingHost")
-  cultivar3 <- loadCultivar(name="Resistant2", type="growingHost")
+  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar2 <- loadCultivar(name="Resistant1", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar3 <- loadCultivar(name="Resistant2", type=cultivarTypeDisease2type(disease, "growingHost"))
   cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
@@ -367,7 +419,7 @@ loadDemoRO <- function(params){
   return(params)
 }
 
-loadDemoPY <- function(params){
+loadDemoPY <- function(params, disease){
   gene1 <- loadGene(name="MG 1", type="majorGene")
   gene2 <- loadGene(name="MG 2", type="majorGene")
   gene1$mutation_prob <- 1E-4
@@ -376,8 +428,8 @@ loadDemoPY <- function(params){
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type="growingHost")
-  cultivar2 <- loadCultivar(name="Resistant", type="growingHost")
+  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar2 <- loadCultivar(name="Resistant", type=cultivarTypeDisease2type(disease, "growingHost"))
   cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
@@ -420,12 +472,15 @@ PercentageInput <- function(inputId, label, value) {
 #################################################################
 ### Tooltip message
 #################################################################
+
+SEX_PROPAGULE_VIABILITY_LIMIT <- "Maximum number of cropping seasons up to which a sexual propagule is viable"
+SEX_PROPAGULE_RELEASE_MEAN <- "Average number of cropping seasons after which a sexual propagule is released."
 SIGMOID_SIGMA <- "Sigma parameter of the sigmoid contamination function (0 to relax density-dependence, 1 for linear dependence)"
 SIGMOID_KAPPA <- "Kappa parameter of the sigmoid contamination function"
 INFECTIOUS_PERIOD_VAR <- "Variance of the infectious period duration"
-INFECTIOUS_PERIOD_EXP <- "Maximal expected infectious period duration"
+INFECTIOUS_PERIOD_MEAN <- "Maximal expected infectious period duration"
 LATENT_PERIOD_VAR <- "Variance of the latent period duration"
-LATENT_PERIOD_EXP <- "Minimal expected latent period duration"
+LATENT_PERIOD_MEAN <- "Minimal expected latent period duration"
 PROPAGULE_PROD_RATE <- "Maximal expected effective propagule production rate per timestep and per infectious individual"
 INFECTION_RATE <- "Maximal expected infection rate of a propagule on a healthy individual"
 SURVIVAL_PROB <- "Off-season survival probability of a propagule"
@@ -433,7 +488,7 @@ INOCULUM <- "Initial probability for the first susceptible host (usually indexed
 GENERATE_LANDSCAPE <- "Generates a landscape composed of fields where croptypes are allocated with controlled proportions and spatio-temporal aggregation"
 RUN_SIMULATION <- "Run the simulation (depending of the parameters it can be long)"
 STOP_SIMULATION <- "Force to stop the simulation"
-EXPORT_SIMULATION <- "Download a GPKG containing most of the parameters"
+EXPORT_SIMULATION <- "Download a GPKG and txt files containing most of the parameters"
 ROTATION_PERIOD <- "Rotation period, in years, between two configurations: (1) croptypes 0 and 1; and (2) croptypes 0 and 2. If Rotation period is 0, there is no rotation"
 
 CULTIVARS_TOOLTIP <- c("Name of the cultivar",
@@ -456,4 +511,5 @@ GENES_TOOLTIP <- c("Name of the resistance gene",
                    "Number of adaptation levels related to each resistance gene (i.e. 1 + number of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene)",
                    "maximal fitness penalty paid by a pathogen genotype fully adapted to the resistance gene on hosts that do not carry this gene",
                    "Strength of the trade-off relationship between the level of aggressiveness hosts that do and do not carry the resistance gene",
-                   "Aggressiveness component targeted by the resistance gene")
+                   "Aggressiveness component targeted by the resistance gene",
+                   "Variance for sexual recombination (only QTL)")

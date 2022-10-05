@@ -58,6 +58,13 @@ knitr::opts_chunk$set(
 #  califlopp(file=file_land, dispf=1, param=param, resfile=file_disp)
 
 ## ---- eval=FALSE--------------------------------------------------------------
+#  my_df <-function(x)((b-2)*(b-1)/(2*a^2*pi)*(1+(abs(x)/a))^(-b))
+#  
+#  param <- list(input=2, output=0, method="cub", dp=6000, dz=6000, warn.poly=FALSE,
+#                warn.conv=FALSE, verbose=FALSE)
+#  califlopp(file=file_land, dispf=my_df, param=param, resfile=file_disp)
+
+## ---- eval=FALSE--------------------------------------------------------------
 #  ## Import califlopp results
 #  disp_df <- getRes(file_disp)
 #  emitter <- c(disp_df$poly1, disp_df$poly2)

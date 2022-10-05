@@ -13,10 +13,9 @@ epid_output(
   croptypes,
   cultivars_param,
   eco_param,
-  GLAnoDis = cultivars_param$max_density[1],
-  ylim_param = list(audpc = c(0, 0.76), audpc_rel = c(0, 1), gla = c(0, 1.48), gla_rel
-    = c(0, 1), eco_cost = c(0, NA), eco_yield = c(0, NA), eco_product = c(0, NA),
-    eco_margin = c(NA, NA), contrib = c(0, 1)),
+  treatment_param,
+  pathogen_param,
+  audpc100S = 0.76,
   writeTXT = TRUE,
   graphic = TRUE,
   path = getwd()
@@ -74,10 +73,33 @@ as if cultivated in pure crops, and one row per host genotype
 \item market_value = a vector of market values of the production (in monetary units / weight or volume unit).
 }}
 
-\item{GLAnoDis}{the value of absolute GLA in absence of disease (required to compute economic outputs).}
+\item{treatment_param}{list of parameters related to pesticide treatments: \itemize{
+\item treatment_reduction_rate = reduction per time step of chemical concentration,
+\item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
+\item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
+\item treatment_cultivars = vector of cultivar indices that receive treatments,
+\item treatment_cost = cost of a single treatment application (monetary units/ha)
+}}
 
-\item{ylim_param}{a list of graphical parameters for each required output: bounds for y-axes for
-audpc, gla, gla_rel, eco_cost, eco_yield, eco_product, eco_margin, contrib.}
+\item{pathogen_param}{a list of i. pathogen aggressiveness parameters on a susceptible host
+for a pathogen genotype not adapted to resistance and ii. sexual reproduction parameters: \itemize{
+\item infection_rate = maximal expected infection rate of a propagule on a healthy host,
+\item propagule_prod_rate = maximal expected effective propagule production rate of an infectious host per time step,
+\item latent_period_mean = minimal expected duration of the latent period,
+\item latent_period_var = variance of the latent period duration,
+\item infectious_period_mean = maximal expected duration of the infectious period,
+\item infectious_period_var = variance of the infectious period duration,
+\item survival_prob = probability for a propagule to survive the off-season,
+\item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning,
+\item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
+\item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
+\item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
+\item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
+\item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
+\item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
+}}
+
+\item{audpc100S}{the audpc in a fully susceptible landscape (used as reference value for graphics).}
 
 \item{writeTXT}{a logical indicating if the output is written in a text file (TRUE) or not (FALSE).}
 

@@ -14,16 +14,19 @@ for a pathogen genotype not adapted to resistance: \itemize{
 \item infection_rate = maximal expected infection rate of a propagule on a healthy host,
 \item propagule_prod_rate = maximal expected effective propagule production rate of an
 infectious host per time step,
-\item latent_period_exp = minimal expected duration of the latent period,
+\item latent_period_mean = minimal expected duration of the latent period,
 \item latent_period_var = variance of the latent period duration,
-\item infectious_period_exp = maximal expected duration of the infectious period,
+\item infectious_period_mean = maximal expected duration of the infectious period,
 \item infectious_period_var = variance of the infectious period duration,
 \item survival_prob = probability for a propagule to survive the off-season,
 \item repro_sex_prob = probability for an infectious host to reproduce via sex rather
 than via cloning,
 \item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
 \item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
-\item sigmoid_plateau = plateau parameter of the sigmoid contamination function.
+\item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
+\item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
+\item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released.
+\item clonal_propagule_gradual_release = whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 }
 It can be generated manually, or, alternatively, via \code{\link{loadPathogen}}.}
 }
@@ -34,7 +37,7 @@ a LandsepiParams object
 Updates a LandsepiParams object with pathogen parameters
 }
 \details{
-a set of parameters representative of rust fungi can be loaded via
+a set of parameters representative of rust fungi and downy mildew can be loaded via
 \code{\link{loadPathogen}}.
 }
 \examples{

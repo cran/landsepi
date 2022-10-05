@@ -4,7 +4,12 @@
 \alias{allocateCultivarGenes}
 \title{Allocate genes to a cultivar}
 \usage{
-allocateCultivarGenes(params, cultivarName, listGenesNames = c(""))
+allocateCultivarGenes(
+  params,
+  cultivarName,
+  listGenesNames = c(""),
+  force.clean = FALSE
+)
 }
 \arguments{
 \item{params}{a LandsepiParams object.}
@@ -12,6 +17,8 @@ allocateCultivarGenes(params, cultivarName, listGenesNames = c(""))
 \item{cultivarName}{the name of the cultivar to be allocated.}
 
 \item{listGenesNames}{the names of the genes the cultivar carries}
+
+\item{force.clean}{force to clean previous allocated genes to all cultivars}
 }
 \value{
 a LandsepiParams object

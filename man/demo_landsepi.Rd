@@ -9,7 +9,7 @@ demo_landsepi(
   strat = "MO",
   Nyears = 10,
   nTSpY = 120,
-  videoMP4 = TRUE
+  videoMP4 = FALSE
 )
 }
 \arguments{
@@ -32,8 +32,8 @@ A set of text files, graphics and a video showing epidemic dynamics.
 run a simulation demonstration with landsepi
 }
 \details{
-In these examples, 2 completely efficient resistance sources (typical of major
-resistance genes) are deployed in the landscape according
+In these examples on rust fungi of cereal crops, 2 completely efficient resistance sources
+(typical of major resistance genes) are deployed in the landscape according
 to one of the following strategies:\itemize{
 \item Mosaic: 3 pure crops (S + R1 + R2) with very high spatial aggregation.
 \item Mixture: 1 pure susceptible crop + 1 mixture of two resistant cultivars, with high aggregation.

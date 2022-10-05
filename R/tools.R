@@ -42,7 +42,7 @@ setSeedValue <- function(seed = NULL) {
   # set seed for RNG
   # if( getRversion >= "3.6.0" ) RNGkind(sample.kind = "Rounding")
   set.seed(newseed, kind = "Mersenne-Twister", normal.kind = "Inversion")
-  message("Seed for RGN set to : ", newseed)
+  #message("Seed for RGN set to : ", newseed)
 
   return(newseed)
 }

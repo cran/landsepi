@@ -5,5 +5,5 @@
 \begin{document}
 \SweaveOpts{concordance=TRUE}
 \includepdf[pages=1, fitpaper=true, rotateoversize]{listofparameters.pdf}
-\includepdf[pages=2-4, landscape=true, fitpaper=true]{listofparameters.pdf}
+\includepdf[pages=last, landscape=true, fitpaper=true]{listofparameters.pdf}
 \end{document}

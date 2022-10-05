@@ -40,8 +40,9 @@ simul_params@Landscape
 ```
 
 Then you can simply call the method __allocateLandscapeCroptypes__ to allocate croptypes to the fields of 
-the landscape with controlled proportions and spatio-temporal aggregation (*see tutorial on how to [run a simple 
-simulation](O1-run_simple_simul.html)*). Otherwise, you can use your own allocation (see below).
+the landscape with controlled proportions and spatio-temporal aggregation 
+(*see tutorial on how to [run a simple simulation](O1-run_simple_simul.html)*). 
+Otherwise, you can use your own allocation (see below).
 
 
 ## Using your own croptype allocation
@@ -149,6 +150,17 @@ param <- list(input=2, output=0, method="cub", dp=6000, dz=6000
               , warn.poly=FALSE, warn.conv=FALSE, verbose=FALSE)
 califlopp(file=file_land, dispf=1, param=param, resfile=file_disp)
 ```
+The *RCALI* package has a limited number of built-in dispersal kernels (dispf = 1 in our example). 
+However, users can code for their own dispersal kernel as follows. 
+
+```{r, eval=FALSE}
+my_df <-function(x)((b-2)*(b-1)/(2*a^2*pi)*(1+(abs(x)/a))^(-b))
+
+param <- list(input=2, output=0, method="cub", dp=6000, dz=6000, warn.poly=FALSE,
+              warn.conv=FALSE, verbose=FALSE)
+califlopp(file=file_land, dispf=my_df, param=param, resfile=file_disp)
+```
+
 The output of califlopp must then be reformatted to generate the dispersal matrix that will 
 be further used in *landsepi*. 
 The vector of field areas can also be generated.

@@ -148,3 +148,23 @@ multiN <- function(d, area, prop, range = 0, algo = "random") {
   # plot(centroid, col=grey((s-min(s))/diff(range(s))), pch=16, cex=2)
   # plot(centroid, col=(s<0)+1, pch=16, cex=2)
 }
+
+
+#' @title Antiderivative of the Verhulst logistic function
+#' @name antideriv_verhulst
+#' @description Give the antiderivative of the logistic function from the Verhulst model.
+#' @param x timestep from which antiderivative must be computed
+#' @param initial_density host initial densities
+#' @param max_density host maximal densities
+#' @param growth_rate host growth rates
+#' @details The Verhulst model (used to simulate host growth) is defined by 
+#' \eqn{ f(x) = max_density / (1 + (max_density/initial_density)*exp(-growth_rate*x)) }.
+#' See https://en.wikipedia.org/wiki/Logistic_function for details.
+#' @return An object of the same type as x containing the antiderivative of the input values.
+#' @examples
+#' antideriv_verhulst(119, 0.1, 2, 0.1) / 120
+#' @export
+antideriv_verhulst <- function(x, initial_density, max_density, growth_rate){
+  res <- (max_density/growth_rate) * ( log( exp(growth_rate * x) + max_density/initial_density - 1 ) - log(max_density/initial_density) )
+  return(res)
+}

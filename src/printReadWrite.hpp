@@ -45,9 +45,9 @@ void print_1d(FILE* f, const std::vector<T>& t, const std::string& title) {
     }
     for(unsigned int i = 0; i < t.size(); i++) {
         if(typeid(T) == typeid(int)) {
-            fprintf(f, "%7d", t[i]);
+            fprintf(f, "%7d", (int)t[i]);
         } else if(typeid(T) == typeid(double)) {
-            fprintf(f, "%.3f ", t[i]);
+            fprintf(f, "%.3f ", (double)t[i]);
         } else {
             fprintf(f, "NaN");
         }

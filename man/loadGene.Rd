@@ -25,7 +25,7 @@ pathogen mutation
 \item "QTL" means a partial resistance (50\% efficiency) that requires several pathogen mutations
 to be completely eroded
 \item "immunity" means a completely efficient resistance that the pathogen has no way to adapt
-(i.e. the cultivar is nonhost).
+(i.e. the cultivar is nonCrop).
 }
 
 For different scenarios, the data.frame can be manually updated later.

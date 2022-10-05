@@ -4,13 +4,19 @@
 \alias{setDispersalPathogen}
 \title{Set pathogen dispersal}
 \usage{
-setDispersalPathogen(params, mat)
+setDispersalPathogen(params, mat, mat_sex = NULL)
 }
 \arguments{
 \item{params}{a LandsepiParams Object.}
 
 \item{mat}{a square matrix giving the probability of pathogen dispersal
 from any field of the landscape to any other field.
+It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}.
+The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum
+to 1.}
+
+\item{mat_sex}{a square matrix giving the probability of pathogen (sexual spores) dispersal
+from any field of the landscape to any other field (default identity matrix) .
 It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}.
 The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum
 to 1.}

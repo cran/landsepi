@@ -1,7 +1,10 @@
 simul_params <- createSimulParams(outputDir = paste0(ROOT_PATH, "/www/tmp/"))
 
+## fake time
+simul_params <- setTime(simul_params, Nyears = 10, nTSpY = 120)
 ## Pathogen parameters
 simul_params <- setPathogen(simul_params, loadPathogen("rust"))
+simul_pathogen("rust")
 ## Initial conditions
 simul_params <- setInoculum(simul_params, 5e-4)
 
@@ -41,14 +44,17 @@ server <- function(input, output, session) {
     patho_survival_prob = TRUE,
     patho_repro_sex_prob = TRUE,
     patho_propagule_prod_rate = TRUE,
-    patho_latent_period_exp = TRUE,
+    patho_latent_period_mean = TRUE,
     patho_latent_period_var = TRUE,
-    patho_infectious_period_exp = TRUE,
+    patho_infectious_period_mean = TRUE,
     patho_infectious_period_var = TRUE,
     patho_sigmoid_kappa = TRUE,
     patho_sigmoid_sigma = TRUE,
     patho_sigmoid_plateau = TRUE,
-    inoculum = TRUE
+    patho_sex_propagule_viability_limit = TRUE,
+    patho_sex_propagule_release_mean = TRUE,
+    inoculum = TRUE,
+    treatment = TRUE
   )
 
   ## Observe reactiveValues
@@ -86,14 +92,17 @@ server <- function(input, output, session) {
       can_run_simul$patho_survival_prob &&
       can_run_simul$patho_repro_sex_prob &&
       can_run_simul$patho_propagule_prod_rate &&
-      can_run_simul$patho_latent_period_exp &&
+      can_run_simul$patho_latent_period_mean &&
       can_run_simul$patho_latent_period_var &&
-      can_run_simul$patho_infectious_period_exp &&
+      can_run_simul$patho_infectious_period_mean &&
       can_run_simul$patho_infectious_period_var &&
       can_run_simul$patho_sigmoid_kappa &&
       can_run_simul$patho_sigmoid_sigma &&
       can_run_simul$patho_sigmoid_plateau &&
-      can_run_simul$inoculum
+      can_run_simul$patho_sex_propagule_viability_limit &&
+      can_run_simul$patho_sex_propagule_release_mean &&
+      can_run_simul$inoculum &&
+      can_run_simul$treatment
     ) {
       shinyjs::enable(id = "runSimulation")
       shinyjs::disable(id = "stopSimulation")
@@ -109,7 +118,7 @@ server <- function(input, output, session) {
   # Test if the croptypes proportion sum is 1
   ## TODO remove input$ and move to global.R
   ProportionValidation <- function() {
-    if ((advanced_mode() == FALSE && input$demo == "RO") || (advanced_mode() && !is.na(input$rotationPeriod) && input$rotationPeriod > 0)) {
+    if ((advanced_mode() == FALSE && simul_demo() == "RO") || (advanced_mode() && !is.na(input$rotationPeriod) && input$rotationPeriod > 0)) {
       sum_prop <-
         ((croptypes_proportions()[1] + croptypes_proportions()[2]) + (croptypes_proportions()[1] + croptypes_proportions()[3])) / 2
     }
@@ -128,12 +137,12 @@ server <- function(input, output, session) {
     }
     return(invisible(TRUE))
   }
-  
+
   ## Print Rotation labels
-  setRotationText <- function(list_name=NULL) {
-    text <- paste0("<u>1st configuration</u> : croptypes 0 (<b>",list_name[1],"</b>) and 1 (<b>",list_name[2],"</b>)")
-    text <- paste0(text, "<br/><u>2nd configuration</u> : croptypes 0 (<b>",list_name[1],"</b>) and 2 (<b>",list_name[3],"</b>)")
-    text  
+  setRotationText <- function(list_name = NULL) {
+    text <- paste0("<u>1st configuration</u> : croptypes 0 (<b>", list_name[1], "</b>) and 1 (<b>", list_name[2], "</b>)")
+    text <- paste0(text, "<br/><u>2nd configuration</u> : croptypes 0 (<b>", list_name[1], "</b>) and 2 (<b>", list_name[3], "</b>)")
+    text
   }
 
   #############################################################################
@@ -157,11 +166,14 @@ server <- function(input, output, session) {
                          structure with a discrete time step. It provides a useful tool to assess the performance
                          of a wide range of deployment options with respect to their epidemiological,
                          evolutionary and economic outcomes.</h3>
-                          <h3> Authors:</h3> J-L Gaussen, J. Papaïx, J-F Rey, L. Rimbaud
+                          <h3> Authors:</h3> J-L Gaussen, J. Papaïx, J-F Rey, L. Rimbaud, M. Zaffaroni
                           <h3>Package project:</h3><a href='https://CRAN.R-project.org/package=landsepi' target='_blank'> CRAN package</a><br/><a href='https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi' target='_blank'> Source code</a>
+                          <br/><a href='https://csiro-inra.pages.biosp.inrae.fr/landsepi/' target='_blank'> Package Documentation</a>
                           <br/> License GPL-3
                           <h3> How to cite the package:</h3> <b>Rimbaud L, Papaïx J, Rey J-F (2019).</b> landsepi: Landscape Epidemiology and Evolution. R package version 0.1.0, &lt;URL: https://cran.r-project.org/package=landsepi&gt;.
                           <h3> Full model description:</h3> <b>Rimbaud L, Papaïx J, Rey J-F, Barrett LG and Thrall PH. 2018.</b> Assessing the durability and efficiency of landscape-based strategies to deploy plant resistance to pathogens. PLoS Computational Biology 14(4): e1006067. <a href='https://doi.org/10.1371/journal.pcbi.1006067' target='_blank'>https://doi.org/10.1371/journal.pcbi.1006067</a>
+			              <h3> Funding</h3>
+			              This work benefited from ANR project 'ArchiV' (2019–2023, grant n°ANR-18-CE32-0004-01), AFB Ecophyto II-Leviers Territoriaux Project 'Médée' (2020–2023), GRDC grant CSP00192 and the CSIRO/INRA linkage program
                           <div>
                           <img src='Republique_Francaise_RVB.jpg' alt='RF' style='width:50px; margin-left: 10px;' />
                           <img src='LogoINRAE_Fr_rvb_web.png' alt='INRAE' style='width:50px; margin-left: 10px;' />
@@ -177,41 +189,45 @@ server <- function(input, output, session) {
   observeEvent(input$Mode, {
     advanced_mode(!advanced_mode())
     if (advanced_mode()) {
-      printVerbose("enable mode edition", level=3)
-      removeCssClass("Mode","btn-default")
-      updateTabsetPanel(session,inputId = "inputtabpanel", selected = "Cultivars and Genes")
+      printVerbose("enable mode edition", level = 3)
+      removeCssClass("Mode", "btn-default")
+      updateTabsetPanel(session, inputId = "inputtabpanel", selected = "Cultivars and Genes")
       shinyjs::disable(id = "demo")
       shinyjs::disable(id = "rotationPeriod")
       shiny::updateNumericInput(session, "rotationPeriod", value = 0)
       shinyjs::enable(id = "patho_infection_rate")
       shinyjs::enable(id = "patho_propagule_prod_rate")
-      shinyjs::enable(id = "patho_latent_period_exp")
+      shinyjs::enable(id = "patho_latent_period_mean")
       shinyjs::enable(id = "patho_latent_period_var")
-      shinyjs::enable(id = "patho_infectious_period_exp")
+      shinyjs::enable(id = "patho_infectious_period_mean")
       shinyjs::enable(id = "patho_infectious_period_var")
       shinyjs::enable(id = "patho_survival_prob")
       shinyjs::enable(id = "patho_repro_sex_prob")
       shinyjs::enable(id = "patho_sigmoid_kappa")
       shinyjs::enable(id = "patho_sigmoid_sigma")
       shinyjs::enable(id = "patho_sigmoid_plateau")
+      shinyjs::enable(id = "patho_sex_propagule_viability_limit")
+      shinyjs::enable(id = "patho_sex_propagule_release_mean")
     }
     else {
-      printVerbose("disable mode edition", level=3)
-      addCssClass("Mode","btn-default")
+      printVerbose("disable mode edition", level = 3)
+      addCssClass("Mode", "btn-default")
       shinyjs::disable(id = "rotationPeriod")
       shiny::updateNumericInput(session, "rotationPeriod", value = 0)
       shinyjs::enable(id = "demo")
       shinyjs::disable(id = "patho_infection_rate")
       shinyjs::disable(id = "patho_propagule_prod_rate")
-      shinyjs::disable(id = "patho_latent_period_exp")
+      shinyjs::disable(id = "patho_latent_period_mean")
       shinyjs::disable(id = "patho_latent_period_var")
-      shinyjs::disable(id = "patho_infectious_period_exp")
+      shinyjs::disable(id = "patho_infectious_period_mean")
       shinyjs::disable(id = "patho_infectious_period_var")
       shinyjs::disable(id = "patho_survival_prob")
       shinyjs::disable(id = "patho_repro_sex_prob")
       shinyjs::disable(id = "patho_sigmoid_kappa")
       shinyjs::disable(id = "patho_sigmoid_sigma")
       shinyjs::disable(id = "patho_sigmoid_plateau")
+      shinyjs::disable(id = "patho_sex_propagule_viability_limit")
+      shinyjs::disable(id = "patho_sex_propagule_release_mean")
     }
   })
 
@@ -238,7 +254,7 @@ server <- function(input, output, session) {
     can_gen_landscape$rotation <<- TRUE
     can_run_simul$landscape <<- FALSE
     shiny::removeUI(selector = "#rotationPeriodError")
-    if (input$demo == "RO" && advanced_mode() == FALSE) {
+    if (simul_demo() == "RO" && advanced_mode() == FALSE) {
       if (input$rotationPeriod < 1 ||
         input$rotationPeriod > input$nYear ||
         is.na(input$rotationPeriod)) {
@@ -252,8 +268,8 @@ server <- function(input, output, session) {
       }
     } else {
       if (input$rotationPeriod < 0 ||
-          input$rotationPeriod > input$nYear ||
-          is.na(input$rotationPeriod)) {
+        input$rotationPeriod > input$nYear ||
+        is.na(input$rotationPeriod)) {
         showErrorMessage(
           id = "rotationPeriodError", selectorafter = "#generateLandscape",
           message = paste0(
@@ -280,7 +296,7 @@ server <- function(input, output, session) {
       can_run_simul$nYear <<- FALSE
     }
     else {
-      simul_params <<- setTime(simul_params, Nyears = input$nYear, nTSpY = input$nTSpY)
+      simul_params <<- setTime(simul_params, Nyears = as.numeric(input$nYear), nTSpY = as.numeric(input$nTSpY))
       can_run_simul$nYear <<- TRUE
     }
   })
@@ -298,8 +314,13 @@ server <- function(input, output, session) {
       can_run_simul$nTSpY <<- FALSE
     }
     else {
-      simul_params <<- setTime(simul_params, Nyears = input$nYear, nTSpY = input$nTSpY)
+      simul_params <<- setTime(simul_params, Nyears = as.numeric(input$nYear), nTSpY = as.numeric(input$nTSpY))
       can_run_simul$nTSpY <<- TRUE
+      if (input$patho_repro_sex_active == TRUE) {
+        simul_params <<- setReproSexProb(simul_params, c(rep(0, simul_params@TimeParam$nTSpY), 1))
+      } else {
+        simul_params <<- setReproSexProb(simul_params, rep(0, simul_params@TimeParam$nTSpY + 1))
+      }
     }
   })
   ######################################################################################
@@ -333,17 +354,25 @@ server <- function(input, output, session) {
   # Select Pathogen
   shiny::observeEvent(input$defaultPathogen, {
     simul_params <<- setPathogen(simul_params, loadPathogen(disease = tolower(input$defaultPathogen)))
+    simul_pathogen(tolower(input$defaultPathogen))
+    printVerbose(tolower(input$defaultPathogen))
+    if (advanced_mode() == FALSE) {
+      update_demo()
+    }
     updateNumericInput(session = session, inputId = "patho_survival_prob", value = simul_params@Pathogen$survival_prob)
     updateNumericInput(session = session, inputId = "patho_repro_sex_prob", value = simul_params@Pathogen$repro_sex_prob)
-     updateNumericInput(session = session, inputId = "patho_infection_rate", value = simul_params@Pathogen$infection_rate)
+    updateNumericInput(session = session, inputId = "patho_infection_rate", value = simul_params@Pathogen$infection_rate)
     updateNumericInput(session = session, inputId = "patho_propagule_prod_rate", value = simul_params@Pathogen$propagule_prod_rate)
-    updateNumericInput(session = session, inputId = "patho_latent_period_exp", value = simul_params@Pathogen$latent_period_exp)
+    updateNumericInput(session = session, inputId = "patho_latent_period_mean", value = simul_params@Pathogen$latent_period_mean)
     updateNumericInput(session = session, inputId = "patho_latent_period_var", value = simul_params@Pathogen$latent_period_var)
-    updateNumericInput(session = session, inputId = "patho_infectious_period_exp", value = simul_params@Pathogen$infectious_period_exp)
+    updateNumericInput(session = session, inputId = "patho_infectious_period_mean", value = simul_params@Pathogen$infectious_period_mean)
     updateNumericInput(session = session, inputId = "patho_infectious_period_var", value = simul_params@Pathogen$infectious_period_var)
     updateNumericInput(session = session, inputId = "patho_sigmoid_kappa", value = simul_params@Pathogen$sigmoid_kappa)
     updateNumericInput(session = session, inputId = "patho_sigmoid_sigma", value = simul_params@Pathogen$sigmoid_sigma)
     updateNumericInput(session = session, inputId = "patho_sigmoid_plateau", value = simul_params@Pathogen$sigmoid_plateau)
+    updateCheckboxInput(session = session, inputId = "patho_repro_sex_active", value = FALSE)
+    updateNumericInput(session = session, inputId = "patho_sex_propagule_viability_limit", value = simul_params@Pathogen$sex_propagule_viability_limit)
+    updateNumericInput(session = session, inputId = "patho_sex_propagule_release_mean", value = simul_params@Pathogen$sex_propagule_release_mean)
   })
 
   # inoculum
@@ -400,7 +429,7 @@ server <- function(input, output, session) {
     if (input$patho_propagule_prod_rate > VALUEMAX || input$patho_propagule_prod_rate < 0 || is.na(input$patho_propagule_prod_rate)) {
       showErrorMessage(
         id = "pathoProdRateError", selectorafter = "#generateLandscape",
-        message = paste0("The maximal expected effective propagule production rate of an infectious host per time step should be between 0 and ",VALUEMAX)
+        message = paste0("The maximal expected effective propagule production rate of an infectious host per time step should be between 0 and ", VALUEMAX)
       )
       can_run_simul$patho_propagule_prod_rate <<- FALSE
     }
@@ -410,19 +439,19 @@ server <- function(input, output, session) {
     }
   })
 
-  # latent_period_exp
-  shiny::observeEvent(input$patho_latent_period_exp, {
+  # latent_period_mean
+  shiny::observeEvent(input$patho_latent_period_mean, {
     shiny::removeUI(selector = "#pathoLatPerExpError")
-    if (input$patho_latent_period_exp > VALUEMAX || input$patho_latent_period_exp < 0 || is.na(input$patho_latent_period_exp)) {
+    if (input$patho_latent_period_mean > VALUEMAX || input$patho_latent_period_mean < 0 || is.na(input$patho_latent_period_mean)) {
       showErrorMessage(
         id = "pathoLatPerExpError", selectorafter = "#generateLandscape",
-        message = paste0("The minimal expected duration of the latent period should be between 0 and ",VALUEMAX)
+        message = paste0("The minimal expected duration of the latent period should be between 0 and ", VALUEMAX)
       )
-      can_run_simul$patho_latent_period_exp <<- FALSE
+      can_run_simul$patho_latent_period_mean <<- FALSE
     }
     else {
-      simul_params@Pathogen$latent_period_exp <<- input$patho_latent_period_exp
-      can_run_simul$patho_latent_period_exp <<- TRUE
+      simul_params@Pathogen$latent_period_mean <<- input$patho_latent_period_mean
+      can_run_simul$patho_latent_period_mean <<- TRUE
     }
   })
 
@@ -432,7 +461,7 @@ server <- function(input, output, session) {
     if (input$patho_latent_period_var > VALUEMAX || input$patho_latent_period_var < 0 || is.na(input$patho_latent_period_var)) {
       showErrorMessage(
         id = "pathoLatPerVarError", selectorafter = "#generateLandscape",
-        message = paste0("The variance of the infectious period duration should be between 0 and ",VALUEMAX)
+        message = paste0("The variance of the infectious period duration should be between 0 and ", VALUEMAX)
       )
       can_run_simul$patho_latent_period_var <<- FALSE
     }
@@ -442,19 +471,19 @@ server <- function(input, output, session) {
     }
   })
 
-  # infectious_period_exp
-  shiny::observeEvent(input$patho_infectious_period_exp, {
+  # infectious_period_mean
+  shiny::observeEvent(input$patho_infectious_period_mean, {
     shiny::removeUI(selector = "#pathoInfPerExpError")
-    if (input$patho_infectious_period_exp > VALUEMAX || input$patho_infectious_period_exp < 0 || is.na(input$patho_infectious_period_exp)) {
+    if (input$patho_infectious_period_mean > VALUEMAX || input$patho_infectious_period_mean < 0 || is.na(input$patho_infectious_period_mean)) {
       showErrorMessage(
         id = "pathoInfPerExpError", selectorafter = "#generateLandscape",
-        message = paste0("The maximal expected duration of the infectious period should be between 0 and ",VALUEMAX)
+        message = paste0("The maximal expected duration of the infectious period should be between 0 and ", VALUEMAX)
       )
-      can_run_simul$patho_infectious_period_exp <<- FALSE
+      can_run_simul$patho_infectious_period_mean <<- FALSE
     }
     else {
-      simul_params@Pathogen$infectious_period_exp <<- input$patho_infectious_period_exp
-      can_run_simul$patho_infectious_period_exp <<- TRUE
+      simul_params@Pathogen$infectious_period_mean <<- input$patho_infectious_period_mean
+      can_run_simul$patho_infectious_period_mean <<- TRUE
     }
   })
 
@@ -464,7 +493,7 @@ server <- function(input, output, session) {
     if (input$patho_infectious_period_var > VALUEMAX || input$patho_infectious_period_var < 0 || is.na(input$patho_infectious_period_var)) {
       showErrorMessage(
         id = "pathoInfPerVarError", selectorafter = "#generateLandscape",
-        message = paste0("The variance of the infectious period duration should be between 0 and ",VALUEMAX)
+        message = paste0("The variance of the infectious period duration should be between 0 and ", VALUEMAX)
       )
       can_run_simul$patho_infectious_period_var <<- FALSE
     }
@@ -480,7 +509,7 @@ server <- function(input, output, session) {
     if (input$patho_sigmoid_kappa > VALUEMAX || input$patho_sigmoid_kappa < 0 || is.na(input$patho_sigmoid_kappa)) {
       showErrorMessage(
         id = "pathoSigKapError", selectorafter = "#generateLandscape",
-        message = paste0("The kappa parameter of the sigmoid contamination function should be between 0 and ",VALUEMAX)
+        message = paste0("The kappa parameter of the sigmoid contamination function should be between 0 and ", VALUEMAX)
       )
       can_run_simul$patho_sigmoid_kappa <<- FALSE
     }
@@ -496,7 +525,7 @@ server <- function(input, output, session) {
     if (input$patho_sigmoid_sigma > VALUEMAX || input$patho_sigmoid_sigma < 0 || is.na(input$patho_sigmoid_sigma)) {
       showErrorMessage(
         id = "pathoSigSigError", selectorafter = "#generateLandscape",
-        message = paste0("The sigma parameter of the sigmoid contamination function should be between 0 and ",VALUEMAX)
+        message = paste0("The sigma parameter of the sigmoid contamination function should be between 0 and ", VALUEMAX)
       )
       can_run_simul$patho_sigmoid_sigma <<- FALSE
     }
@@ -538,18 +567,174 @@ server <- function(input, output, session) {
     }
   })
 
+  # oospore dormancy limit
+  shiny::observeEvent(input$patho_repro_sex_active, {
+    if (input$patho_repro_sex_active == TRUE) {
+      # force check
+      updateNumericInput(session = session, inputId = "patho_sex_propagule_viability_limit", value = simul_params@Pathogen$sex_propagule_viability_limit)
+      updateNumericInput(session = session, inputId = "patho_sex_propagule_release_mean", value = simul_params@Pathogen$sex_propagule_release_mean)
+      simul_params <<- setReproSexProb(simul_params, c(rep(0, simul_params@TimeParam$nTSpY), 1))
+    }
+    else {
+      shiny::removeUI(selector = "#pathoDorLimError")
+      shiny::removeUI(selector = "#pathoMuExpError")
+      simul_params <<- setReproSexProb(simul_params, rep(0, simul_params@TimeParam$nTSpY + 1))
+    }
+  })
+
+  # oospore dormancy limit
+  shiny::observeEvent(input$patho_sex_propagule_viability_limit, {
+    shiny::removeUI(selector = "#pathoDorLimError")
+    if (input$patho_repro_sex_active == TRUE) {
+      if (input$patho_sex_propagule_viability_limit < 0 || input$patho_sex_propagule_viability_limit > simul_params@TimeParam$nTSpY) {
+        showErrorMessage(
+          id = "pathoDorLimError", selectorafter = "#generateLandscape",
+          message = "Wrong value for pathogen oospore dormancy limit"
+        )
+        can_run_simul$path_sex_propagule_viability_limit <<- FALSE
+      }
+      else {
+        simul_params@Pathogen$sex_propagule_viability_limit <<- input$patho_sex_propagule_viability_limit
+        can_run_simul$patho_sex_propagule_viability_limit <<- TRUE
+      }
+    }
+  })
+
+  # oospore mu exp average germination
+  shiny::observeEvent(input$patho_sex_propagule_release_mean, {
+    shiny::removeUI(selector = "#pathoMuExpError")
+    if (input$patho_repro_sex_active == TRUE) {
+      if (input$patho_sex_propagule_release_mean < 1) {
+        showErrorMessage(
+          id = "pathoMuExpError", selectorafter = "#generateLandscape",
+          message = "Pathogen oospore average number of cropping seasons value have to be > 0"
+        )
+        can_run_simul$patho_sex_propagule_release_mean <<- FALSE
+      }
+      else {
+        simul_params@Pathogen$patho_sex_propagule_release_mean <<- input$patho_sex_propagule_release_mean
+        can_run_simul$patho_sex_propagule_release_mean <<- TRUE
+      }
+    }
+  })
+
+  ######################################################################################
+  #
+  # Treatment Tab Observe
+  #
+  ######################################################################################
+  updateTreatment <- function() {
+    shiny::removeUI(selector = "#treatmentError")
+    
+    if (treatment_is_active()) {
+      if (length(input$treatment_cultivars_select) < 1 || input$treatment_day_start < 1 ||
+        input$treatment_days_interval > input$nTSpY || input$treatment_day_start > input$nTSpY ||
+        input$treatment_reduction_rate <= 0 || input$treatment_efficiency < 0 || input$treatment_efficiency > 1
+        #|| input$treatment_cost < 0
+        ) {
+        showErrorMessage(
+          id = "treatmentError", selectorafter = "#generateLandscape",
+          message = "Trouble in Treatment values"
+        )
+        can_run_simul$treatment <<- FALSE
+      }
+      else {
+        days_list <- seq(input$treatment_day_start, as.numeric(input$nTSpY), input$treatment_days_interval)
+        cults <- which(simul_params_cultivars()[, 1] %in% input$treatment_cultivars_select)
+        cults <- cults -1 #id cultivars start at 0
+        simul_params <<- setTreatment(
+          simul_params,
+          list(
+            treatment_reduction_rate = input$treatment_reduction_rate,
+            treatment_efficiency = input$treatment_efficiency,
+            treatment_timesteps = days_list,
+            treatment_cultivars = cults,
+            treatment_cost = 0.0 # input$treatment_cost
+          )
+        )
+        can_run_simul$treatment <<- TRUE
+      }
+    }
+    else {
+      simul_params <<- setTreatment(simul_params, loadTreatment())
+      can_run_simul$treatment <<- TRUE
+    }
+  }
+
+  # Active Treatment
+  shiny::observeEvent(input$treatment_active, {
+    treatment_is_active(input$treatment_active)
+    if (treatment_is_active()) {
+      shinyjs::enable(id = "treatment_days_interval")
+      shinyjs::enable(id = "treatment_day_start")
+      shinyjs::enable(id = "treatment_cultivars_select")
+      shinyjs::enable(id = "treatment_efficiency")
+      shinyjs::enable(id = "treatment_reduction_rate")
+      #shinyjs::enable(id = "treatment_cost")
+      updateSelectInput(session, "treatment_cultivars_select", choices = c(Choose='',simul_params_cultivars()[, 1]), selected=NULL)
+    }
+    else {
+      shinyjs::disable(id = "treatment_days_interval")
+      shinyjs::disable(id = "treatment_day_start")
+      shinyjs::disable(id = "treatment_cultivars_select")
+      shinyjs::disable(id = "treatment_efficiency")
+      shinyjs::disable(id = "treatment_reduction_rate")
+      #shinyjs::disable(id = "treatment_cost")
+    }
+    updateTreatment()
+  })
+
+  # day start Treatment
+  shiny::observeEvent(input$treatment_day_start, {
+    updateTreatment()
+  })
+  # days between Treatment
+  shiny::observeEvent(input$treatment_days_interval, {
+    updateTreatment()
+  })
+
+  # Cultivars Treatment
+  shiny::observeEvent(input$treatment_cultivars_select, {
+    #printVerbose(input$treatment_cultivars_select)
+    updateTreatment()
+  }, ignoreNULL = FALSE, ignoreInit = TRUE)
+
+  # beta Treatment
+  shiny::observeEvent(input$treatment_reduction_rate, {
+    updateTreatment()
+  })
+
+  # trait red Treatment
+  shiny::observeEvent(input$treatment_efficiency, {
+    updateTreatment()
+  })
+  
+  # shiny::observeEvent(input$treatment_cost, {
+  #     updateTreatment()
+  # })
 
   ######################################################################
   # Handle the download gpkg button
   ######################################################################
   output$export <-
+    # shiny::downloadHandler(
+    #   filename = "landsepi_landscape.gpkg",
+    #   content <- function(file) {
+    #     simul_params <<- saveDeploymentStrategy(simul_params)
+    #     file.copy(file.path(simul_params@OutputDir, simul_params@OutputGPKG), file)
+    #   },
+    #   contentType = "application/x-sqlite3"
+    # )
     shiny::downloadHandler(
-      filename = "landsepi_landscape.gpkg",
+      filename = "landsepi_landscape.zip",
       content <- function(file) {
         simul_params <<- saveDeploymentStrategy(simul_params)
-        file.copy(file.path(simul_params@OutputDir, simul_params@OutputGPKG), file)
+        filels <- file.path(simul_params@OutputDir, simul_params@OutputGPKG)
+        filetxt <- list.files(simul_params@OutputDir, pattern = "*.txt", full.names = TRUE)
+        filels <- c(filels, filetxt)
+        zip(zipfile = file, files = filels, extras = "-j")
       },
-      contentType = "application/x-sqlite3"
+      contentType = "application/zip"
     )
   ######################################################################################
   # Handle the "Generate the landscape" button
@@ -564,13 +749,13 @@ server <- function(input, output, session) {
       # Remove old files
       cleanDir(simul_params@OutputDir)
 
-      #print(simul_params@Croptypes)
+      # print(simul_params@Croptypes)
       # print(simul_params@Cultivars)
       # print(simul_params@CultivarsGenes)
       # print(simul_params@Genes)
 
       # Croptypes Rotation
-      if ( (advanced_mode() == FALSE && input$demo == "RO") || (advanced_mode() && input$rotationPeriod > 0)) {
+      if ((advanced_mode() == FALSE && simul_demo() == "RO") || (advanced_mode() && input$rotationPeriod > 0)) {
         rotation_period <- input$rotationPeriod
         prop <- list(
           c(croptypes_proportions()[1], croptypes_proportions()[2]),
@@ -585,7 +770,8 @@ server <- function(input, output, session) {
       else {
         rotation_period <- 0
         rotation_sequence <- list(c(simul_params@Croptypes$croptypeID))
-        if (input$demo == "PY") {
+        ## TODO check PY in advanced mode
+        if (advanced_mode() == FALSE && simul_demo() == "PY") {
           prop <- list(croptypes_proportions()[1:2])
         } else {
           prop <- list(croptypes_proportions())
@@ -598,7 +784,7 @@ server <- function(input, output, session) {
       # Run the landscape generation
       simul_params <<- setLandscape(simul_params, loadLandscape(input$landscape))
       ## Dispersal parameters
-      simul_params <<- setDispersalPathogen(simul_params, loadDispersalPathogen(input$landscape))
+      simul_params <<- setDispersalPathogen(simul_params, loadDispersalPathogen(input$landscape)[[1]])
       ## Dispersal parameters
       disp_host <- loadDispersalHost(simul_params, type = "no")
       simul_params <<- setDispersalHost(simul_params, disp_host)
@@ -683,8 +869,8 @@ server <- function(input, output, session) {
   # Handle the "Run simulation" button
 
   shiny::observeEvent(input$runSimulation, {
-    
-    printVerbose(simul_params, level=2)
+    printVerbose(simul_params, level = 2)
+
     withProgress(message = "Running Simulation, please wait...", value = 0, {
       progressBar <- Progress$new()
       progressBar$set(value = NULL, message = "Running Simulation, please wait...")
@@ -694,10 +880,10 @@ server <- function(input, output, session) {
       shinyjs::disable(id = "runSimulation")
       shinyjs::disable(id = "export")
       shinyjs::enable(id = "stopSimulation")
-      
+
       shinyjs::disable("showInputside")
       shinyjs::disable("showBothside")
-      #shinyjs::click("showOutputside") # seems not working -> force it
+      # shinyjs::click("showOutputside") # seems not working -> force it
       shinyjs::showElement(id = "outputside")
       shinyjs::hideElement(id = "inputside")
       removeCssClass("inputside", "col-sm-12")
@@ -710,13 +896,13 @@ server <- function(input, output, session) {
 
       progressBar$set(value = 0.4)
 
-      plan(list(multicore, multisession))
+      plan(list(multisession, multicore))
 
       future_process <<- future({
         res <- landsepi::runSimul(simul_params,
           graphic = FALSE, videoMP4 = TRUE
         )
-      })
+      }, seed=input$seed)
 
       then(future_process,
         onFulfilled = function(value) {
@@ -735,8 +921,8 @@ server <- function(input, output, session) {
             shiny::renderUI(
               tags$video(
                 id = "video",
-                type = "video/mp4",
-                src = paste0("tmp/", basename(simul_params@OutputDir), "/video.mp4?rand=", as.integer(Sys.time())),
+                type = "video/webm",
+                src = paste0("video/", basename(simul_params@OutputDir), "/video.webm?rand=", as.integer(Sys.time())),
                 controls = "controls",
                 width = "100%",
                 height = "auto"
@@ -745,7 +931,7 @@ server <- function(input, output, session) {
           shinyjs::enable("showInputside")
           shinyjs::enable("showBothside")
           shinyjs::click("showOutputside")
-          shinyBS::addTooltip(session, "runSimulation",title=RUN_SIMULATION, placement = "top", trigger="hover")
+          shinyBS::addTooltip(session, "runSimulation", title = RUN_SIMULATION, placement = "top", trigger = "hover")
           # setwd(dirname(getwd()))
         },
         onRejected = function(err) {
@@ -756,10 +942,10 @@ server <- function(input, output, session) {
           shinyjs::enable("showBothside")
           shinyjs::click("showBothside")
           shinyjs::enable(id = "generateLandscape")
-          shinyBS::addTooltip(session, "runSimulation",title=RUN_SIMULATION, placement = "top", trigger="hover")
+          shinyBS::addTooltip(session, "runSimulation", title = RUN_SIMULATION, placement = "top", trigger = "hover")
           can_run_simul$landscape <<- FALSE
           future_process <- NULL
-          
+
           shinyalert::shinyalert(
             "Oups! Something went wrong !",
             "Please check inputs",
@@ -778,31 +964,38 @@ server <- function(input, output, session) {
   })
   ######################################################################################
   # Handle the demo list
+  simul_demo <- reactiveVal("MO")
   shiny::observeEvent(input$demo, {
+    simul_demo(input$demo)
+    update_demo()
+  })
+
+  ## Load a demo strategy
+  update_demo <- function() {
     # Cultivar tab
-    switch(input$demo,
+    switch(simul_demo(),
       MO = {
-        simul_params <<- loadDemoMO(simul_params)
+        simul_params <<- loadDemoMO(simul_params, disease = simul_pathogen())
       },
       MI = {
-        simul_params <<- loadDemoMI(simul_params)
+        simul_params <<- loadDemoMI(simul_params, disease = simul_pathogen())
       },
       RO = {
-        simul_params <<- loadDemoRO(simul_params)
+        simul_params <<- loadDemoRO(simul_params, disease = simul_pathogen())
       },
       PY = {
-        simul_params <<- loadDemoPY(simul_params)
+        simul_params <<- loadDemoPY(simul_params, disease = simul_pathogen())
       },
       {
         # Default case
-        print("input$demo : Unknown input$demo")
+        print(paste("simul_demo() : Unknown ", simul_demo()))
       }
     )
 
-    default_gene <<- simul_params@Genes[1,]
-    default_cultivar <<- simul_params@Cultivars[1,]
-    default_croptype <<- simul_params@Croptypes[1,c(1,2)]
-    
+    default_gene <<- simul_params@Genes[1, ]
+    default_cultivar <<- simul_params@Cultivars[1, ]
+    default_croptype <<- simul_params@Croptypes[1, c(1, 2)]
+
     simul_params_croptypes(simul_params@Croptypes)
     simul_params_cultivars(simul_params@Cultivars)
     simul_params_cultivarsgenes(simul_params@CultivarsGenes)
@@ -831,26 +1024,28 @@ server <- function(input, output, session) {
     shinyjs::disable(id = "rotationPeriod")
     shiny::updateNumericInput(session, "rotationPeriod", value = 0)
 
-    if (input$demo == "MO") {
+    if (simul_demo() == "MO") {
       croptypes_proportions(c(0.33, 0.33, 0.34))
       shiny::updateSelectInput(session, "aggregLevel", selected = "high")
     }
-    else if (input$demo == "MI" || input$demo == "PY") {
+    else if (simul_demo() == "MI" || simul_demo() == "PY") {
       croptypes_proportions(c(0.5, 0.5))
       shiny::updateSelectInput(session, "aggregLevel", selected = "high")
     }
-    else if (input$demo == "RO") {
+    else if (simul_demo() == "RO") {
       croptypes_proportions(c(0.5, 0.5, 0.5))
       shinyjs::enable(id = "rotationPeriod")
       shiny::updateNumericInput(session, "rotationPeriod", value = 2)
       shiny::updateSelectInput(session, "aggregLevel", selected = "medium")
     }
-    else if (input$demo == "PY") {
+    else if (simul_demo() == "PY") {
       shiny::updateSelectInput(session, "aggregLevel", selected = "low")
     }
-    
-    output$rotationText <- renderUI({HTML(setRotationText(simul_params@Croptypes[,2]))})
-  })
+
+    output$rotationText <- renderUI({
+      HTML(setRotationText(simul_params@Croptypes[, 2]))
+    })
+  }
 
   ###################
   ### TABS TABLES ###
@@ -873,10 +1068,10 @@ server <- function(input, output, session) {
     }),
     canRm = advanced_mode,
     rownames = FALSE,
-    tooltips = c("Croptype index (starts at 0)","Croptype name"),
+    tooltips = c("Croptype index (starts at 0)", "Croptype name"),
     row.default = default_croptype,
     row.cols = 1:2,
-    row.inc = c(1,2)
+    row.inc = c(1, 2)
   )
 
   ##### croptypes table modification #####
@@ -895,20 +1090,22 @@ server <- function(input, output, session) {
 
       croptypes_proportions(croptypesTable$data[, "Proportions"])
       can_gen_landscape$proportions <<- ProportionValidation()
-      
+
       if (can_gen_landscape$proportions == FALSE) can_run_simul$landscape <<- FALSE
 
       if (isTRUE(advanced_mode())) {
         shiny::isolate(simul_params_croptypes(croptypesTable$data[, 1:(ncol(croptypesTable$data) - 2)]))
-        
-        if (nrow(croptypesTable$data) == 0 
-            || checkCroptypesTable(croptypesTable$data[, -which(colnames(croptypesTable$data) %in% c("Proportions", "delete"))]) == FALSE) {
+
+        if (nrow(croptypesTable$data) == 0 ||
+          checkCroptypesTable(croptypesTable$data[, -which(colnames(croptypesTable$data) %in% c("Proportions", "delete"))]) == FALSE) {
           can_run_simul$croptypes <<- FALSE
           can_gen_landscape$croptypeID <<- FALSE
         }
         else {
-          croptypesTable$data[,"croptypeID"] <- seq(1:nrow(croptypesTable$data))-1
-          output$rotationText <- renderUI({HTML(setRotationText(croptypesTable$data[, 2]))})
+          croptypesTable$data[, "croptypeID"] <- seq(1:nrow(croptypesTable$data)) - 1
+          output$rotationText <- renderUI({
+            HTML(setRotationText(croptypesTable$data[, 2]))
+          })
           simul_params <<- setCroptypes(simul_params, croptypesTable$data[, 1:(ncol(croptypesTable$data) - 2)])
           can_run_simul$croptypes <<- TRUE
           can_gen_landscape$croptypeID <<- TRUE
@@ -926,7 +1123,7 @@ server <- function(input, output, session) {
     DTdata = shiny::reactive(simul_params_cultivars()),
     disableCol = shiny::reactive({
       if (isTRUE(advanced_mode())) {
-        c("reproduction_rate","death_rate")
+        c("reproduction_rate", "death_rate")
       } else {
         names(simul_params_cultivars())
       }
@@ -936,7 +1133,7 @@ server <- function(input, output, session) {
     tooltips = CULTIVARS_TOOLTIP,
     row.default = default_cultivar,
     row.inc = c(1),
-    col.hidden = which( names(simul_params_cultivars()) %in% c("reproduction_rate","death_rate")) -1
+    col.hidden = which(names(simul_params_cultivars()) %in% c("reproduction_rate", "death_rate")) - 1
   )
 
   ##### cultivars table modification #####
@@ -947,15 +1144,15 @@ server <- function(input, output, session) {
       if (sum(is.na(cultivarsTable$value))) {
         return(1)
       }
-      
-      #message("data ", cultivarsTable$data)
-      #message("value ", cultivarsTable$value)
-      #message("i ", cultivarsTable$row)
-      #message("j", cultivarsTable$col)
+
+      # message("data ", cultivarsTable$data)
+      # message("value ", cultivarsTable$value)
+      # message("i ", cultivarsTable$row)
+      # message("j", cultivarsTable$col)
 
       if (isTRUE(advanced_mode())) {
-        if (#nrow(cultivarsTable$data) == 0 ||
-             checkCultivarsTable(cultivarsTable$data[, -which(colnames(cultivarsTable$data) %in% c("delete"))]) == FALSE) {
+        if ( # nrow(cultivarsTable$data) == 0 ||
+          checkCultivarsTable(cultivarsTable$data[, -which(colnames(cultivarsTable$data) %in% c("delete"))]) == FALSE) {
           can_run_simul$cultivars <<- FALSE
         }
         else {
@@ -975,20 +1172,22 @@ server <- function(input, output, session) {
           # rename a cultivars in croptypes
           crop <- simul_params_croptypes()
           colnames(crop) <- c(colnames(simul_params_croptypes())[1:2], cultivarsTable$data[, 1])
-          if(nrow(cultivarsTable$data) != 0) simul_params <<- setCroptypes(simul_params,crop)
+          if (nrow(cultivarsTable$data) != 0) simul_params <<- setCroptypes(simul_params, crop)
           simul_params_croptypes(crop)
-          
+          # rename cultivars in genes
           colnames(simul_params@CultivarsGenes) <<- genesTable$data[, 1]
           # if (nrow(simul_params@CultivarsGenes) != 0)
-            rownames(simul_params@CultivarsGenes) <<- c(cultivarsTable$data[, "cultivarName"])
-            printVerbose(paste0("update CultivarsGenes",simul_params@CultivarsGenes))
+          rownames(simul_params@CultivarsGenes) <<- c(cultivarsTable$data[, "cultivarName"])
+          printVerbose(paste0("update CultivarsGenes", simul_params@CultivarsGenes))
           simul_params_cultivarsgenes(simul_params@CultivarsGenes)
 
           # update cultivars
           simul_params <<- setCultivars(simul_params, cultivarsTable$data[, -ncol(cultivarsTable$data)])
           shiny::isolate(simul_params_cultivars(simul_params@Cultivars))
-
           can_run_simul$cultivars <<- TRUE
+
+          # update treatment cultivars list
+          updateSelectInput(session, "treatment_cultivars_select", choices = c(Choose='',simul_params_cultivars()[, 1]))
         }
       }
     },
@@ -1022,17 +1221,17 @@ server <- function(input, output, session) {
       # message("i ", cultivars_genesTable$row)
       # message("j", cultivars_genesTable$col)
 
-      #if (isTRUE(advanced_mode())) {
-        if (checkCultivarsGenesTable(cultivars_genesTable$data) == FALSE) {
-          can_run_simul$cultivarsgenes <<- FALSE
-        }
-        else {
-          simul_params@CultivarsGenes <<- cultivars_genesTable$data
-          #print(simul_params@CultivarsGenes)
-          simul_params_cultivarsgenes(simul_params@CultivarsGenes)
-          can_run_simul$cultivarsgenes <<- TRUE
-        }
-      #}
+      # if (isTRUE(advanced_mode())) {
+      if (checkCultivarsGenesTable(cultivars_genesTable$data) == FALSE) {
+        can_run_simul$cultivarsgenes <<- FALSE
+      }
+      else {
+        simul_params@CultivarsGenes <<- cultivars_genesTable$data
+        # print(simul_params@CultivarsGenes)
+        simul_params_cultivarsgenes(simul_params@CultivarsGenes)
+        can_run_simul$cultivarsgenes <<- TRUE
+      }
+      # }
     },
     ignoreNULL = TRUE,
     ignoreInit = TRUE
@@ -1072,21 +1271,21 @@ server <- function(input, output, session) {
       # message("j", genesTable$col)
 
       if (isTRUE(advanced_mode())) {
-        if (#nrow(genesTable$data) == 0  ||
-            checkGenesTable(genesTable$data[, -which(colnames(genesTable$data) %in% c("delete"))]) == FALSE) {
+        if ( # nrow(genesTable$data) == 0  ||
+          checkGenesTable(genesTable$data[, -which(colnames(genesTable$data) %in% c("delete"))]) == FALSE) {
           can_run_simul$genes <<- FALSE
         }
         else {
           # rename genes in cultivars genes table
           # remove line -> remove genes in cultivars genes
           if (genesTable$col == 0 && nrow(simul_params@Genes) > nrow(genesTable$data)) {
-            #print("remove here")
+            # print("remove here")
             simul_params@CultivarsGenes <<- simul_params@CultivarsGenes[, -c(genesTable$row), drop = FALSE]
-            printVerbose(paste0("set Cultivars Genes ",simul_params@CultivarsGenes))
+            printVerbose(paste0("set Cultivars Genes ", simul_params@CultivarsGenes))
           }
           # add line -> add a genes in cultivars genes
           if (nrow(simul_params@Genes) < nrow(genesTable$data)) {
-            #print("add here")
+            # print("add here")
             simul_params@CultivarsGenes <<- cbind(simul_params@CultivarsGenes, rep(0, nrow(simul_params@CultivarsGenes)))
           }
           colnames(simul_params@CultivarsGenes) <<- genesTable$data[, 1]
@@ -1112,22 +1311,30 @@ server <- function(input, output, session) {
   ## Patho tabs default
   shinyjs::disable(id = "patho_infection_rate")
   shinyjs::disable(id = "patho_propagule_prod_rate")
-  shinyjs::disable(id = "patho_latent_period_exp")
+  shinyjs::disable(id = "patho_latent_period_mean")
   shinyjs::disable(id = "patho_latent_period_var")
-  shinyjs::disable(id = "patho_infectious_period_exp")
+  shinyjs::disable(id = "patho_infectious_period_mean")
   shinyjs::disable(id = "patho_infectious_period_var")
   shinyjs::disable(id = "patho_survival_prob")
   shinyjs::disable(id = "patho_repro_sex_prob")
   shinyjs::disable(id = "patho_sigmoid_kappa")
   shinyjs::disable(id = "patho_sigmoid_sigma")
   shinyjs::disable(id = "patho_sigmoid_plateau")
+  shinyjs::disable(id = "patho_sex_propagule_viability_limit")
+  shinyjs::disable(id = "patho_sex_propagule_release_mean")
+
+  shinyjs::disable(id = "treatment_days_interval")
+  shinyjs::disable(id = "treatment_day_start")
+  shinyjs::disable(id = "treatment_cultivars_select")
+  shinyjs::disable(id = "treatment_efficiency")
+  shinyjs::disable(id = "treatment_reduction_rate")
+  #shinyjs::disable(id = "treatment_cost")
 
   # Remove image
   output$landscapeimg <- renderPlot({
     plot(loadLandscape(input$landscape))
   })
   # output$landscapeimg <- NULL
-
 
   ############################################################
   # Screen split

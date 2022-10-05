@@ -59,7 +59,7 @@ used to delimit durabilities of the resistance genes. No line is drawn if keyDat
 \item{path}{path where binary files are located and where the video will be generated.}
 }
 \value{
-A video file of format mp4.
+A video file of format webM
 }
 \description{
 Generates a video showing the epidemic dynamics on a map representing the cropping landscape.

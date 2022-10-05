@@ -182,12 +182,12 @@ plot_freqPatho <- function(name_gene, Nlevels_aggressiveness, I_aggrProp, nTS, N
   axis(side = 1, at = 1:Nlevels_aggressiveness, labels = LABELS)
   if (Nyears == 1) {
     axis(2, at = round(seq(1, nTS, length.out = 8)), las = 1)
-    title(ylab = "Evolutionnary time (days)")
+    title(ylab = "Evolutionary time (days)")
   } else {
     axis(2,
       at = seq(1, nTS + 1, nTSpY * ((Nyears - 1) %/% 10 + 1)),
       labels = seq(0, Nyears, ((Nyears - 1) %/% 10 + 1)), las = 1
     )
-    title(ylab = "Evolutionnary time (years)")
+    title(ylab = "Evolutionary time (years)")
   }
 }

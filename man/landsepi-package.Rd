@@ -16,8 +16,8 @@ resistance deployment strategies.
 \tabular{ll}{
 Package: \tab landsepi\cr
 Type: \tab Package\cr
-Version: \tab 1.1.2\cr
-Date: \tab 2022-03-01\cr
+Version: \tab 1.2.0\cr
+Date: \tab 2022-10-05\cr
 License: \tab GPL (>=2)\cr
 }
 
@@ -27,7 +27,8 @@ It is based on a spatial geometry for describing the landscape and allocation of
 a dispersal kernel for the dissemination of the pathogen,
 and a SEIR (‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed'
 to avoid confusions with 'susceptible host') structure with a discrete time step. It simulates the spread and
-evolution of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
+evolution (via mutation, recombination through sexual reproduction, selection and drift)
+of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
 potential bottlenecks to the pathogen.
 
 The lansdcape is represented by a set of polygons where the pathogen can disperse
@@ -48,6 +49,8 @@ production rate. Resistance may be complete (i.e. complete inhibition of the tar
 Cultivar allocation can be realised via an algorithm (\code{allocateCroptypeCultivars()})
 but it is possible to use your own cultivar allocation if it is included in the shapefile
 containing the landsape.
+Additionally, any cultivar may be treated with contact pesticides, which reduce the pathogen infection rate
+with an efficiency gradually decreasing with host growth.
 
 To each resistance gene in the host (whether it may be a major gene or a QTL for quantitative resistance)
 is associated a pathogenicity gene in the pathogen.
@@ -68,7 +71,8 @@ the epidemio-evolutionary context on the performance of a given strategy.
 
 The package includes five examples of landscape structures and a default parameterisation to represent
 plant pathogens as typified by rusts of cereal crops (genus \emph{Puccinia},
-e.g. stripe rust, stem rust and leaf rust of wheat and barley).
+e.g. stripe rust, stem rust and leaf rust of wheat and barley). A parameterisation to
+downy mildew of grapevine is also available.
 The main function of the package is \code{runSimul()}.
 It can be parameterised to simulate various resistance deployment strategies using either the provided
 landscapes and parameters for cereal rusts, or landscapes and parameters set by the user.
@@ -92,18 +96,39 @@ during the cropping season.} Plant growth is deterministic (logistic growth) and
 only healthy hosts (state H) contribute to plant growth (castrating pathogen).
 \item \strong{The decreasing availability of healthy host tissues (as epidemics spread) makes pathogen infection less likely
 (i.e. density-dependence due to plant architecture).}
-\item \strong{Host are cultivated, thus there is no host reproduction, dispersal and natural death.}
+\item \strong{Host are cultivated (i.e. sown/planted and harvested), thus there is no host reproduction, dispersal and natural death.}
 \item Environmental and climate conditions are constant, and host individuals of a given genotype are equally
 susceptible to disease from the first to the last day of every cropping season.
 \item Crop yield depends on the average amount of producing host individuals during the cropping season
 and does not depend on the time of epidemic peak. \strong{Only healthy individuals (state H) contribute to crop yield.}
 \item Components of a mixture are independent each other (i.e. there is neither plant-plant interaction
 nor competition for space, and harvests are segregated).
+\item 9.	Crops may be treated with chemicals which reduce the pathogen infection rate (contact treatment).
+Treatment efficiency decreases with host growth (i.e. new biomass is not protected by treatments)
+\strong{and time (i.e. pesticide degradation)}. Crops to be treated and dates of chemical applications are
+fixed prior to simulations (thus they are independent from the epidemic dynamics) and are the same
+for all polygons cultivated with the crops to be treated.
 \item The pathogen is haploid.
 \item Initially, the pathogen is not adapted to any source of resistance, and is only present on
 susceptible hosts (at state I).
 \item \strong{Pathogen dispersal is isotropic (i.e. equally probable in every direction).}
-\item \strong{Pathogen reproduction is clonal.}
+\item Pathogen reproduction can be purely clonal, purely sexual, or mixed (alternation of clonal and sexual reproduction).
+\item If there is sexual reproduction (or gene recombination), it occurs only between parental infections located
+in the same polygon and the same host genotype. The host population is panmictic (i.e. all pairs of parents have
+the same probability to occur). The propagule production rate of a parental pair is the sum of
+the propagule production rates of the parents. For a given parental pair, the genotype of each
+propagule is issued from random loci segregation of parental qualitative resistance genes.
+For each quantitative resistance gene, the value of each propagule trait is issued from a
+normal distribution around the average of the parental traits, following the infinitesimal model (Fisher 1919).
+\item Each type of propagule (i.e. either clonal or sexual) has its own dispersal ability.
+\item At the end of each cropping season, pathogens experience a bottleneck representing
+the off-season and then propagules are produced (either via clonal or sexual reproduction).
+Clonal propagules are released during the following season only, either altogether at the
+first day of the season, or progressively (in that case the day of release of each propagule
+is sampled from a uniform distribution). Sexual propagules are gradually released during several
+of the following seasons (between-season release). The season of release of each propagule is
+sampled from an exponential distribution, truncated by a maximum viability limit. Then,
+the day of release in a given season is sampled from a uniform distribution (within-season release).
 \item Pathogenicity genes mutate independently from each other.
 \item \strong{Pathogen adaptation to a given resistance gene consists in restoring the same aggressiveness component
 as the one targeted by the resistance gene.}
@@ -111,12 +136,8 @@ as the one targeted by the resistance gene.}
 hosts that do not carry this gene, and consists in a reduction in the same aggressiveness component as
 the one targeted by the resistance gene.
 \item When there is a delay for activation of a given resistance gene (APR), the time to activation is the same for
-all hosts carrying this gene and located in the same field.
+all hosts carrying this gene and located in the same polygon.
 \item Variances of the durations of the latent and the infectious periods of the pathogen are not affected by plant resistance.
-\item If there is sexual reproduction (or gene recombination), it occurs only between parental infections located
-in the same polygon and the same host genotype. The host population is panmictic (i.e. all pairs of parents have
-the same probability to occur). The propagule production rate of a couple is the sum of the propagule production
-rates of the parents. The genotype of each daughter propagule is issued from random loci segregation between parental loci.
 }
 }
 \item{\strong{Epidemiological outputs}}{
@@ -158,7 +179,7 @@ in monetary units per hectare (depends on initial host density and planting cost
 \strong{Future versions:}
 
 Future versions of the package will include in particular:\itemize{
-\item Sets of pathogen parameters to simulate other pathosystems (e.g. canola blackleg, grapevine downy mildew, potato virus Y on pepper).
+\item Sets of pathogen parameters to simulate other pathosystems (e.g. black sigatoka of banana, potato virus Y on pepper).
 \item More flexible initial conditions (e.g. size, location and composition of pathogen inoculum at the beginning of the simulation).
 }
 \strong{Dependencies:}
@@ -173,7 +194,6 @@ and the following R packages:\itemize{
 \item stats
 \item Matrix
 \item mvtnorm
-\item maptools
 \item fields
 \item splancs
 \item sf
@@ -181,14 +201,15 @@ and the following R packages:\itemize{
 \item RSQLite
 \item foreach
 \item parallel
-\item doParallel}
+\item doParallel
+\item deSolve}
 In addition, to generate videos the package will need ffmpeg.
 }
 \examples{
 \dontrun{
 library("landsepi")
 
-## Run demonstrations (in 20-year simulations) for different deployment strategies:
+## Run demonstrations (in 10-year simulations) for different deployment strategies:
 demo_landsepi(strat = "MO") ## for a mosaic of cultivars
 demo_landsepi(strat = "MI") ## for a mixture of cultivars
 demo_landsepi(strat = "RO") ## for a rotation of cultivars
@@ -224,7 +245,11 @@ Julien Papaix \email{julien.papaix@inrae.fr}
 
 Jean-Francois Rey \email{jean-francois.rey@inrae.fr}
 
+Marta Zaffaroni \email{marta.zaffaroni@inrae.fr}
+
 Jean-Loup Gaussen \email{jean-loup-thomas.gaussen@inrae.fr}
+
+Marta Zaffaroni \email{marta.zaffaroni@inrae.fr}
 
 Maintainer: Jean-Francois Rey \email{jean-francois.rey@inrae.fr}
 }

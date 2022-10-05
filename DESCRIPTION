@@ -2,13 +2,14 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 1.1.2
-Date: 2022-03-01
+Version: 1.2.0
+Date: 2022-10-05
 Authors@R: 
     c(person(given = "Loup",
              family = "Rimbaud",
              role = "aut",
-             email = "loup.rimbaud@inrae.fr"),
+             email = "loup.rimbaud@inrae.fr",
+             comment = c(ORCID = "0000-0002-8098-9984")),
       person(given = "Julien",
              family = "Papaix",
              role = "aut",
@@ -18,6 +19,11 @@ Authors@R:
              role = c("aut","cre"),
              email = "jean-francois.rey@inrae.fr",
              comment = c(ORCID = "0000-0003-3281-6701")),
+      person(given = "Marta",
+             family = "Zaffaroni",
+             role = "ctb",
+             email = "marta.zaffaroni@inrae.fr",
+             comment = c(ORCID = "0000-0002-2951-8626")),
       person(given = "Jean-Loup",
              family = "Gaussen",
              role = "ctb",
@@ -41,22 +47,24 @@ BuildVignettes: true
 NeedsCompilation: yes
 Biarch: true
 SystemRequirements: C++11, gsl
-Depends: methods, utils, grDevices (>= 3.0.0), graphics (>= 3.0.0), R
-        (>= 3.3.0), sp (>= 1.0-17),
-Imports: Rcpp (>= 0.9.0), stats (>= 3.0.2), Matrix, mvtnorm, fields,
-        splancs, sf, DBI, RSQLite, foreach, parallel, doParallel
+Depends: R (>= 3.5.0), sp (>= 1.0-17)
+Imports: methods, utils, stats (>= 3.0.2), grDevices (>= 3.0.0),
+        graphics (>= 3.0.0), parallel, Rcpp (>= 0.9.0), Matrix (>=
+        1.3-0), mvtnorm, fields, splancs, sf, DBI, RSQLite, foreach,
+        doParallel, deSolve
 Collate: 'Math-Functions.R' 'RcppExports.R' 'graphics.R' 'AgriLand.R'
-        'Class-LandsepiParams.R' 'GPKGTools.R' 'tools.R'
-        'Methods-LandsepiParams.R' 'demo_landsepi.R' 'landsepi.R'
-        'output.R' 'runShiny.R' 'simul_landsepi.R'
+        'Class-LandsepiParams.R' 'Cultivars_List.R' 'GPKGTools.R'
+        'tools.R' 'Methods-LandsepiParams.R' 'demo_landsepi.R'
+        'landsepi.R' 'output.R' 'runShiny.R' 'simul_landsepi.R'
 LinkingTo: Rcpp, testthat
-RoxygenNote: 7.1.2
-Suggests: testthat, shiny, shinyjs, DT, knitr, rmarkdown
+RoxygenNote: 7.2.1
+Suggests: testthat (>= 3.0.0), shiny, shinyjs, DT, knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2022-03-01 15:38:50 UTC; root
-Author: Loup Rimbaud [aut],
+Packaged: 2022-10-05 09:57:04 UTC; root
+Author: Loup Rimbaud [aut] (<https://orcid.org/0000-0002-8098-9984>),
   Julien Papaix [aut],
   Jean-François Rey [aut, cre] (<https://orcid.org/0000-0003-3281-6701>),
+  Marta Zaffaroni [ctb] (<https://orcid.org/0000-0002-2951-8626>),
   Jean-Loup Gaussen [ctb]
 Repository: CRAN
-Date/Publication: 2022-03-02 13:10:02 UTC
+Date/Publication: 2022-10-05 11:10:05 UTC

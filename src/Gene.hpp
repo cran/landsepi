@@ -31,17 +31,18 @@ class Gene {
                                                 const double& tradeoff_strength);
 
 public:
-    const double time_to_activ_exp;               /* Expected delay to resistance activation (for APRs) */
+    const double time_to_activ_mean;               /* Expected delay to resistance activation (for APRs) */
     const double time_to_activ_var;               /* Variance of the delay to resistance activation (for APRs) */
     const int Nlevels_aggressiveness;             /* Number of adaptation levels related to a given aggressiveness component */
     const std::string target_trait;               /* Aggressiveness component targeted by resistance (IR, LAT, IP, PR) */
     const Vector2D<double> mutkernel;             /* Mutation matrix (for pathogen evolution) */
     const Vector2D<double> aggressiveness_matrix; /* Aggressiveness matrix (plant-pathogen interaction) */
+    const double recombination_sd;                /* Standard deviation of the normal distribution used for recombination of quantitative traits during sexual reproduction (infinitesimal model) */    
 
     Gene();
-    Gene(const double& time_to_activ_exp, const double& time_to_activ_var, const int& Nlevels_aggressiveness,
+    Gene(const double& time_to_activ_mean, const double& time_to_activ_var, const int& Nlevels_aggressiveness,
          const std::string& target_trait, const double& mutation_prob, const double& efficiency,
-         const double& fitness_cost, const double& tradeoff_strength);
+         const double& fitness_cost, const double& tradeoff_strength, const double& recombination_sd);
     std::string to_string() const;
 };
 

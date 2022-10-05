@@ -16,13 +16,15 @@ simul_landsepi(
   area,
   rotation,
   basic_patho_param,
+  repro_sex_prob,
   disp_patho,
+  disp_patho_sex,
   disp_host,
+  treatment,
   pI0 = 5e-04,
   epid_outputs = "all",
   evol_outputs = "all",
   thres_breakdown = 50000,
-  GLAnoDis = 1.48315,
   audpc100S = 0.76,
   writeTXT = TRUE,
   graphic = TRUE,
@@ -73,7 +75,7 @@ each corresponding pathogenicity gene. Columns of the dataframe are:\itemize{
 \item target_trait: aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes,
 \item efficiency: resistance gene efficiencies (percentage of reduction of targeted aggressiveness components:
 IR, 1/LAT, IP and PR),
-\item time_to_activ_exp: expected delays to resistance activation (for APRs),
+\item time_to_activ_mean: expected delays to resistance activation (for APRs),
 \item time_to_activ_var: variances of the delay to resistance activation (for APRs),
 \item mutation_prob: mutation probabilities for pathogenicity genes (each of them corresponding to a resistance gene),
 \item Nlevels_aggressiveness: number of adaptation levels related to each resistance gene (i.e. 1 + number
@@ -82,6 +84,7 @@ of required mutations for a pathogenicity gene to fully adapt to the correspondi
 to the considered resistance genes on host that do not carry the resistance genes,
 \item tradeoff_strength: strengths of the trade-off relationships between the level of aggressiveness
 on hosts that do and do not carry the resistance genes.
+\item recombination_sd: standard deviation of the normal distribution used for recombination of quantitative traits during sexual reproduction (infinitesimal model)
 }}
 
 \item{landscape}{a sp object containing the landscape (required only if videoMP4=TRUE).}
@@ -92,26 +95,43 @@ on hosts that do and do not carry the resistance genes.
 the index of the cultivated croptype. Importantly, the matrix must contain 1 more column than the real number
 of simulated years.}
 
-\item{basic_patho_param}{a list of pathogen aggressiveness parameters on a susceptible host
-for a pathogen genotype not adapted to resistance: \itemize{
+\item{basic_patho_param}{a list of i. pathogen aggressiveness parameters on a susceptible host
+for a pathogen genotype not adapted to resistance and ii. sexual reproduction parameters: \itemize{
 \item infection_rate = maximal expected infection rate of a propagule on a healthy host,
 \item propagule_prod_rate = maximal expected effective propagule production rate of an infectious host per time step,
-\item latent_period_exp = minimal expected duration of the latent period,
+\item latent_period_mean = minimal expected duration of the latent period,
 \item latent_period_var = variance of the latent period duration,
-\item infectious_period_exp = maximal expected duration of the infectious period,
+\item infectious_period_mean = maximal expected duration of the infectious period,
 \item infectious_period_var = variance of the infectious period duration,
 \item survival_prob = probability for a propagule to survive the off-season,
 \item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning,
 \item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
 \item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
-\item sigmoid_plateau = plateau parameter of the sigmoid contamination function.
+\item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
+\item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
+\item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
+\item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 }}
+
+\item{repro_sex_prob}{a vector of size \code{time_param$nSTpY+1} of probability for an infectious host to reproduce
+via sex rather than via cloning,}
 
 \item{disp_patho}{a vectorized matrix giving the probability of pathogen dispersal
 from any field of the landscape to any other field.}
 
+\item{disp_patho_sex}{a vectorized matrix giving the probability of dispersal for sexual pathogen propagules
+from any field of the landscape to any other field.}
+
 \item{disp_host}{a vectorized matrix giving the probability of host dispersal
 from any field of the landscape to any other field}
+
+\item{treatment}{list of parameters related to pesticide treatments: \itemize{
+\item treatment_reduction_rate = reduction per time step of chemical concentration,
+\item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
+\item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
+\item treatment_cultivars = vector of cultivar indices that receive treatments,
+\item treatment_cost = cost of a single treatment application (monetary units/ha)
+}}
 
 \item{pI0}{initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
 at the beginning of the simulation. Must be between 0 and 1.}
@@ -151,8 +171,6 @@ specifying the type of evolutionary outputs to generate :\itemize{
 above which a pathogen genotype is unlikely to go extinct, used to characterise the time to invasion
 of resistant hosts (several values are computed if several thresholds are given in a vector).}
 
-\item{GLAnoDis}{the absolute Green Leaf Area in absence of disease (used to compute economic outputs).}
-
 \item{audpc100S}{the audpc in a fully susceptible landscape (used as reference value for graphics).}
 
 \item{writeTXT}{a logical indicating if outputs must be written in text files (TRUE, default) or not (FALSE).}
@@ -189,9 +207,11 @@ See ?landsepi for details on the model and assumptions.
 Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
 (‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions
 with 'susceptible host') structure with a discrete time step. It simulates the spread and
-evolution of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
-potential bottlenecks to the pathogen. A wide array of resistance deployment strategies can be simulated and
-evaluated using several possible outputs to assess the epidemiological, evolutionary and economic performance
+evolution (via mutation, recombination through sexual reproduction, selection and drift)
+of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
+potential bottlenecks to the pathogen. A wide array of resistance deployment strategies
+(possibly including chemical treatments) can be simulated and evaluated using several possible
+outputs to assess the epidemiological, evolutionary and economic performance
 of deployment strategies (See ?epid_output and ?evol_output for details).
 }
 \examples{
@@ -220,7 +240,11 @@ simul_landsepi(
   seed = 12345, time_param, croptype_names, croptypes_cultivars_prop, cultivars,
   cultivars_genes_list, genes, landscape = NULL, area, rotation,
   basic_patho_param = loadPathogen(disease = "rust"),
-  disp_patho = c(0.99, 0.01, 0.01, 0.99), disp_host = c(1, 0, 0, 1), pI0 = 5e-4
+  repro_sex_prob = rep(0, time_param$nSTpY),
+  disp_patho = c(0.99, 0.01, 0.01, 0.99),
+  disp_patho_sex = c(0.99, 0.01, 0.01, 0.99),
+  disp_host = c(1, 0, 0, 1),
+  pI0 = 5e-4
 )
 
 
@@ -265,7 +289,9 @@ simul_landsepi(
   croptype_names, croptypes_cultivars_prop, cultivars,
   cultivars_genes_list, genes, landscape, area, rotation,
   basic_patho_param = loadPathogen(disease = "rust"),
+  repro_sex_prob = rep(0, 120+1),
   disp_patho = loadDispersalPathogen(1),
+  disp_patho_sex = as.numeric(diag(Npoly)),
   disp_host = as.numeric(diag(Npoly)),
   pI0 = 5e-4
 )

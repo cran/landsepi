@@ -63,9 +63,31 @@
 #' \item planting_cost_perHa = a vector of planting costs (in monetary units / ha / cropping season),
 #' \item market_value = a vector of market values of the production (in monetary units / weight or volume unit).
 #' }
-#' @param GLAnoDis the value of absolute GLA in absence of disease (required to compute economic outputs).
-#' @param ylim_param a list of graphical parameters for each required output: bounds for y-axes for
-#' audpc, gla, gla_rel, eco_cost, eco_yield, eco_product, eco_margin, contrib.
+#' @param pathogen_param a list of i. pathogen aggressiveness parameters on a susceptible host
+#' for a pathogen genotype not adapted to resistance and ii. sexual reproduction parameters: \itemize{
+#' \item infection_rate = maximal expected infection rate of a propagule on a healthy host,
+#' \item propagule_prod_rate = maximal expected effective propagule production rate of an infectious host per time step,
+#' \item latent_period_mean = minimal expected duration of the latent period,
+#' \item latent_period_var = variance of the latent period duration,
+#' \item infectious_period_mean = maximal expected duration of the infectious period,
+#' \item infectious_period_var = variance of the infectious period duration,
+#' \item survival_prob = probability for a propagule to survive the off-season,
+#' \item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning,
+#' \item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
+#' \item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
+#' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
+#' \item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
+#' \item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
+#' \item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
+#' }
+#' @param treatment_param list of parameters related to pesticide treatments: \itemize{ 
+#' \item treatment_reduction_rate = reduction per time step of chemical concentration,
+#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
+#' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
+#' \item treatment_cultivars = vector of cultivar indices that receive treatments,
+#' \item treatment_cost = cost of a single treatment application (monetary units/ha)
+#' }
+#' @param audpc100S the audpc in a fully susceptible landscape (used as reference value for graphics).
 #' @param writeTXT a logical indicating if the output is written in a text file (TRUE) or not (FALSE).
 #' @param graphic a logical indicating if a tiff graphic of the output is generated (only if more than one year is simulated).
 #' @param path path of text file (if writeTXT = TRUE) and tiff graphic (if graphic = TRUE) to be generated.
@@ -109,20 +131,12 @@
 #' @importFrom sf st_read
 #' @importFrom grDevices colorRampPalette dev.off graphics.off gray png tiff
 #' @importFrom utils write.table
+#' @importFrom utils tail
+#' @importFrom deSolve ode
 #' @export
-epid_output <- function(types = "all", time_param, Npatho, area, rotation, croptypes, cultivars_param, eco_param,
-                        GLAnoDis = cultivars_param$max_density[1] ## true for non-growing host
-                        , ylim_param = list(
-                          audpc = c(0, 0.76), #0.38),
-                          audpc_rel = c(0, 1),
-                          gla = c(0, 1.48),
-                          gla_rel = c(0, 1),
-                          eco_cost = c(0, NA),
-                          eco_yield = c(0, NA),
-                          eco_product = c(0, NA),
-                          eco_margin = c(NA, NA),
-                          contrib = c(0,1)
-                        ),
+epid_output <- function(types = "all", time_param, Npatho, area, rotation, croptypes, 
+                        cultivars_param, eco_param, treatment_param,
+                        pathogen_param, audpc100S = 0.76, #8.48 for downy mildew,
                         writeTXT = TRUE, graphic = TRUE, path = getwd()) {
   valid_outputs <- c("audpc", "audpc_rel", "gla", "gla_rel", "eco_yield", "eco_product", "eco_cost", "eco_margin", "HLIR_dynamics", "contrib")
   if (types[1] == "all") {
@@ -143,17 +157,38 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
   areaTot <- sum(area)
   Npoly <- length(area)
   
+
   ## Host parameters
-  cultivar_names <- cultivars_param$name
+  cultivar_names  <- cultivars_param$name
   initial_density <- cultivars_param$initial_density
-  max_density <- cultivars_param$max_density
+  max_density     <- cultivars_param$max_density
+  growth_rate     <- cultivars_param$growth_rate
   cultivars_genes_list <- cultivars_param$cultivars_genes_list
-  yield_perIndivPerTS <- eco_param$yield_perHa * 1E-4 / nTSpY / GLAnoDis
-  planting_cost_perIndiv <- eco_param$planting_cost_perHa * 1E-4 / initial_density
   market_value <- eco_param$market_value
   Nhost <- length(initial_density)
+  ## Computation of GLAnoDis
+  ## (the value of absolute GLA in absence of disease for each cultivar (required to compute economic outputs))
+  GLAnoDis <- initial_density  ## true for non-growing hosts
+  yield_perIndivPerTS <- matrix(0, ncol=4, nrow=Nhost)
+  colnames(yield_perIndivPerTS)=colnames(eco_param$yield_perHa)
+  planting_cost_perIndiv <- rep(0, Nhost)
+  for (v in 1:Nhost){
+    if (initial_density[v]>0){
+      planting_cost_perIndiv[v] <- eco_param$planting_cost_perHa[v] * 1E-4 / initial_density[v]
+      if (growth_rate[v]>0 & initial_density[v]<max_density[v]){
+        ## GLAnoDis is computed analytically using the antiderivative function of Verhulst 
+        ## nTSpY-1 because the verhulst function is defined on 0:(nTSpY-1) while timesteps are defined on 1:nTSpY
+        GLAnoDis[v] <- antideriv_verhulst(nTSpY-1, initial_density[v], max_density[v], growth_rate[v]) / nTSpY
+        # GLAnoDis = 14.8315  for mildew
+        # GLAnoDis = 1.48315 for rust
+      }
+    }
+    if (GLAnoDis[v] > 0){
+      yield_perIndivPerTS[v,] <- eco_param$yield_perHa[v,] * 1E-4 / nTSpY / GLAnoDis[v]
+    }
+  } ## for v
   
-  
+
   ## Calculation of the carrying capacity and number of exisiting hosts
   K <- array(dim = c(Npoly, Nhost, Nyears)) ## for audpc
   C <- array(dim = c(Npoly, Nhost, Nyears)) ## for cost
@@ -173,14 +208,15 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
         prop <- croptypes[i, "proportion"]
         K[poly, index_host, y] <- floor(area[poly] * max_density[index_host] * prop)
         C[poly, index_host, y] <- area[poly] * initial_density[index_host] * prop
-        area_host[y, index_host] <- area_host[y, index_host] + area[poly]
+        area_host[y, index_host] <- area_host[y, index_host] + area[poly] # in pure crop
       }
     } ## for poly
   } ## for y
   K_host <- apply(K, c(2, 3), sum, na.rm = TRUE)
   C_host <- apply(C, c(2, 3), sum, na.rm = TRUE)
-  C_host[C_host == 0] <- NA
+  # C_host[C_host == 0] <- NA
   area_host[, Nhost + 1] <- areaTot
+  
   
   ## IMPORTATION OF THE SIMULATION OUTPUT (only those required depending on parameter "types" --> not necessary any more)
   # requireH <- sum(is.element(substr(types, 1, 3), c("gla", "eco"))) > 0
@@ -419,13 +455,69 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
         } ## for y
         
         ## Economic outputs
+        
+        # Computing the price reduction rate: if the severity of infection on grape is higher than
+        # a threshold value, the market value is reduced (only for downy mildew)
+        
+        # computing the disease severity on grape (% of infected grape) from the disease 
+        # severity on leaves (Savary et al. 2009)
+        
+        severity_leaf = I_host/(N_host + 1e-15) #to avoid NaN
+
+        # from bud break to flowering and from veraison to leaf fall the transmission coefficient
+        # leaf infection to grape infection is = 0 Bove et al. 2020
+
+        leaves_to_grape <- function(t, x, parms) {
+          with(as.list(c(parms, x)), {
+            import <- input_severity_leaf(t)   
+            if(t<40 | t>80){
+              tc<-0
+            }
+            dI_grape <- tc*import*(1-I_grape)
+            res <- c(dI_grape)
+            list(res, signal = import)
+          })
+        }
+
+        parms <- c(tc = 0.01)
+        xstart <- c(I_grape = 0)
+        times <- seq(1,120, 1)
+
+        final_severity_grape<-matrix(NA, nrow = Nhost, ncol=Nyears)
+
+        for(host in 1:Nhost){
+          for (y in 1:Nyears) {
+            ts_year <- ((y - 1) * nTSpY + 1):(y * nTSpY)
+            input_severity_leaf<- approxfun(seq(1, nTSpY,1),severity_leaf[host,ts_year],
+                                            method = "linear", rule =2)
+            out <- deSolve::ode(y = xstart, times = times, func = leaves_to_grape, parms)
+            final_severity_grape[host, y]<-tail(out[,"I_grape"], n=1)
+          }
+        }
+
+        # Compute of the price reduction, one value for each year and for each cultivar
+
+        # PARAMS #
+        severity_thresh <- 0.075
+        price_reduction <- 0 # (0.05-0.10) # NOTE: put 0 if we don't have a price reduction due to disease severity
+
+        price_reduction_rate<-matrix(1, nrow = Nhost, ncol=Nyears)
+        price_reduction_rate[which(final_severity_grape > severity_thresh)] = (1-price_reduction)
+       
+        # Computing the annual treatment cost (for each host)
+        n_treatments<-length(treatment_param$treatment_timesteps)
+        annual_treatments_cost_perIndiv<-matrix(0,Nyears,Nhost)
+        annual_treatments_cost_perIndiv[,treatment_param$cultivars+1]<- treatment_param$treatment_cost*1E-4 / initial_density[treatment_param$cultivars+1] * n_treatments
+        
+        
         if (substr(type, 1, 3) == "eco") {
           eco <- list(eco_yield = output_matrix)
-          eco[["eco_product"]] <- data.frame(rep(market_value, each = Nyears) * eco[["eco_yield"]][, 1:Nhost])
+          eco[["eco_product"]] <- data.frame(rep(market_value, each = Nyears) * eco[["eco_yield"]][, 1:Nhost] * t(price_reduction_rate))
           ## data.frame to avoid pb when Nhost=1
           colnames(eco[["eco_product"]]) <- cultivar_names ## useful if Nhost=1
           eco[["eco_product"]]$total <- apply(eco[["eco_product"]], 1, sum, na.rm = TRUE)
-          eco[["eco_cost"]] <- data.frame(rep(planting_cost_perIndiv, each = Nyears) * t(C_host))
+          eco[["eco_cost"]] <- data.frame(rep(planting_cost_perIndiv, each = Nyears) * t(C_host) + 
+                                            annual_treatments_cost_perIndiv * t(C_host))
           colnames(eco[["eco_cost"]]) <- cultivar_names ## useful if Nhost=1
           eco[["eco_cost"]]$total <- apply(eco[["eco_cost"]], 1, sum, na.rm = TRUE)
           eco[["eco_margin"]] <- eco[["eco_product"]] - eco[["eco_cost"]]
@@ -494,6 +586,18 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
       
       if (graphic & Nyears > 1) {
         ## Graphical parameters
+        ylim_param = list(
+          audpc = c(0, audpc100S),
+          audpc_rel = c(0, 1),
+          gla = c(0, max(GLAnoDis)),
+          gla_rel = c(0, 1),
+          eco_cost = c(0, NA),
+          eco_yield = c(0, NA),
+          eco_product = c(0, NA),
+          eco_margin = c(NA, NA),
+          contrib = c(0,1)
+        )
+        
         PCH_host <- 15:(15 + Nhost - 1)
         PCH_patho <- 15:(15 + Npatho - 1) 
         PCH.tot <- 0
@@ -577,7 +681,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
             abline(h = 0, lwd = 1, lty = 3, col = BLUE[1], xpd = FALSE)
           }
           
-          legend(Nyears * 1.05, .5 * ymax_output,
+          legend(Nyears * 1.05, ymin_output + 0.5*(ymax_output-ymin_output),
                  title.adj = -.01, bty = "n", title = "Cultivar:",
                  legend = c(cultivar_names, "Whole landscape"), cex = 0.9, lty = c(1:Nhost, LTY.tot),
                  lwd = 2, pch = c(PCH_host, PCH.tot), pt.cex = c(rep(1, Nhost), 1), col = c(GRAY_host[1:Nhost], COL.tot), seg.len = 2.5
@@ -719,7 +823,7 @@ switch_patho_to_aggr <- function(index_patho, Ngenes, Nlevels_aggressiveness) {
 evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes_param, thres_breakdown = 50000,
                         writeTXT = TRUE, graphic = TRUE, path = getwd()) {
 
-  valid_outputs <- c("evol_patho", "evol_aggr", "durability")
+  valid_outputs <- c("evol_patho", "evol_patho_bi", "evol_aggr", "durability")
   if (types[1] == "all") {
     types <- valid_outputs
   }
@@ -749,6 +853,7 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
 
   #### IMPORTATION OF THE SIMULATION OUTPUT
   P <- as.list(1:nTS)
+  P_bi <- as.list(1:Nyears)
   L <- as.list(1:nTS)
   I <- as.list(1:nTS)
   index <- 0
@@ -757,11 +862,14 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
   for (year in 1:Nyears) {
     binfileP <- file(paste(path, sprintf("/P-%02d", year), ".bin", sep = ""), "rb")
     P.tmp <- readBin(con = binfileP, what = "int", n = Npoly * Npatho * nTSpY, size = 4, signed = T, endian = "little")
+    binfileP_bi <- file(paste(path, sprintf("/Pbefinter-%02d", year), ".bin", sep = ""), "rb")
+    P_bi.tmp <- readBin(con = binfileP_bi, what = "int", n = Npoly * Npatho, size = 4, signed = T, endian = "little")
     binfileI <- file(paste(path, sprintf("/I-%02d", year), ".bin", sep = ""), "rb")
     I.tmp <- readBin(con = binfileI, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
     binfileL <- file(paste(path, sprintf("/L-%02d", year), ".bin", sep = ""), "rb")
     L.tmp <- readBin(con = binfileL, what = "int", n = Npoly * Npatho * Nhost * nTSpY, size = 4, signed = T, endian = "little")
-
+    
+    P_bi[[year]] <- matrix(P_bi.tmp, ncol = Npatho, byrow = T)
 
     for (t in 1:nTSpY) {
       P[[t + index]] <- matrix(P.tmp[((Npatho * Npoly) * (t - 1) + 1):(t * (Npatho * Npoly))], ncol = Npatho, byrow = T)
@@ -774,9 +882,11 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
         dim = c(Nhost, Npatho, Npoly)
       )
     }
-
+  
     index <- index + nTSpY
+    
     close(binfileP)
+    close(binfileP_bi)
     close(binfileL)
     close(binfileI)
   }
@@ -792,7 +902,7 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
     pathoToAggr[p, ] <- switch_patho_to_aggr(p - 1, Ngenes, Nlevels_aggressiveness) + 1
   } ## -1/+1 because indices start at 0 in function switch
 
-  ####  Summary of P, L, I for each pathogen genotype
+  ####  Summary of P, L, I and P_bi for each pathogen genotype
   P_patho <- NULL
   L_patho <- NULL
   I_patho <- NULL
@@ -805,6 +915,13 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
       IL_patho_Rhost <- cbind(IL_patho_Rhost, apply(L[[t]][Rhosts, , ] + I[[t]][Rhosts, , ], 1 + (length(Rhosts) > 1), sum))
     } ## length(Rhosts)=2 --> need to use the 2nd dimension
   }
+  
+  P_bi_patho <- NULL
+  
+  for (y in 1:Nyears) {
+    P_bi_patho <- cbind(P_bi_patho, apply(P_bi[[y]], 2, sum))
+  }
+  
 
   ## Genotype frequencies
   I_pathoProp <- matrix(NA, nrow = Npatho, ncol = nTS)
@@ -813,6 +930,17 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
     for (t in 1:nTS) {
       if (Itot[t] > 0) {
         I_pathoProp[p, t] <- I_patho[p, t] / Itot[t]
+      }
+    }
+  }
+  
+  ## Genotype frequencies BEFORE THE INTERSEASON
+  P_pathoProp_bi <- matrix(NA, nrow = Npatho, ncol = Nyears)
+  P_bi_tot <- apply(matrix(P_bi_patho, ncol = Nyears), 2, sum) ## matrix to avoid pb if only 1 row
+  for (p in 1:Npatho) {
+    for (y in 1:Nyears) {
+      if (P_bi_tot[y] > 0) {
+        P_pathoProp_bi[p, y] <- P_bi_patho[p, y] / P_bi_tot[y]
       }
     }
   }
@@ -848,6 +976,19 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
     write.table(pathoToAggr, file = paste(path, "/evol_patho2aggr", ".txt", sep = ""), sep = ",")
   }
   res[["evol_patho"]] <- patho_evol
+  
+  ## Pathogen frequency before the interseason (must be computed in any case)
+  patho_freq_bi_evol <- matrix(NA, ncol = Nyears, nrow = Npatho)
+  colnames(patho_freq_bi_evol) <- paste("year_",1:Nyears, sep = "")
+  rownames(patho_freq_bi_evol) <- paste("patho_", 1:Npatho, sep = "")
+  
+  for (patho in 1:Npatho) {
+    patho_freq_bi_evol[patho,] <- P_pathoProp_bi[patho,]
+  }
+  if (writeTXT & sum(is.element(types, c("evol_patho_bi"))) > 0) {
+    write.table(patho_freq_bi_evol, file = paste(path, "/evol_patho_bi", ".txt", sep = ""), sep = ",")
+  }
+  res[["evol_patho_bi"]] <- patho_freq_bi_evol
 
   ## "Time_to_first" variables for each level of aggressiveness
   if (sum(is.element(types, c("evol_aggr", "durability"))) > 0) {
@@ -924,13 +1065,13 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
     plot(0, 0, type = "n", xlim = c(1, nTS), bty = "n", las = 1, ylim = c(0, 1), xaxt = "n", xlab = "", ylab = "Frequency")
     if (Nyears == 1) {
       axis(1, at = round(seq(1, nTS, length.out = 8)), las = 1)
-      title(xlab = "Evolutionnary time (days)")
+      title(xlab = "Evolutionary time (days)")
     } else {
       axis(1,
         las = 1, at = seq(1, nTS + 1, nTSpY * ((Nyears - 1) %/% 10 + 1)),
         labels = seq(0, Nyears, ((Nyears - 1) %/% 10 + 1))
       )
-      title(xlab = "Evolutionnary time (years)")
+      title(xlab = "Evolutionary time (years)")
     }
 
     for (patho in 1:Npatho) {
@@ -943,10 +1084,37 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
       legend = 1:Npatho, lty = 1:Npatho, lwd = 2, col = 1:Npatho
     )
     dev.off()
+    
+    ## Dynamics of genotypes frequencies (curves) BEFORE THE INTERSEASON
+    # COL <- c("#FF5555","#4F94CD","darkolivegreen4","#CD950C","black") ## colors: red, blue, green, orange, black
+    tiff(
+      filename = paste(path, "/freqPathoGenotypes_BI.tiff", sep = ""), width = 180, height = 110,
+      units = "mm", compression = "lzw", res = 300
+    )
+    par(xpd = FALSE, mar = c(4, 4, 0, 9))
+    plot(0, 0, type = "n", xlim = c(1, Nyears), bty = "n", las = 1, ylim = c(0, 1), xaxt = "n", xlab = "", ylab = "Frequency")
+      axis(1,
+           las = 1, at = seq(0, Nyears, ((Nyears - 1) %/% 10 + 1)),
+           labels = seq(0, Nyears, ((Nyears - 1) %/% 10 + 1))
+      )
+      title(xlab = "Evolutionary time (years)")
+    
+    for (patho in 1:Npatho) {
+      lines(P_pathoProp_bi[patho, ], col = patho, lty = patho, lwd = 1.5)
+    }
+    
+    par(xpd = TRUE)
+    legend(Nyears * 1.05, .5,
+           title.adj = -.01, bty = "n", title = "Pathogen genotype:",
+           legend = 1:Npatho, lty = 1:Npatho, lwd = 2, col = 1:Npatho
+    )
+    dev.off()
   } ## if graphic
 
   return(res[match(types, valid_outputs)])
 }
+
+
 
 ## Hack foreach dopar y variable
 utils::globalVariables(c("y"))
@@ -984,7 +1152,7 @@ utils::globalVariables(c("y"))
 #' for each cultivar as well as the global average. The right panel illustrates the landscape,
 #' where fields are hatched depending on the cultivated croptype, and coloured depending on the prevalence of the disease.
 #' Note that up to 9 different croptypes can be represented properly in the right panel.
-#' @return A video file of format mp4.
+#' @return A video file of format webM
 #' @examples
 #' \dontrun{
 #' demo_landsepi()
@@ -1196,18 +1364,19 @@ video <- function(audpc, time_param, Npatho, landscape, area, rotation, croptype
   # cat *.png | ffmpeg -f image2pipe -framerate 3 -i - -vcodec libx264 -vb 1024k  video.mp4
   # fast
   # ffmpeg -f image2 -framerate 2.5 -i HLIR_%04d.png  -vcodec libx264 -vb 1024k -crf 25 -pix_fmt yuv420p video.mp4
-  # slow
+  # slow to webm
   # ffmpeg -f image2 -framerate 2.5 -i HLIR_%04d.png -vcodec vp9 -vb 1024k -crf 25 -pix_fmt yuv420p video.webm
+  # fast to webm
+  # ffmpeg -f image2 -framerate 2.5 -i HLIR_%04d.png -vcodec vp9 -vb 1024k -crf 25 -pix_fmt yuv420p -deadline realtime -cpu-used -5 video.webm
+  
   setwd("maps")
   # rename png file to HLIR_XXXX.png
   lfiles <- list.files(pattern = "*.png")
   file.rename(lfiles, paste0("HLIR_", sprintf("%04d", 1:length(lfiles)), ".png"))
-  title_video <- paste("video.mp4", sep = "")
-  command_line <- paste("ffmpeg -f image2 -framerate ", nMapPY / 2,
-    " -i HLIR_%04d.png -vcodec libx264 -vb 1024k -crf 25 -pix_fmt yuv420p 2>&1 > /dev/null ",
-    title_video,
-    sep = ""
-  )
+  title_video <- paste("video.webm", sep = "")
+  command_line <- paste("ffmpeg -f image2 -framerate ",nMapPY / 2," -i HLIR_%04d.png -vcodec vp9 -vb 1024k -crf 25 -pix_fmt yuv420p -deadline realtime -cpu-used -5 ", 
+                        title_video,
+                        sep='')
   system(command_line, ignore.stdout = TRUE, ignore.stderr = TRUE)
 
   system(paste("mv ", title_video, " ", "../."))

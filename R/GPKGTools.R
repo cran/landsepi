@@ -97,6 +97,7 @@ getGPKGRotation <- function(gpkgfile) {
 #' It adds Cultivar, CultivarList, Gene, GeneList tables
 #' @param gpkgfile a GPKF file
 #' @return the GPKG file name
+#' @import DBI
 GPKGAddTables <- function(gpkgfile) {
   outputDB <-
     DBI::dbConnect(RSQLite::SQLite(), gpkgfile)
@@ -149,13 +150,14 @@ GPKGAddTables <- function(gpkgfile) {
     "CREATE TABLE Gene(geneID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                                   geneName TEXT NOT NULL,
                                                   efficiency REAL NOT NULL CHECK(efficiency BETWEEN 0 AND 1),
-                                                  time_to_activ_exp REAL NOT NULL CHECK(time_to_activ_exp >= 0),
+                                                  time_to_activ_mean REAL NOT NULL CHECK(time_to_activ_mean >= 0),
                                                   time_to_activ_var REAL NOT NULL CHECK(time_to_activ_var >= 0),
                                                   mutation_prob REAL NOT NULL CHECK(mutation_prob BETWEEN 0 AND 1),
                                                   Nlevels_aggressiveness INTEGER NOT NULL CHECK(Nlevels_aggressiveness >= 1),
                                                   fitness_cost REAL NOT NULL CHECK(fitness_cost BETWEEN 0 AND 1),
                                                   tradeoff_strength REAL NOT NULL CHECK(tradeoff_strength > 0),
-                                                  target_trait TEXT NOT NULL);"
+                                                  target_trait TEXT NOT NULL,
+                                                  recombination_sd REAL CHECK(recombination_sd > 0));"
   )
 
   # Create a table for GeneList

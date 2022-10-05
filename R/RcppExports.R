@@ -17,7 +17,8 @@
 #' @param croptypes_cultivars_prop a matrix with three columns named 'croptypeID' for croptype index, 
 #' 'cultivarID' for cultivar index and 'proportion' for the proportion of the cultivar within the croptype. 
 #' @param dispersal list of dispersal parameters:\itemize{ 
-#' \item disp_patho = vectorised dispersal matrix of the pathogen, 
+#' \item disp_patho = vectorised dispersal matrix of the pathogen (asexual propagules), 
+#' \item disp_patho_sex = vectorised dispersal matrix of the pathogen (sexual propagules), 
 #' \item disp_host = vectorised dispersal matrix of the host.
 #' }
 #' @param inits list of initial conditions:\itemize{
@@ -36,26 +37,29 @@
 #' \item sigmoid_plateau_host = plateau parameter for the sigmoid invasion function (for host dispersal),
 #' \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes.
 #' } 
-#' @param basic_patho_param list of pathogen aggressiveness parameters on a susceptible host 
-#' for a pathogen genotype not adapted to resistance: \itemize{
+#' @param basic_patho_param list of i. pathogen aggressiveness parameters on a susceptible host 
+#' for a pathogen genotype not adapted to resistance and ii. germination of sexual spores parameters: \itemize{
 #' \item infection_rate = maximal expected infection rate of a propagule on a healthy host, 
 #' \item propagule_prod_rate = maximal expected reproduction_rate of an infectious host per timestep, 
-#' \item latent_period_exp = minimal expected duration of the latent period, 
+#' \item latent_period_mean = minimal expected duration of the latent period, 
 #' \item latent_period_var = variance of the latent period duration, 
-#' \item infectious_period_exp = maximal expected duration of the infectious period, 
+#' \item infectious_period_mean = maximal expected duration of the infectious period, 
 #' \item infectious_period_var = variance of the infectious period duration,
 #' \item survival_prob = probability for a propagule to survive the off-season, 
 #' \item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning, 
 #' \item sigmoid_kappa = kappa parameter of the sigmoid contamination function, 
 #' \item sigmoid_sigma = sigma parameter of the sigmoid contamination function, 
-#' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function.
+#' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
+#' \item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
+#' \item sex_propagule_release_mean = average number of cropping seasons after which a sexual propagule is released.
+#' \item clonal_propagule_gradual_release = whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 #' }
 #' @param genes_param list of parameters associated with each resistance gene and with the evolution of 
 #' each corresponding pathogenicity gene:\itemize{ 
 #' \item target_trait = vector of aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes, 
 #' \item efficiency = vector of resistance gene efficiencies (percentage of reduction of the targeted 
 #' aggressiveness component: IR, 1/LAT, IP and PR), 
-#' \item time_to_activ_exp = vector of expected delays to resistance activation (for APRs), 
+#' \item time_to_activ_mean = vector of expected delays to resistance activation (for APRs), 
 #' \item time_to_activ_var = vector of variances of the delay to resistance activation (for APRs),  
 #' \item mutation_prob = vector of mutation probabilities for pathogenicity genes (each of them corresponding to a resistance gene), 
 #' \item Nlevels_aggressiveness = vector of number of adaptation levels related to each resistance gene (i.e. 1 + number 
@@ -65,13 +69,23 @@
 #' \item tradeoff_strength = vector of strengths of the trade-off relationships between the level of aggressiveness 
 #' on hosts that do and do not carry the resistance genes.
 #' }
+#' @param treatment_param list of parameters related to pesticide treatments: \itemize{ 
+#'  \item treatment_reduction_rate = reduction per time step of treatment concentration,
+#'  \item treatment_efficiency =  Maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection at the application date),
+#'  \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
+#'  \item treatment_cultivars  = vector of cultivar indices that receive treatments, 
+#'  \item treatment_cost = cost of a single treatments (monetary units/ha)
+#'  
+#'  }
 #' 
 #' @details See ?landsepi for details on the model and assumptions. 
 #' Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
 #' (‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions 
 #' with 'susceptible host') structure with a discrete time step. It simulates the spread and 
-#' evolution of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
-#' potential bottlenecks to the pathogen. A wide array of resistance deployment strategies can be simulated.
+#' evolution (via mutation, recombination through sexual reproduction, selection and drift) 
+#' of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
+#' potential bottlenecks to the pathogen. A wide array of resistance deployment strategies 
+#' (possibly including chemical treatments) can be simulated.
 #'  
 #' @return A set of binary files is generated for every year of simulation and every compartment: 
 #' \itemize{
@@ -108,6 +122,7 @@
 #'                basic_patho_param = loadPathogen(disease = "rust"),
 #'                inits = list(pI0=0.01), area_vector = area,
 #'                dispersal = list(disp_patho=c(0.99,0.01,0.01,0.99),
+#'                disp_patho_sex=c(1,0,0,1),
 #'                disp_host=c(1,0,0,1)),
 #'                rotation_matrix = as.matrix(rotation),
 #'                croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop),
@@ -141,13 +156,16 @@
 #' , mutation_prob = numeric(0)
 #' , efficiency = numeric(0) , tradeoff_strength = numeric(0)
 #' , Nlevels_aggressiveness = numeric(0)
-#' , time_to_activ_exp = numeric(0) , time_to_activ_var = numeric(0)
+#' , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
 #' , target_trait = character(0))
 #'     
 #' ## run simulation
 #' model_landsepi(seed=1, time_param = time_param
 #' , basic_patho_param = loadPathogen(disease = "rust"),
-#' inits = list(pI0=0.01), area_vector = area, dispersal = list(disp_patho=c(1), disp_host=c(1)),
+#' inits = list(pI0=0.01), area_vector = area,
+#'              dispersal = list(disp_patho=c(1),
+#'              disp_patho_sex=c(1),
+#'              disp_host=c(1)),
 #' rotation_matrix = as.matrix(rotation),
 #' croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop),
 #' cultivars_param = cultivars,  genes_param = genes) 
@@ -157,7 +175,7 @@
 #' resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' 
 #' @export
-model_landsepi <- function(time_param, area_vector, rotation_matrix, croptypes_cultivars_prop, dispersal, inits, seed, cultivars_param, basic_patho_param, genes_param) {
-    invisible(.Call(`_landsepi_model_landsepi`, time_param, area_vector, rotation_matrix, croptypes_cultivars_prop, dispersal, inits, seed, cultivars_param, basic_patho_param, genes_param))
+model_landsepi <- function(time_param, area_vector, rotation_matrix, croptypes_cultivars_prop, dispersal, inits, seed, cultivars_param, basic_patho_param, genes_param, treatment_param) {
+    invisible(.Call(`_landsepi_model_landsepi`, time_param, area_vector, rotation_matrix, croptypes_cultivars_prop, dispersal, inits, seed, cultivars_param, basic_patho_param, genes_param, treatment_param))
 }
 

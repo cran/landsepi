@@ -23,21 +23,35 @@
 #define __MODEL_SIMUL__
 
 #include <Rcpp.h>
+using namespace Rcpp;
 #include <gsl/gsl_randist.h> // gsl_ran_binomial, gsl_ran_poisson...
 #include <gsl/gsl_rng.h> // gsl_rng_mt19937, gsl_rng*...
+#include <gsl/gsl_cdf.h> // for cumulativee distribution
+#include <gsl/gsl_linalg.h>
 #include <math.h> // pow...
 #include <stdio.h> // FILE*...
 #include <array>
 #include <fstream> // ofstream
 #include <string>
 #include <vector>
-
+#include <chrono> 
+using namespace std::chrono;
+#include <iostream>
 #include "Basic_patho.hpp"
 #include "Croptype.hpp"
 #include "Cultivar.hpp"
 #include "Gene.hpp"
+#include "Treatment.hpp"
 #include "functions.hpp" // find_paramGamma, sigmoid, sample...
 #include "printReadWrite.hpp" // write_HHjuvPLIR
+
+//#include <Eigen/Eigen>
+//#include <Eigen/Core>
+//#include <Eigen/Dense>
+//#include "eigenmvn.h"
+
+//#include <armadillo>
+
 
 struct Model {
     const int Nyears;               // Duration of the simulation (number of cropping seasons)
@@ -51,44 +65,62 @@ struct Model {
     const gsl_rng* random_generator;       // Randomness generator
     const std::vector<Cultivar> cultivars; // Array of available cultivars
     const std::vector<Gene> genes;         // Array of available genes
-    const Basic_patho basic_patho;         // Aggressiveness of a wild-type pathogen on a S cultivar
+    const Basic_patho basic_patho;         // Aggressiveness of a wild-type pathogen on a S cultivar and parameters relative to germination of sexual spores
+    const Treatment treatment;             // Effect of chemical treatments on the pathogen
     const std::vector<Croptype> croptypes; // List of pairs {cultivar, relative proportion} for each croptype
     const double sigmoid_kappa_host;       // Kappa parameter for the sigmoid invasion function (for host dispersal)
     const double sigmoid_sigma_host;       // Sigma parameter for the sigmoid invasion function (for host dispersal)
     const double sigmoid_plateau_host;     // Plateau parameter for the sigmoid invasion function (for host dispersal)
     const double pI0;                      // Initial inoculum: probability to be I at t=0
-    const Vector2D<double> disp_patho;     // Pathogen dispersal matrix
+    const Vector2D<double> disp_patho;     // Pathogen dispersal matrix (asexual propagules)
+    const Vector2D<double> disp_patho_sex;     // Pathogen dispersal matrix (sexual propagules)
     const Vector2D<double> disp_host;      // Host dispersal matrix
 
     Model(const int& Nyears, const int& time_steps_per_year, const int& Npoly, const int& Nhost, const int& Npatho,
           const int& Ngene, const std::vector<double>& area, const Vector2D<int>& rotation,
           const gsl_rng* random_generator, const std::vector<Cultivar>& cultivars, const std::vector<Gene>& genes,
-          const Basic_patho& basic_patho, const std::vector<Croptype>& croptypes, const double& sigmoid_kappa_host,
+          const Basic_patho& basic_patho, const Treatment& treatment, const std::vector<Croptype>& croptypes, const double& sigmoid_kappa_host,
           const double& sigmoid_sigma_host, const double& sigmoid_plateau_host, const double& pI0,
-          const Vector2D<double>& disp_patho, const Vector2D<double>& disp_host, const int& seed);
+          const Vector2D<double>& disp_patho, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed);
 
     void dynepi();
     void infection(const int& t, std::vector<int>& H, const Vector2D<int>& Hcontaminated, Vector2D<int>& L,
                    Vector2D<int>& I, Vector2D<int>& R, Vector3D<int>& L2I, Vector3D<int>& I2R,
-                   const std::vector<int>& activeR);
+                   const std::vector<int>& activeR, const std::vector<int>& N,  const std::vector<int>& Nspray);
     Vector2D<int> contamination(const std::vector<int>& H, const std::vector<int>& P, const std::vector<int>& N);
-    void host_dynamic(const int& poly, const int& year, std::vector<int>& H, std::vector<int>& Hjuv,
-                      const Vector2D<int>& L, const Vector2D<int>& I, const Vector2D<int>& R, std::vector<int>& N);
+    void host_dynamic(const int& poly, const int& year, const int& t, std::vector<int>& H, std::vector<int>& Hjuv,
+                             const Vector2D<int>& L, const Vector2D<int>& I, const Vector2D<int>& R, std::vector<int>& N, 
+                             std::vector<int>& Nspray);
     Vector3D<int> bottleneck(const int& t, const Vector3D<int>& L, const Vector3D<int>& I,
                              const Vector2D<int>& activeQR);
-    void dispersal(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P);
+    void dormancy(std::vector<int>& P, const int& year, const int& poly, Vector2D<int>& P_rest, std::vector<int>& P_germ);
+    void dispersal(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix);
     void mutation(std::vector<int>& P);
     void mutation_locus(const int& patho, const int& trait_mut, Vector2D<int>& PpathoMut);
-    void reproSex(const int& t, std::vector<int>& P, const Vector2D<int>& I, const std::vector<int>& activeQR);
+    void reproSex(const int& t, std::vector<int>& P, const Vector2D<int>& I, const std::vector<int>& activeQR, 
+                  const std::vector<int>& Nlevels_aggressiveness, const int& Nquali_gene);
+    void between_season_pr_inoc(std::vector<int>& P_sex_tmp, Vector2D<int>& P_stock, int& year);
+    void in_season_pr_inoc(std::vector<int>& P_stock_germ, Vector2D<int>& P_sex, const bool& distr);
     void reproClonal(const int& t, std::vector<int>& P, const Vector2D<int>& I, const std::vector<int>& activeR);
-    std::array<Vector2D<int>, 2> split_IclonalIsex(const Vector2D<int>& I);
+    std::array<Vector2D<int>, 2> split_IclonalIsex(const int& t, const Vector2D<int>& I);
     bool get_resistance(const int& index_gene, const int& host, const int& t, const int& activeR);
-
+    double get_treat_effect(const int& Nt, const int& Nspray, const int& t);
+    std::vector<int> get_P_stock_germ(Vector2D<int>& P_stock_poly, const int& year);
+    void get_P_daily(Vector2D<int>& P_daily, Vector3D<int>& P_dorm, const int& t);
+    Vector2D<int> get_sum_Vector2D(Vector2D<int>& M1, Vector2D<int>& M2);
+        
     /* Init functions */
     int switch_aggr_to_patho(const std::vector<int>& aggr);
     std::vector<int> switch_patho_to_aggr(const int& index_patho);
+    std::vector<double> switch_aggr_to_trait(const std::vector<int>& aggr, const std::vector<bool>& activeR);
+    std::vector<int> switch_trait_to_aggr(const std::vector<double>& trait, const std::vector<bool>& activeR);
     Vector2D<int> init_activeR();
-    void init_HjuvPLIR(Vector2D<int>& Hjuv, Vector2D<int>& P, Vector3D<int>& L, Vector3D<int>& I, Vector3D<int>& R);
+    void init_HjuvLIR(Vector2D<int>& Hjuv, Vector3D<int>& L, Vector3D<int>& I, Vector3D<int>& R);
+    void init_PgermPrest(Vector2D<int>& P_germ, Vector3D<int>& P_rest);
+    void init_P(Vector2D<int>& P, Vector2D<int>& P_sex_tmp, Vector2D<int>& P_asex_tmp, Vector3D<int>& P_sex, Vector3D<int>& P_asex, 
+                    Vector2D<int>& P_sex_daily,Vector2D<int>& P_asex_daily, Vector3D<int>& P_stock);
+    void init_Nspray(Vector2D<int>& Nspray);
+    void init_Nlevels_aggressiveness(std::vector<int>& Nlevels_aggressiveness);
     void init_L2I2R(Vector4D<int>& L2I, Vector4D<int>& I2R);
     Vector2D<int> intro_H(const int& year);
     void intro_I(Vector2D<int>& H, Vector3D<int>& I, Vector4D<int>& I2R, const Vector2D<int>& activeR);
@@ -99,6 +131,11 @@ struct Model {
     double ran_gamma(const double& a, const double& b);
     int ran_binomial(const double& p, const int& n);
     std::vector<int> ran_multinomial(const int& N, const std::vector<double>& p);
+    double ran_gaussian(const double& mu, const double& sigma);
+    double ran_exponential(const double& mu);
+    double ran_exponential_trunc(const double& mu, const double& limit_sup);
+    std::vector<double>ran_multivariate_gaussian(const std::vector<double>& mu, const std::vector<std::vector<double>>& A);
+    std::vector<std::vector<double>> ran_multisample_multivariate_gaussian(unsigned n, const std::vector<double>& mu, const std::vector<std::vector<double>>& A);
 
     /* Print parameters in an output .txt file */
     void print_param(const int& seed, const std::vector<double>& mutation_prob, const std::vector<double>& efficiency,
@@ -108,7 +145,128 @@ struct Model {
     void write_HHjuvPLIR(const Vector2D<int>& H, const Vector2D<int>& Hjuv, const Vector2D<int>& P,
                          const Vector3D<int>& L, const Vector3D<int>& I, const Vector3D<int>& R, FILE* fH, FILE* fHjuv,
                          FILE* fP, FILE* fL, FILE* fI, FILE* fR);
+
+    /* Write model output in .txt files and print output on screen (Pbefinter ONLY) */
+    void write_Pbefinter(const Vector2D<int>& Pbefinter, FILE* fPbefinter);
+
 };
+
+
+/********************
+ * Inline functions
+ ********************/
+
+inline double Model::rng_uniform() {
+    return gsl_rng_uniform(this->random_generator);
+}
+
+inline int Model::ran_poisson(const double& mu) {
+    return gsl_ran_poisson(this->random_generator, mu);
+}
+
+inline double Model::ran_gamma(const double& a, const double& b) {
+    return gsl_ran_gamma(this->random_generator, a, b);
+}
+
+inline int Model::ran_binomial(const double& p, const int& n) {
+    return gsl_ran_binomial(this->random_generator, p, n);
+}
+
+inline std::vector<int> Model::ran_multinomial(const int& N, const std::vector<double>& p) {
+    const unsigned int K = p.size();
+    std::vector<int> res(K);
+    gsl_ran_multinomial(this->random_generator, K, N, p.data(), (unsigned int*)res.data());
+    return res;
+}
+
+inline double Model::ran_gaussian(const double& mu, const double& sigma) {
+    /* This function returns a Gaussian random variate, with mean mu and standard deviation sigma */
+    return mu+gsl_ran_gaussian(this->random_generator, sigma);
+}
+
+inline double Model::ran_exponential(const double& mu) {
+    return gsl_ran_exponential(this->random_generator, mu);
+}
+
+inline double Model::ran_exponential_trunc(const double& mu, const double& limit_sup) {
+    /* This function returns a truncated exponential random variate, with mean mu, 
+    lower limit = 0 and upper limit = limit_sup 
+    (following approach https://www.r-bloggers.com/2020/08/generating-data-from-a-truncated-distribution/ )*/
+    const double& limit_inf = 0.0; 
+    double F_inf = gsl_cdf_exponential_P(limit_inf, mu);
+    double F_sup = gsl_cdf_exponential_P(limit_sup, mu);
+    //double u = gsl_ran_flat(this->random_generator, F_inf, F_sup);
+    double u = (F_sup - F_inf)*rng_uniform()+F_inf;
+    double f_u = gsl_cdf_exponential_Pinv(u, mu);
+    return f_u;
+}
+
+
+inline std::vector<double> Model::ran_multivariate_gaussian(const std::vector<double>& mu, const std::vector<std::vector<double>>& A){
+    /* This function generates a random vector satisfying the k-dimensional multivariate
+     Gaussian distribution with mean \mu and variance-covariance matrix A.*/
+    
+    //std::vector<std::vector<int>> L(K,std::vector<int>(K));
+    gsl_vector * mup = gsl_vector_alloc(mu.size());
+    gsl_vector * res = gsl_vector_alloc(mu.size());
+    for(size_t i = 0; i<mu.size(); i++)
+        gsl_vector_set(mup, i, mu[i]);
+    gsl_matrix * L = gsl_matrix_alloc(A.size(), A[0].size());
+    for(size_t i = 0; i<A.size(); i++){
+        for(size_t j=0; j<A[0].size(); j++){
+            gsl_matrix_set(L, i, j, A[i][j]);
+        }
+    }
+    gsl_linalg_cholesky_decomp(L);
+    //std::vector<double> res(K);
+    
+    gsl_ran_multivariate_gaussian(this->random_generator, mup, L, res);
+    //std::vector<double> resp(res->data, &res->data[res->size-1]);
+    std::vector<double> resp(mu.size());
+    for(unsigned int i=0; i<res->size; i++ ){
+        resp[i]=res->data[i];
+    }
+    
+    gsl_vector_free(res);
+    gsl_vector_free(mup);
+    gsl_matrix_free(L);
+    return resp;
+}
+
+inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaussian(unsigned n, const std::vector<double>& mu, const std::vector<std::vector<double>>& A){
+    /* This function generates a random vector satisfying the k-dimensional multivariate
+     Gaussian distribution with mean \mu and variance-covariance matrix A.*/
+    
+    //std::vector<std::vector<int>> L(K,std::vector<int>(K));
+    std::vector<std::vector<double>> resp(n, std::vector<double>(mu.size()));
+    gsl_vector * mup = gsl_vector_alloc(mu.size());
+    gsl_vector * res = gsl_vector_alloc(mu.size());
+    for(size_t i = 0; i<mu.size(); i++)
+        gsl_vector_set(mup, i, mu[i]);
+    gsl_matrix * L = gsl_matrix_alloc(A.size(), A[0].size());
+    for(size_t i = 0; i<A.size(); i++){
+        for(size_t j=0; j<A[0].size(); j++){
+            gsl_matrix_set(L, i, j, A[i][j]);
+        }
+    }
+    gsl_linalg_cholesky_decomp(L);
+    //std::vector<double> res(K);
+    
+    for(size_t i = 0; i<n ; i++){
+        gsl_ran_multivariate_gaussian(this ->random_generator, mup, L, res);
+        std::copy(res->data, &(res->data[res->size]), resp[i].begin());
+        /*for(unsigned int i=0; i<res->size; i++ ){
+         resp[i]=res->data[i];
+        }*/
+        
+    }
+    
+    gsl_vector_free(res);
+    gsl_vector_free(mup);
+    gsl_matrix_free(L);
+    return resp;
+}
+
 
 //' @title Model for Landscape Epidemiology & Evolution
 //' @name model_landsepi
@@ -126,7 +284,8 @@ struct Model {
 //' @param croptypes_cultivars_prop a matrix with three columns named 'croptypeID' for croptype index, 
 //' 'cultivarID' for cultivar index and 'proportion' for the proportion of the cultivar within the croptype. 
 //' @param dispersal list of dispersal parameters:\itemize{ 
-//' \item disp_patho = vectorised dispersal matrix of the pathogen, 
+//' \item disp_patho = vectorised dispersal matrix of the pathogen (asexual propagules), 
+//' \item disp_patho_sex = vectorised dispersal matrix of the pathogen (sexual propagules), 
 //' \item disp_host = vectorised dispersal matrix of the host.
 //' }
 //' @param inits list of initial conditions:\itemize{
@@ -145,26 +304,29 @@ struct Model {
 //' \item sigmoid_plateau_host = plateau parameter for the sigmoid invasion function (for host dispersal),
 //' \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes.
 //' } 
-//' @param basic_patho_param list of pathogen aggressiveness parameters on a susceptible host 
-//' for a pathogen genotype not adapted to resistance: \itemize{
+//' @param basic_patho_param list of i. pathogen aggressiveness parameters on a susceptible host 
+//' for a pathogen genotype not adapted to resistance and ii. germination of sexual spores parameters: \itemize{
 //' \item infection_rate = maximal expected infection rate of a propagule on a healthy host, 
 //' \item propagule_prod_rate = maximal expected reproduction_rate of an infectious host per timestep, 
-//' \item latent_period_exp = minimal expected duration of the latent period, 
+//' \item latent_period_mean = minimal expected duration of the latent period, 
 //' \item latent_period_var = variance of the latent period duration, 
-//' \item infectious_period_exp = maximal expected duration of the infectious period, 
+//' \item infectious_period_mean = maximal expected duration of the infectious period, 
 //' \item infectious_period_var = variance of the infectious period duration,
 //' \item survival_prob = probability for a propagule to survive the off-season, 
 //' \item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning, 
 //' \item sigmoid_kappa = kappa parameter of the sigmoid contamination function, 
 //' \item sigmoid_sigma = sigma parameter of the sigmoid contamination function, 
-//' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function.
+//' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
+//' \item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
+//' \item sex_propagule_release_mean = average number of cropping seasons after which a sexual propagule is released.
+//' \item clonal_propagule_gradual_release = whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 //' }
 //' @param genes_param list of parameters associated with each resistance gene and with the evolution of 
 //' each corresponding pathogenicity gene:\itemize{ 
 //' \item target_trait = vector of aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes, 
 //' \item efficiency = vector of resistance gene efficiencies (percentage of reduction of the targeted 
 //' aggressiveness component: IR, 1/LAT, IP and PR), 
-//' \item time_to_activ_exp = vector of expected delays to resistance activation (for APRs), 
+//' \item time_to_activ_mean = vector of expected delays to resistance activation (for APRs), 
 //' \item time_to_activ_var = vector of variances of the delay to resistance activation (for APRs),  
 //' \item mutation_prob = vector of mutation probabilities for pathogenicity genes (each of them corresponding to a resistance gene), 
 //' \item Nlevels_aggressiveness = vector of number of adaptation levels related to each resistance gene (i.e. 1 + number 
@@ -174,13 +336,23 @@ struct Model {
 //' \item tradeoff_strength = vector of strengths of the trade-off relationships between the level of aggressiveness 
 //' on hosts that do and do not carry the resistance genes.
 //' }
+//' @param treatment_param list of parameters related to pesticide treatments: \itemize{ 
+//'  \item treatment_reduction_rate = reduction per time step of treatment concentration,
+//'  \item treatment_efficiency =  Maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection at the application date),
+//'  \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
+//'  \item treatment_cultivars  = vector of cultivar indices that receive treatments, 
+//'  \item treatment_cost = cost of a single treatments (monetary units/ha)
+//'  
+//'  }
 //' 
 //' @details See ?landsepi for details on the model and assumptions. 
 //' Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
 //' (‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions 
 //' with 'susceptible host') structure with a discrete time step. It simulates the spread and 
-//' evolution of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
-//' potential bottlenecks to the pathogen. A wide array of resistance deployment strategies can be simulated.
+//' evolution (via mutation, recombination through sexual reproduction, selection and drift) 
+//' of a pathogen in a heterogeneous cropping landscape, across cropping seasons split by host harvests which impose
+//' potential bottlenecks to the pathogen. A wide array of resistance deployment strategies 
+//' (possibly including chemical treatments) can be simulated.
 //'  
 //' @return A set of binary files is generated for every year of simulation and every compartment: 
 //' \itemize{
@@ -217,6 +389,7 @@ struct Model {
 //'                basic_patho_param = loadPathogen(disease = "rust"),
 //'                inits = list(pI0=0.01), area_vector = area,
 //'                dispersal = list(disp_patho=c(0.99,0.01,0.01,0.99),
+//'                disp_patho_sex=c(1,0,0,1),
 //'                disp_host=c(1,0,0,1)),
 //'                rotation_matrix = as.matrix(rotation),
 //'                croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop),
@@ -250,13 +423,16 @@ struct Model {
 //' , mutation_prob = numeric(0)
 //' , efficiency = numeric(0) , tradeoff_strength = numeric(0)
 //' , Nlevels_aggressiveness = numeric(0)
-//' , time_to_activ_exp = numeric(0) , time_to_activ_var = numeric(0)
+//' , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
 //' , target_trait = character(0))
 //'     
 //' ## run simulation
 //' model_landsepi(seed=1, time_param = time_param
 //' , basic_patho_param = loadPathogen(disease = "rust"),
-//' inits = list(pI0=0.01), area_vector = area, dispersal = list(disp_patho=c(1), disp_host=c(1)),
+//' inits = list(pI0=0.01), area_vector = area,
+//'              dispersal = list(disp_patho=c(1),
+//'              disp_patho_sex=c(1),
+//'              disp_host=c(1)),
 //' rotation_matrix = as.matrix(rotation),
 //' croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop),
 //' cultivars_param = cultivars,  genes_param = genes) 
@@ -276,5 +452,7 @@ void model_landsepi(Rcpp::List time_param
                         , int seed
                         , Rcpp::List cultivars_param
                         , Rcpp::List basic_patho_param
-                        , Rcpp::List genes_param);
+                        , Rcpp::List genes_param
+                        , Rcpp::List treatment_param
+                        );
 #endif

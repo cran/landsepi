@@ -23,26 +23,34 @@
 #define __BASIC_PATHO__
 
 #include <string>
+#include <vector>
+#include <sstream>
+#include <iterator>
 
 // Pathogen aggressiveness components on a susceptible host for a pathogen genotype not adapted to resistance
 struct Basic_patho {
     const double infection_rate;        // Maximal expected infection rate of a propagule on a healthy host
     const double propagule_prod_rate;   // Maximal expected propagule production rate per timestep and per infectious host
-    const double latent_period_exp;     // Minimal expected latent period duration
+    const double latent_period_mean;     // Minimal expected latent period duration
     const double latent_period_var;     // Variance of the latent period duration
-    const double infectious_period_exp; // Maximal expected infectious period duration
+    const double infectious_period_mean; // Maximal expected infectious period duration
     const double infectious_period_var; // Variance of the infectious period duration
     const double survival_prob;         // Off-season survival probability of a propagule
-    const double repro_sex_prob;        // Probability for an infectious host to reproduce via sex
+    const std::vector<double> repro_sex_prob;        // Probability for an infectious host to reproduce via sex
     const double sigmoid_kappa;         // Kappa parameter of the sigmoid contamination function
     const double sigmoid_sigma;         // Sigma parameter of the sigmoid contamination function
     const double sigmoid_plateau;       // Plateau parameter of the sigmoid contamination function
+    const int sex_propagule_viability_limit;   // Maximum number of cropping seasons up to which a sexual propagule is viable
+    const double sex_propagule_release_mean;       // average number of cropping seasons after which a sexual propagule is released.
+    const bool clonal_propagule_gradual_release;        // whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season. 
 
     Basic_patho();
-    Basic_patho(const double& infection_rate, const double& propagule_prod_rate, const double& latent_period_exp,
-                const double& latent_period_var, const double& infectious_period_exp,
-                const double& infectious_period_var, const double& survival_prob, const double& repro_sex_prob,
-                const double& sigmoid_kappa, const double& sigmoid_sigma, const double& sigmoid_plateau);
+    Basic_patho(const double& infection_rate, const double& propagule_prod_rate, const double& latent_period_mean,
+                const double& latent_period_var, const double& infectious_period_mean,
+                const double& infectious_period_var, const double& survival_prob, const std::vector<double>& repro_sex_prob,
+                const double& sigmoid_kappa, const double& sigmoid_sigma, const double& sigmoid_plateau,
+                const int& sex_propagule_viability_limit, const double& sex_propagule_release_mean,
+                const bool& clonal_propagule_gradual_release);
     std::string to_string() const;
 };
 
