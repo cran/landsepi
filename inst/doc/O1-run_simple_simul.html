@@ -357,7 +357,7 @@ to store simulation outputs, and return an object of class
 <code>LandsepiParams</code> that will further contain all simulation
 parameters.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">createSimulParams</span>(<span class="at">outputDir =</span> <span class="fu">getwd</span>())</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Created output directory : /tmp/Rtmpxtt437/Rbuild2a810281e28/landsepi/vignettes/simul_landsepi_2022-10-05_16-15-03</span></span></code></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Created output directory : /tmp/RtmpLwWNOb/Rbuild2a847b27a15/landsepi/vignettes/simul_landsepi_2022-10-06_09-28-28</span></span></code></pre></div>
 <p>In the following, the object <code>simul_params</code> is to be
 updated with all simulation parameters using <code>set*()</code>
 functions. To help parameterisation, built-in parameters are available
@@ -370,7 +370,7 @@ and may be loaded via <code>load*()</code> functions.</p>
 <code>createSimulParams()</code>. If a specific seed is required, it can
 be set using the function <code>setSeed()</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1664979303</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1665041308</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setSeed</span>(simul_params, <span class="at">seed =</span> <span class="dv">1</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div>
