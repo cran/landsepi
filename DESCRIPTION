@@ -2,7 +2,7 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 1.2.3
+Version: 1.2.4
 Date: 2023-01-16
 Authors@R: 
     c(person(given = "Loup",
@@ -57,14 +57,14 @@ Collate: 'Math-Functions.R' 'RcppExports.R' 'graphics.R' 'AgriLand.R'
         'tools.R' 'Methods-LandsepiParams.R' 'demo_landsepi.R'
         'landsepi.R' 'output.R' 'runShiny.R' 'simul_landsepi.R'
 LinkingTo: Rcpp, testthat
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Suggests: testthat (>= 3.0.0), shiny, shinyjs, DT, knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2023-01-16 12:44:40 UTC; jfrey
+Packaged: 2023-01-16 14:39:57 UTC; root
 Author: Loup Rimbaud [aut] (<https://orcid.org/0000-0002-8098-9984>),
   Julien Papaix [aut],
   Jean-François Rey [aut, cre] (<https://orcid.org/0000-0003-3281-6701>),
   Marta Zaffaroni [ctb] (<https://orcid.org/0000-0002-2951-8626>),
   Jean-Loup Gaussen [ctb]
 Repository: CRAN
-Date/Publication: 2023-01-16 13:10:10 UTC
+Date/Publication: 2023-01-16 18:20:11 UTC
