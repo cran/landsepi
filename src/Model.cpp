@@ -833,13 +833,13 @@ void Model:: dynepi() {
     auto start = high_resolution_clock::now(); 
     Rprintf("----------------------------- YEAR %d -----------------------------\n", year);
     /* Create the files to write the output */
-    sprintf(name_fH, "H-%02d.bin", year);
-    sprintf(name_fHjuv, "Hjuv-%02d.bin", year);
-    sprintf(name_fP, "P-%02d.bin", year);
-    sprintf(name_fL, "L-%02d.bin", year);
-    sprintf(name_fI, "I-%02d.bin", year);
-    sprintf(name_fR, "R-%02d.bin", year);
-    sprintf(name_fPbefinter, "Pbefinter-%02d.bin", year);
+    snprintf(name_fH, 20, "H-%02d.bin", year);
+    snprintf(name_fHjuv, 20, "Hjuv-%02d.bin", year);
+    snprintf(name_fP, 20, "P-%02d.bin", year);
+    snprintf(name_fL, 20, "L-%02d.bin", year);
+    snprintf(name_fI, 20, "I-%02d.bin", year);
+    snprintf(name_fR, 20, "R-%02d.bin", year);
+    snprintf(name_fPbefinter, 20, "Pbefinter-%02d.bin", year);
     
     FILE* fH = fopen(name_fH, "wb");
     FILE* fHjuv = fopen(name_fHjuv, "wb");
