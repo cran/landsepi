@@ -4,22 +4,22 @@
 \alias{setDispersalPathogen}
 \title{Set pathogen dispersal}
 \usage{
-setDispersalPathogen(params, mat, mat_sex = NULL)
+setDispersalPathogen(params, mat_clonal, mat_sex = NULL)
 }
 \arguments{
 \item{params}{a LandsepiParams Object.}
 
-\item{mat}{a square matrix giving the probability of pathogen dispersal
+\item{mat_clonal}{a square matrix giving the probability of pathogen dispersal (clonal propagules)
 from any field of the landscape to any other field.
 It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}.
 The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum
 to 1.}
 
-\item{mat_sex}{a square matrix giving the probability of pathogen (sexual spores) dispersal
+\item{mat_sex}{a square matrix giving the probability of pathogen dispersal (sexual propagules)
 from any field of the landscape to any other field (default identity matrix) .
 It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}.
 The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum
-to 1.}
+to 1 in a continuous landscape.}
 }
 \value{
 a LandsepiParam object.
@@ -39,8 +39,8 @@ from field i to field i'.
 simul_params <- createSimulParams()
 simul_params <- setLandscape(simul_params, loadLandscape(1))
 d <- loadDispersalPathogen(1)
-simul_params <- setDispersalPathogen(simul_params, d)
-simul_params@DispPatho
+simul_params <- setDispersalPathogen(simul_params, d[[1]], d[[2]])
+simul_params@DispPathoClonal
 }
 }
 \seealso{

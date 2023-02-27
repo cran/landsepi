@@ -345,8 +345,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="general-presentation-of-the-package" class="section level2">
 <h2>General presentation of the package</h2>
 <p>See <code>?lansdepi</code> for a complete description of the model,
-assumptions and available functions. See also the <a href="list_of_parameters.pdf">detailed list of parameters</a> for a
-detailed description of all model parameters.<br />
+assumptions and available functions. See also the vignette <a href="list_of_parameters.pdf">list of parameters</a> for a detailed
+description of all model parameters.<br />
 Take a <a href="landsepi_poster.pdf">quick overview</a> of what landsepi
 can do.</p>
 </div>
@@ -356,8 +356,7 @@ can do.</p>
 to store simulation outputs, and return an object of class
 <code>LandsepiParams</code> that will further contain all simulation
 parameters.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">createSimulParams</span>(<span class="at">outputDir =</span> <span class="fu">getwd</span>())</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Created output directory : /tmp/RtmpjPfK8V/Rbuild2a640f42182/landsepi/vignettes/simul_landsepi_2023-01-16_15-39-45</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">createSimulParams</span>(<span class="at">outputDir =</span> <span class="fu">getwd</span>())</span></code></pre></div>
 <p>In the following, the object <code>simul_params</code> is to be
 updated with all simulation parameters using <code>set*()</code>
 functions. To help parameterisation, built-in parameters are available
@@ -370,7 +369,7 @@ and may be loaded via <code>load*()</code> functions.</p>
 <code>createSimulParams()</code>. If a specific seed is required, it can
 be set using the function <code>setSeed()</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1673879985</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1677261740</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setSeed</span>(simul_params, <span class="at">seed =</span> <span class="dv">1</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div>
@@ -390,8 +389,9 @@ using <code>setTime()</code>:</p>
 <p>Pathogen parameters must be stored in a list of aggressiveness
 components defined on a susceptible host for a pathogen genotype not
 adapted to resistance.</p>
-<p>Buit-in parameterisation for rust pathogens of cereal crops is
-available using function <code>loadPathogen()</code>:</p>
+<p>Buit-in parameterisation for different pathogens (e.g. rusts of
+cereal crops) is available using function
+<code>loadPathogen()</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="at">disease =</span> <span class="st">&quot;rust&quot;</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>basic_patho_param</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $name</span></span>
@@ -487,7 +487,7 @@ instance, to change the infection rate to 50%:</p>
 <span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $clonal_propagule_gradual_release</span></span>
 <span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div>
-<p>Finally, the list may be generated manually to control all
+<p>Alternatively, the list may be generated manually to control all
 parameters:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>basic_patho_param <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">infection_rate =</span> <span class="fl">0.4</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                          , <span class="at">latent_period_mean =</span> <span class="dv">10</span></span>
@@ -580,18 +580,18 @@ of the matrix must be the square of the number of fields in the
 landscape. It is thus specific to both the pathogen and the landscape.
 For rusts pathogens, a built-in dispersal matrix is available for each
 landscape using the function <code>loadDispersalPathogen()</code>:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>disp_patho <span class="ot">&lt;-</span> <span class="fu">loadDispersalPathogen</span>(<span class="at">id =</span> <span class="dv">1</span>)[[<span class="dv">1</span>]]</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(disp_patho)</span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>disp_patho_clonal <span class="ot">&lt;-</span> <span class="fu">loadDispersalPathogen</span>(<span class="at">id =</span> <span class="dv">1</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(disp_patho_clonal)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 8.814254e-01 9.525884e-04 7.079895e-10 1.594379e-10 3.285800e-06</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [6] 3.634297e-11</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(landscape)<span class="sc">^</span><span class="dv">2</span> <span class="sc">==</span> <span class="fu">length</span>(disp_patho)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(landscape)<span class="sc">^</span><span class="dv">2</span> <span class="sc">==</span> <span class="fu">length</span>(disp_patho_clonal)</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>Then, the object <code>simul_params</code> is updated with the
 landscape and dispersal matrix via the functions
 <code>setLandscape()</code> and <code>setDispersalPathogen()</code>,
 respectively:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setLandscape</span>(simul_params, <span class="at">land =</span> landscape)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setDispersalPathogen</span>(simul_params, <span class="at">mat =</span> disp_patho)</span></code></pre></div>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setDispersalPathogen</span>(simul_params, disp_patho_clonal)</span></code></pre></div>
 </div>
 <div id="setting-croptypes-cultivars-and-resistance-genes" class="section level2">
 <h2>Setting croptypes, cultivars and resistance genes</h2>
@@ -628,12 +628,12 @@ of the dataframe to allow pathogen initial inoculation.</strong></p>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3   Resistant2             0.1           2         0.1                 0</span></span>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4   Resistant3             2.0           2         0.0                 0</span></span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       Forest             0.0           2         0.0                 0</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   death_rate yield_H yield_L yield_I yield_R planting_cost market_value</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1          0     2.5       0       0       0           225          200</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          0     2.5       0       0       0           225          200</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          0     2.5       0       0       0           225          200</span></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4          0     2.5       0       0       0           225          200</span></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5          0     0.0       0       0       0             0            0</span></span></code></pre></div>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   yield_H yield_L yield_I yield_R planting_cost market_value</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     2.5       0       0       0           225          200</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     2.5       0       0       0           225          200</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     2.5       0       0       0           225          200</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     2.5       0       0       0           225          200</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     0.0       0       0       0             0            0</span></span></code></pre></div>
 <p>Similarly as pathogen parameters, characteristics of the cultivars
 may be updated as required. For example, to change the growth rate of
 the susceptible cultivar:</p>
@@ -645,12 +645,12 @@ the susceptible cultivar:</p>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3   Resistant2             0.1           2         0.1                 0</span></span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4   Resistant3             2.0           2         0.0                 0</span></span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       Forest             0.0           2         0.0                 0</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   death_rate yield_H yield_L yield_I yield_R planting_cost market_value</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1          0     2.5       0       0       0           225          200</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          0     2.5       0       0       0           225          200</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          0     2.5       0       0       0           225          200</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4          0     2.5       0       0       0           225          200</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5          0     0.0       0       0       0             0            0</span></span></code></pre></div>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   yield_H yield_L yield_I yield_R planting_cost market_value</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     2.5       0       0       0           225          200</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     2.5       0       0       0           225          200</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     2.5       0       0       0           225          200</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     2.5       0       0       0           225          200</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     0.0       0       0       0             0            0</span></span></code></pre></div>
 <p>Finally, the dataframe <code>cultivars</code> can also be generated
 entirely from scratch:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cultivars_new <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">cultivarName =</span> <span class="fu">c</span>(<span class="st">&quot;Susceptible&quot;</span>, <span class="st">&quot;Resistant&quot;</span>),</span>
@@ -658,25 +658,25 @@ entirely from scratch:</p>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">max_density =</span>       <span class="fu">c</span>(<span class="fl">2.0</span>, <span class="fl">3.0</span>),</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">growth_rate =</span>       <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>),</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">reproduction_rate =</span> <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">death_rate =</span>        <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_H =</span>           <span class="fu">c</span>(<span class="fl">2.5</span>, <span class="fl">2.0</span>),</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_L =</span>           <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_I =</span>           <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_R =</span>           <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>                            <span class="at">planting_cost =</span>   <span class="fu">c</span>(<span class="dv">225</span>, <span class="dv">300</span>),</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                            <span class="at">market_value =</span>      <span class="fu">c</span>(<span class="dv">200</span>, <span class="dv">150</span>),</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>                            <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>cultivars_new</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cultivarName initial_density max_density growth_rate reproduction_rate</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  Susceptible             0.1           2         0.1                 0</span></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    Resistant             0.2           3         0.2                 0</span></span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   death_rate yield_H yield_L yield_I yield_R planting_cost market_value</span></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1          0     2.5       0       0       0           225          200</span></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          0     2.0       0       0       0           300          150</span></span></code></pre></div>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_H =</span>           <span class="fu">c</span>(<span class="fl">2.5</span>, <span class="fl">2.0</span>),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_L =</span>           <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_I =</span>           <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                            <span class="at">yield_R =</span>           <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                            <span class="at">planting_cost =</span>   <span class="fu">c</span>(<span class="dv">225</span>, <span class="dv">300</span>),</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>                            <span class="at">market_value =</span>      <span class="fu">c</span>(<span class="dv">200</span>, <span class="dv">150</span>),</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                            <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>cultivars_new</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cultivarName initial_density max_density growth_rate reproduction_rate</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  Susceptible             0.1           2         0.1                 0</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    Resistant             0.2           3         0.2                 0</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   yield_H yield_L yield_I yield_R planting_cost market_value</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     2.5       0       0       0           225          200</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     2.0       0       0       0           300          150</span></span></code></pre></div>
 </div>
 <div id="resistance-genes" class="section level3">
 <h3>Resistance genes</h3>
-<p>Characteristics of each plant resistance gene and each corresponding
+<p>This part can be skipped if no resistance gene is to be simulated.
+Characteristics of each plant resistance gene and each corresponding
 pathogenicity gene are summarised in a dataframe.<br />
 A built-in parameterisation for classical resistance sources is
 available using <code>loadGene()</code> to generate each line of the
@@ -729,7 +729,7 @@ the pathogen with regard to its adaptation to “MG 1”:</p>
 <span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2           IR             1.00</span></span>
 <span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3           IR             0.27</span></span>
 <span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4           IR             1.00</span></span></code></pre></div>
-<p>Finally, the dataframe <code>genes</code> can also be generated
+<p>Alternatively, the dataframe <code>genes</code> can also be generated
 entirely from scratch:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>genes_new <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">geneName =</span>               <span class="fu">c</span>(<span class="st">&quot;MG1&quot;</span>, <span class="st">&quot;MG2&quot;</span>),</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">efficiency =</span>             <span class="fu">c</span>(<span class="fl">1.0</span>  , <span class="fl">0.8</span>  ),</span>
@@ -791,18 +791,18 @@ susceptible hosts.</p>
 <span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2    Resistant2             0.1           2         0.1</span></span>
 <span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3    Resistant3             2.0           2         0.0</span></span>
 <span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest            Forest             0.0           2         0.0</span></span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             reproduction_rate death_rate yield_H yield_L yield_I yield_R</span></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible                 0          0     2.5       0       0       0</span></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1                  0          0     2.5       0       0       0</span></span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2                  0          0     2.5       0       0       0</span></span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3                  0          0     2.5       0       0       0</span></span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                      0          0     0.0       0       0       0</span></span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             planting_cost market_value</span></span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible           225          200</span></span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1            225          200</span></span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2            225          200</span></span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3            225          200</span></span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                  0            0</span></span></code></pre></div>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             reproduction_rate yield_H yield_L yield_I yield_R planting_cost</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible                 0     2.5       0       0       0           225</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1                  0     2.5       0       0       0           225</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2                  0     2.5       0       0       0           225</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3                  0     2.5       0       0       0           225</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                      0     0.0       0       0       0             0</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             market_value</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible          200</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1           200</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2           200</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3           200</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                 0</span></span></code></pre></div>
 <p>Then the function <code>allocateCultivarGenes()</code> allows the
 attribution of resistance genes to cultivars:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params</span>
@@ -821,18 +821,18 @@ attribution of resistance genes to cultivars:</p>
 <span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2    Resistant2             0.1           2         0.1</span></span>
 <span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3    Resistant3             2.0           2         0.0</span></span>
 <span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest            Forest             0.0           2         0.0</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             reproduction_rate death_rate yield_H yield_L yield_I yield_R</span></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible                 0          0     2.5       0       0       0</span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1                  0          0     2.5       0       0       0</span></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2                  0          0     2.5       0       0       0</span></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3                  0          0     2.5       0       0       0</span></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                      0          0     0.0       0       0       0</span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             planting_cost market_value</span></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible           225          200</span></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1            225          200</span></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2            225          200</span></span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3            225          200</span></span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                  0            0</span></span></code></pre></div>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             reproduction_rate yield_H yield_L yield_I yield_R planting_cost</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible                 0     2.5       0       0       0           225</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1                  0     2.5       0       0       0           225</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2                  0     2.5       0       0       0           225</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3                  0     2.5       0       0       0           225</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                      0     0.0       0       0       0             0</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             market_value</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible          200</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1           200</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2           200</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3           200</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                 0</span></span></code></pre></div>
 <p>With this example of parameterisation:<br />
 - “Susceptible” is a susceptible cultivar (initially infected by a
 wild-type pathogen)<br />
@@ -867,7 +867,7 @@ zeros:</p>
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2      0</span></span>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3      0</span></span>
 <span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4      0</span></span></code></pre></div>
-<p>Then <code>croptype</code> is updated by
+<p>Then <code>croptypes</code> is updated by
 <code>allocateCroptypeCultivars()</code> to specify the composition of
 every croptype with regard to cultivars (and proportion for
 mixtures):</p>
@@ -911,7 +911,7 @@ mixtures):</p>
 <span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3      1</span></span></code></pre></div>
 <p>Alternatively, the dataframe <code>croptypes</code> can be generated
 from scratch:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>croptypes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">croptypeID =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>croptypes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">croptypeID =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="do">## must start at 0 and match with values from landscape &quot;croptypeID&quot; layer</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                        , <span class="at">croptypeName =</span> <span class="fu">c</span>(<span class="st">&quot;Susceptible crop&quot;</span></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                                           , <span class="st">&quot;Pure resistant crop&quot;</span></span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                                           , <span class="st">&quot;Mixture&quot;</span></span>
@@ -956,6 +956,51 @@ resistant crop is alternated with a mixture every two years:</p>
 <span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(simul_params@Landscape)</span></span></code></pre></div>
 </div>
 </div>
+<div id="setting-chemical-treatments" class="section level2">
+<h2>Setting chemical treatments</h2>
+<p>This part can be skipped if no chemical treatment is to be
+simulated.</p>
+<p>Cultivars may be treated with chemicals which reduce the pathogen
+infection rate. Treatment efficiency is maximum (i.e. equal to the
+parameter <code>treatment_efficiency</code>) at the time of treatment
+application (noted <span class="math inline">\(t^*\)</span>); then it
+decreases with time (i.e. natural pesticide degradation) and host growth
+(i.e. new biomass is not protected by treatments):</p>
+<p><span class="math display">\[IR(t) = IR_{max} \times  \left(1 -
+\frac{treatment\_efficiency}{1+e^{3.5- 9.0 \times C(t)}}\right)\]</span>
+<span class="math inline">\(C(t) = C_1 \times C_2\)</span> is the
+treatment concentration at <span class="math inline">\(t\)</span>, which
+depends on:</p>
+<ul>
+<li>the timelag <span class="math inline">\(\Delta t = t - t^*\)</span>
+passed since the time of treatment application <span class="math inline">\(t^*\)</span> (i.e. natural pesticide degradation
+via the parameter <code>treatment_degradation_rate</code>)</li>
+</ul>
+<p><span class="math display">\[C_1 = e^{-treatment\_degradation\_rate
+\times \Delta t}\]</span></p>
+<ul>
+<li>the newly produced host biomass, which is not protected by
+treatments (<span class="math inline">\(N(t^*)\)</span> and <span class="math inline">\(N(t)\)</span> are host biomass at the time of
+treatment application and at time <span class="math inline">\(t\)</span>, respectively)</li>
+</ul>
+<p><span class="math display">\[C_2 = min(1.0, N(t^*)/N(t))\]</span></p>
+<p>Cultivars to be treated with chemicals and dates of applications are
+defined with parameters <code>treatment_cultivars</code> and
+<code>treatment_timesteps</code>, and are the same for all polygons
+cultivated with the cultivars to be treated. The cost of a single
+treatment application (monetary units/ha) is defiend by
+<code>treatment_cost</code> and will impact the economic outputs.
+Treatment parameters can be set via the function
+<code>setTreatment</code>:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">treatment_degradation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_efficiency =</span> <span class="fl">0.8</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_timesteps =</span>  <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">120</span>,<span class="dv">14</span>) ,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_cultivars  =</span> <span class="fu">c</span>(<span class="dv">0</span>),</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_cost =</span> <span class="dv">0</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setTreatment</span>(simul_params, treatment)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in checkTreatment(params): Simulation with chemical treatment</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; applications</span></span></code></pre></div>
+</div>
 <div id="choosing-output-variables" class="section level2">
 <h2>Choosing output variables</h2>
 <p>Several epidemiological, evolutionary and economic outputs can be
@@ -968,12 +1013,12 @@ on the different output variables.</p>
 <p>Possible epidemiological outputs include:<br />
 - <strong>“audpc”</strong> : Area Under Disease Progress Curve (average
 number of diseased hosts per square meter)<br />
-- <strong>“audpc_rel”</strong> : Relative Area Under Disease Progress
+- <strong>“audpc_rel”</strong> : relative Area Under Disease Progress
 Curve (average proportion of diseased hosts relative to the total number
 of existing hosts)<br />
 - <strong>“gla”</strong> : Green Leaf Area (average number of healthy
 hosts per square meter)<br />
-- <strong>“gla_rel”</strong> : Relative Green Leaf Area (average
+- <strong>“gla_rel”</strong> : relative Green Leaf Area (average
 proportion of healthy hosts relative to the total number of existing
 hosts)<br />
 - <strong>“eco_yield”</strong> : total crop yield (in weight or volume
@@ -982,7 +1027,7 @@ units per ha)<br />
 units per ha)<br />
 - <strong>“eco_product”</strong> : total crop products (in monetary
 units per ha)<br />
-- <strong>“eco_margin”</strong> : Margin (products - operational costs,
+- <strong>“eco_margin”</strong> : margin (products - operational costs,
 in monetary units per ha)<br />
 - <strong>“contrib”</strong>: contribution of pathogen genotypes to LIR
 dynamics<br />
@@ -995,32 +1040,66 @@ Graphics only, works only if graphic=TRUE.<br />
 </blockquote>
 <blockquote>
 <p>Possible evolutionary outputs include:<br />
-- <strong>“evol_patho”</strong>: Dynamics of pathogen genotype
+- <strong>“evol_patho”</strong>: dynamics of pathogen genotype
 frequencies<br />
-- <strong>“evol_aggr”</strong>: Evolution of pathogen
+- <strong>“evol_aggr”</strong>: evolution of pathogen
 aggressiveness<br />
-- <strong>“durability”</strong>: Durability of resistance genes<br />
+- <strong>“durability”</strong>: durability of resistance genes<br />
 - <strong>“all”</strong>: compute all these outputs (default)<br />
 - <strong>““</strong>: none of these outputs will be generated.</p>
 </blockquote>
 <p>A list of outputs can be generated using
 <code>loadOutputs()</code>:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;all&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;all&quot;</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>outputlist</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $epid_outputs</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;all&quot;</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $evol_outputs</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;all&quot;</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $thres_breakdown</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 50000</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $audpc100S</span></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.76</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;all&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;all&quot;</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>outputlist</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $epid_outputs</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;all&quot;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $evol_outputs</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;all&quot;</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $thres_breakdown</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 50000</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $audpc100S</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.76</span></span></code></pre></div>
+<p>Among the elements of <code>outputList</code>, “audpc100S” is the
+audpc in a fully susceptible landscape (used as reference value for
+graphics). If necessary, the function <code>compute_audpc100S</code>
+helps compute this value in a single 1-km^2 field:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>audpc100S <span class="ot">&lt;-</span> <span class="fu">compute_audpc100S</span>(<span class="st">&quot;rust&quot;</span>, <span class="st">&quot;growingHost&quot;</span>, <span class="at">area=</span><span class="fl">1E6</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for rust in a single susceptible field of 1e+06 m^2</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Run the C++ model&quot;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; *** SPATIOTEMPORAL MODEL SIMULATING THE SPREAD AND EVOLUTION OF A PATHOGEN IN A LANDSCAPE ***</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 1 -----------------------------</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 2 -----------------------------</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 3 -----------------------------</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 4 -----------------------------</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 5 -----------------------------</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; total computational time 1 seconds. </span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpRQ4RvF/Rbuild2a7261da0d7/landsepi/vignettes&quot;</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>audpc100S <span class="ot">&lt;-</span> <span class="fu">compute_audpc100S</span>(<span class="st">&quot;mildew&quot;</span>, <span class="st">&quot;grapevine&quot;</span>, <span class="at">area=</span><span class="fl">1E6</span>)</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for mildew in a single susceptible field of 1e+06 m^2</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Run the C++ model&quot;</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; *** SPATIOTEMPORAL MODEL SIMULATING THE SPREAD AND EVOLUTION OF A PATHOGEN IN A LANDSCAPE ***</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 1 -----------------------------</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 2 -----------------------------</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 3 -----------------------------</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 4 -----------------------------</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 5 -----------------------------</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; total computational time 12 seconds. </span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpRQ4RvF/Rbuild2a7261da0d7/landsepi/vignettes&quot;</span></span></code></pre></div>
 <p>Then <code>simul_params</code> can be updated via
 <code>setOutputs()</code>:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span></code></pre></div>
 <p><em>See also tutorial on how to <a href="O2-run_exp_design.html">run
 a numerical experimental design</a> to compute your own output variables
 and to run several simulations within an experimental design</em></p>
@@ -1032,11 +1111,11 @@ and to run several simulations within an experimental design</em></p>
 save the object <code>simul_params</code> (which contains all parameters
 associated with the deployment strategy) into a GPKG file,
 respectively.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkSimulParams</span>(simul_params)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">saveDeploymentStrategy</span>(simul_params)</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">checkSimulParams</span>(simul_params)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">saveDeploymentStrategy</span>(simul_params)</span></code></pre></div>
 <p>Then, the function <code>runSimul()</code> launches the simulation.
 Use <code>?runSimul</code> to get all available options.</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runSimul</span>(simul_params, <span class="at">graphic =</span> <span class="cn">TRUE</span>, <span class="at">videoMP4 =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runSimul</span>(simul_params, <span class="at">graphic =</span> <span class="cn">TRUE</span>, <span class="at">videoMP4 =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 </div>
 
 

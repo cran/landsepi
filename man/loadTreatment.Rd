@@ -9,16 +9,33 @@ loadTreatment()
 \value{
 a list of treatment parameters:
 \itemize{
-\item treatment_reduction_rate = reduction per time step of treatment concentration,
-\item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
-\item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-\item treatment_cultivars  = vector of cultivar indices that receive treatments,
-\item treatment_cost = cost of a single treatment application (monetary units/ha).
+\item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+\item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction
+of pathogen infection rate at the time of application),
+\item treatment_timesteps = vector of time steps corresponding to treatment application dates,
+\item treatment_cultivars = vector of indices of the cultivars that receive treatments,
+\item treatment_cost = cost of a single treatment application (monetary units/ha)
 }
 }
 \description{
-Load the list of treatment parameters required by the model (initialised at 0
+Loads the list of treatment parameters required by the model (initialised at 0
 , i.e. absence of treatments)
+}
+\details{
+Treatment efficiency is maximum (i.e. equal to the parameter treatment_efficiency)
+at the time of treatment application (noted \eqn{t*}); then it decreases with time
+(i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:
+\eqn{ efficiency(t) = treatment\_efficiency / (1 + exp(a-b*C(t))) }
+with \eqn{ C(t)= C_1 * C_2}: \itemize{
+\item{\eqn{C_1 = exp(- treatment\_degradation\_rate * \Delta t) } is the reduction of
+fungicide concentration due to time (e.g. natural degradation, volatilization, weathering),
+with \eqn{\Delta t = t - t*} the timelag passed since the time of
+treatment application.}
+\item{ \eqn{ C_2 = min(1, N(t*) / N(t)) } is the reduction of fungicide concentration due to plant growth,
+since new plant tissue is not covered by fungicide. \eqn{N(t*)} and \eqn{N(t)} being the number of
+host individuals  a the time of treatment \eqn{t*} and at time \eqn{t}, respectively.}
+\item{ \eqn{a \in [3.5 ; 4.5]} and \eqn{b \in [8 ; 9]} are shape parameters.}
+}
 }
 \examples{
 treat <- loadTreatment()

@@ -7,13 +7,13 @@
 antideriv_verhulst(x, initial_density, max_density, growth_rate)
 }
 \arguments{
-\item{x}{timestep from which antiderivative must be computed}
+\item{x}{timestep up to which antiderivative must be computed}
 
-\item{initial_density}{host initial densities}
+\item{initial_density}{initial density}
 
-\item{max_density}{host maximal densities}
+\item{max_density}{maximal density}
 
-\item{growth_rate}{host growth rates}
+\item{growth_rate}{growth rate}
 }
 \value{
 An object of the same type as x containing the antiderivative of the input values.
@@ -23,7 +23,7 @@ Give the antiderivative of the logistic function from the Verhulst model.
 }
 \details{
 The Verhulst model (used to simulate host growth) is defined by
-\eqn{ f(x) = max_density / (1 + (max_density/initial_density)*exp(-growth_rate*x)) }.
+\eqn{ f(x) = max\_density / (1 + (max\_density/initial\_density)*exp(-growth\_rate*x)) }.
 See https://en.wikipedia.org/wiki/Logistic_function for details.
 }
 \examples{

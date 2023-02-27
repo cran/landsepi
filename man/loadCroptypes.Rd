@@ -9,7 +9,7 @@ loadCroptypes(params, croptypeIDs = NULL, names = NULL)
 \arguments{
 \item{params}{a LandsepiParams Object.}
 
-\item{croptypeIDs}{a vector of indices of croptypes (must match with croptypes in the landscape)}
+\item{croptypeIDs}{a vector of indices of croptypes (must start at 0 and match with croptype IDs in the landscape)}
 
 \item{names}{a vector containing the names of all croptypes}
 }

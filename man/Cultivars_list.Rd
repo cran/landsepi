@@ -14,7 +14,6 @@ as if cultivated in pure crop,
 as if cultivated in pure crop,
 \item growth rate: host growth rates,
 \item reproduction rate: host reproduction rates,
-\item death rate: host death rates,
 \item yield_H: theoretical yield (in weight or volume units / ha / cropping season)
 associated with hosts in sanitary status H as if cultivated in pure crop,
 \item yield_L: theoretical yield (in weight or volume units / ha / cropping season)

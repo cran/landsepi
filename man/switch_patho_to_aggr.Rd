@@ -14,7 +14,7 @@ switch_patho_to_aggr(index_patho, Ngenes, Nlevels_aggressiveness)
 \item{Nlevels_aggressiveness}{vector of the number of adaptation levels related to each resistance gene}
 }
 \value{
-a vector containing the indices of aggressiveness on the different components targeter by the resistance genes
+a vector containing the indices of aggressiveness on the different components targeted by the resistance genes
 }
 \description{
 Finds the level of aggressiveness on different components (targeted by different resistance genes)

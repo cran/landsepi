@@ -25,7 +25,7 @@ library(landsepi)
 ## General presentation of the package
 
 See `?lansdepi` for a complete description of the model, assumptions and available functions. 
-See also the [detailed list of parameters](list_of_parameters.pdf) for a detailed description of all model parameters.  
+See also the vignette [list of parameters](list_of_parameters.pdf) for a detailed description of all model parameters.  
 Take a [quick overview](landsepi_poster.pdf) of what landsepi can do.  
 
 ## Initialisation of simulation parameters
@@ -62,7 +62,7 @@ simul_params@TimeParam
 Pathogen parameters must be stored in a list of aggressiveness components defined on a susceptible host for a 
 pathogen genotype not adapted to resistance.  
 
-Buit-in parameterisation for rust pathogens of cereal crops is available using function `loadPathogen()`:
+Buit-in parameterisation for different pathogens (e.g. rusts of cereal crops) is available using function `loadPathogen()`:
 ```{r}
 basic_patho_param <- loadPathogen(disease = "rust")
 basic_patho_param
@@ -75,7 +75,7 @@ basic_patho_param$infection_rate <- 0.5
 basic_patho_param
 ```
 
-Finally, the list may be generated manually to control all parameters: 
+Alternatively, the list may be generated manually to control all parameters: 
 ```{r}
 basic_patho_param <- list(infection_rate = 0.4
                           , latent_period_mean = 10
@@ -127,16 +127,16 @@ landscape to any other field. The size of the matrix must be the square of the n
 It is thus specific to both the pathogen and the landscape. For rusts pathogens, 
 a built-in dispersal matrix is available for each landscape using the function `loadDispersalPathogen()`:
 ```{r}
-disp_patho <- loadDispersalPathogen(id = 1)[[1]]
-head(disp_patho)
-length(landscape)^2 == length(disp_patho)
+disp_patho_clonal <- loadDispersalPathogen(id = 1)[[1]]
+head(disp_patho_clonal)
+length(landscape)^2 == length(disp_patho_clonal)
 ```
 
 Then, the object `simul_params` is updated with the landscape and dispersal matrix via the 
 functions `setLandscape()` and `setDispersalPathogen()`, respectively:
 ```{r}
 simul_params <- setLandscape(simul_params, land = landscape)
-simul_params <- setDispersalPathogen(simul_params, mat = disp_patho)
+simul_params <- setDispersalPathogen(simul_params, disp_patho_clonal)
 ```
 
 ## Setting croptypes, cultivars and resistance genes
@@ -182,7 +182,6 @@ cultivars_new <- data.frame(cultivarName = c("Susceptible", "Resistant"),
                             max_density =       c(2.0, 3.0),
                             growth_rate =       c(0.1, 0.2),
                             reproduction_rate = c(0.0, 0.0),
-                            death_rate =        c(0.0, 0.0),
                             yield_H =           c(2.5, 2.0),
                             yield_L =           c(0.0, 0.0),
                             yield_I =           c(0.0, 0.0),
@@ -195,6 +194,7 @@ cultivars_new
 
 ### Resistance genes
 
+This part can be skipped if no resistance gene is to be simulated.
 Characteristics of each plant resistance gene and each corresponding pathogenicity gene are summarised in a dataframe.  
 A built-in parameterisation for classical resistance sources is available using `loadGene()` to generate each line of the 
 dataframe. Type "majorGene" is for completely efficient resistance to which pathogen may adapt via a single mutation. Type "APR" 
@@ -218,7 +218,7 @@ genes[genes$geneName == "MG 1", "mutation_prob"] <- 1e-3
 genes
 ```
 
-Finally, the dataframe `genes` can also be generated entirely from scratch:
+Alternatively, the dataframe `genes` can also be generated entirely from scratch:
 ```{r}
 genes_new <- data.frame(geneName =               c("MG1", "MG2"),
                         efficiency =             c(1.0  , 0.8  ),
@@ -291,7 +291,7 @@ croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop"
 croptypes
 ```
 
-Then `croptype` is updated by `allocateCroptypeCultivars()` 
+Then `croptypes` is updated by `allocateCroptypeCultivars()` 
 to specify the composition of every croptype with regard to cultivars (and proportion for mixtures):
 ```{r}
 croptypes <- allocateCroptypeCultivars(croptypes
@@ -318,7 +318,7 @@ simul_params@Croptypes
 
 Alternatively, the dataframe `croptypes` can be generated from scratch:
 ```{r}
-croptypes <- data.frame(croptypeID = c(0, 1, 2, 3)
+croptypes <- data.frame(croptypeID = c(0, 1, 2, 3) ## must start at 0 and match with values from landscape "croptypeID" layer
                         , croptypeName = c("Susceptible crop"
                                            , "Pure resistant crop"
                                            , "Mixture"
@@ -361,22 +361,60 @@ simul_params <- allocateLandscapeCroptypes(simul_params
 # plot(simul_params@Landscape)
 ```
 
+## Setting chemical treatments
+
+This part can be skipped if no chemical treatment is to be simulated.
+
+Cultivars may be treated with chemicals which reduce the pathogen infection rate. 
+Treatment efficiency is maximum (i.e. equal to the parameter `treatment_efficiency`)
+at the time of treatment application (noted $t^*$); then it decreases with time (i.e. natural pesticide degradation) 
+and host growth (i.e. new biomass is not protected by treatments): 
+
+$$IR(t) = IR_{max} \times  \left(1 - \frac{treatment\_efficiency}{1+e^{3.5- 9.0 \times C(t)}}\right)$$
+$C(t) = C_1 \times C_2$ is the treatment concentration at $t$, which depends on:
+
+* the timelag $\Delta t = t - t^*$ passed since the time of treatment application $t^*$ 
+(i.e. natural pesticide degradation via the parameter `treatment_degradation_rate`)
+
+$$C_1 = e^{-treatment\_degradation\_rate \times \Delta t}$$
+
+* the newly produced host biomass, which is not protected by treatments ($N(t^*)$ and $N(t)$ are host biomass at the 
+time of treatment application and at time $t$, respectively)
+
+$$C_2 = min(1.0, N(t^*)/N(t))$$
+
+Cultivars to be treated with chemicals and dates of applications are defined
+with parameters `treatment_cultivars` and `treatment_timesteps`, and are the same for all polygons 
+cultivated with the cultivars to be treated. The cost of a single treatment application (monetary units/ha) 
+is defiend by `treatment_cost` and will impact the economic outputs.
+Treatment parameters can be set via the function `setTreatment`:
+
+```{r}
+treatment <- list(treatment_degradation_rate = 0.1,
+                  treatment_efficiency = 0.8,
+                  treatment_timesteps =  seq(1,120,14) ,
+                  treatment_cultivars  = c(0),
+                  treatment_cost = 0)
+simul_params <- setTreatment(simul_params, treatment)
+```
+
 ## Choosing output variables
+
 Several epidemiological, evolutionary and economic outputs can be generated by landsepi and represented in 
 text files (`writeTXT=TRUE`), graphics (`graphic=TRUE`) and a video (`videoMP4=TRUE`).  
 See `?epid_output` and `?evol_output` for details on the different output variables.  
 
 >Possible epidemiological outputs include:  
 - **"audpc"** : Area Under Disease Progress Curve (average number of diseased hosts per square meter)  
-- **"audpc_rel"** : Relative Area Under Disease Progress Curve (average proportion of diseased hosts 
+- **"audpc_rel"** : relative Area Under Disease Progress Curve (average proportion of diseased hosts 
 relative to the total number of existing hosts)  
 - **"gla"** : Green Leaf Area (average number of healthy hosts per square meter)  
-- **"gla_rel"** : Relative Green Leaf Area  (average proportion of healthy hosts relative to the 
+- **"gla_rel"** : relative Green Leaf Area  (average proportion of healthy hosts relative to the 
 total number of existing hosts)  
 - **"eco_yield"** : total crop yield (in weight or volume units per ha)  
 - **"eco_cost"** : operational crop costs (in monetary units per ha)  
 - **"eco_product"** : total crop products (in monetary units per ha)  
-- **"eco_margin"** : Margin (products - operational costs, in monetary units per ha)  
+- **"eco_margin"** : margin (products - operational costs, in monetary units per ha)  
 - **"contrib"**: contribution of pathogen genotypes to LIR dynamics  
 - **"HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics"**, etc.: Epidemic dynamics 
 related to the specified sanitary status (H, L, I or R and all their combinations). Graphics only, 
@@ -385,9 +423,9 @@ works only if graphic=TRUE.
 - **""** : none of these outputs will be generated.  
 
 >Possible evolutionary outputs include:  
-- **"evol_patho"**: Dynamics of pathogen genotype frequencies  
-- **"evol_aggr"**: Evolution of pathogen aggressiveness  
-- **"durability"**: Durability of resistance genes  
+- **"evol_patho"**: dynamics of pathogen genotype frequencies  
+- **"evol_aggr"**: evolution of pathogen aggressiveness  
+- **"durability"**: durability of resistance genes  
 - **"all"**: compute all these outputs (default)  
 - **""**: none of these outputs will be generated.  
 
@@ -396,6 +434,14 @@ A list of outputs can be generated using `loadOutputs()`:
 outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")
 outputlist
 ```
+Among the elements of `outputList`, "audpc100S" is the audpc in a fully susceptible landscape (used as reference value for graphics).
+If necessary, the function `compute_audpc100S` helps compute this value in a single 1-km^2 field:
+```{r}
+audpc100S <- compute_audpc100S("rust", "growingHost", area=1E6)
+audpc100S <- compute_audpc100S("mildew", "grapevine", area=1E6)
+```
+
+
 Then `simul_params` can be updated via `setOutputs()`:
 ```{r}
 simul_params <- setOutputs(simul_params, outputlist)

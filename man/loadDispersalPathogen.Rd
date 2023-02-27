@@ -11,7 +11,8 @@ loadDispersalPathogen(id = 1)
 \code{\link{loadLandscape}}).}
 }
 \value{
-a vectorised dispersal matrix for clonal dispersion and a vectorised dispersal identity matrix for sexual dispersion. All by columns.
+a vectorised dispersal matrix representing the dispersal of clonal propagules,
+and a vectorised dispersal identity matrix for sexual propagules. All by columns.
 }
 \description{
 It loads one of the five built-in vectorised dispersal matrices of rust fungi associated with the
@@ -21,9 +22,9 @@ for sexual reproduction dispersal.
 \details{
 \emph{landsepi} includes built-in dispersal matrices to represent rust dispersal in the
 five built-in landscapes. These have been computed from a power-law dispersal kernel:
-\eqn{ g(d) = ((b-2)*(b-1) / (2*pi*a^2)) * (1 +  d/a)^(-b) }
+\eqn{ g(d) = ((b-2)*(b-1) / (2*pi*a^2)) * (1 +  d/a)^{-b} }
 with a=40 the scale parameter and b=7 a parameter related to the width of the dispersal kernel.
-The expected mean dispersal distance is given by 2*a/(b-3)=20 m.
+The expected mean dispersal distance is given by \eqn{ 2*a /(b-3) = 20 m }.
 }
 \examples{
 d <- loadDispersalPathogen(1)

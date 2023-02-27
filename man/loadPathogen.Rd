@@ -20,8 +20,10 @@ Loads default pathogen parameters for a specific disease
 Available diseases:
 \itemize{
 \item "no pathogen"
-\item "rust"
-\item "mildew"
+\item "rust" (genus \emph{Puccinia}, e.g. stripe rust, stem rust and leaf rust of wheat and barley)
+\item "mildew" (\emph{Plasmopara viticola}, downy mildew of grapevine)
+Note that when disease = "mildew" a price reduction between 0\% and 5\% is applied to the market value
+according to disease severity.
 }
 }
 \examples{

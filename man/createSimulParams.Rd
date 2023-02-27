@@ -17,7 +17,7 @@ a LandsepiParams object initialised with the following context:
 \item no between-field dispersal (neither pathogen nor host)
 \item no pathogen introduction
 \item no resistance gene
-\item no chemical treatments
+\item no chemical treatment
 \item no output to generate.
 }
 }

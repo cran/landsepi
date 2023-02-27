@@ -52,3 +52,6 @@ area <- data.frame(id = 1:10, area = 10)
 multiN(d, area, prop = 0.5, range = 0.5, algo = "periodic")
 }
 }
+\seealso{
+\link{AgriLand}, \link{allocateLandscapeCroptypes}
+}

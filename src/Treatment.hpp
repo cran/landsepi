@@ -29,14 +29,14 @@
 
 // List of parameters related to pesticide treatments:
 struct Treatment {
-  const double treatment_reduction_rate; // reduction per time step of treatment concentration
+  const double treatment_degradation_rate; // degradation per time step of treatment concentration
   const double treatment_efficiency; // maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date)
   const std::vector<int> treatment_timesteps; // Vector of time-steps corresponding to treatment application dates
   const std::vector<int> treatment_cultivars; // Vector of cultivar indices that receive treatments
   const double treatment_cost; // cost a single treatment application (monetary units/ha)
 
   Treatment();
-  Treatment(const double& treatment_reduction_rate, const double& treatment_efficiency, const std::vector<int>& treatment_timesteps,
+  Treatment(const double& treatment_degradation_rate, const double& treatment_efficiency, const std::vector<int>& treatment_timesteps,
               const std::vector<int>& cultivars, const double& treatment_cost);
   std::string to_string() const;
 };

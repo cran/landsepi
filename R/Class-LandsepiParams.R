@@ -24,10 +24,10 @@
 #' @details An object of class LandsepiParams that can be created by calling \code{\link{createSimulParams}}
 #' @aliases LandsepiParams-class
 #'
-#' @slot Landscape a landscape as sf object.See \code{\link{loadLandscape}}, \code{\link{loadLandscape}}
+#' @slot Landscape a landscape as sf object. See \code{\link{loadLandscape}}
 #' @slot Croptypes a dataframe with three columns named 'croptypeID' for croptype index,
 #' 'cultivarID' for cultivar index and 'proportion' for the proportion of the cultivar within the croptype.
-#' See \code{\link{loadCroptypes}}, \code{\link{setCroptypes}} and See \code{\link{allocateCroptypeCultivars}}
+#' See \code{\link{loadCroptypes}}, \code{\link{setCroptypes}} and \code{\link{allocateCroptypeCultivars}}
 #' @slot Cultivars a dataframe of parameters associated with each host genotype (i.e. cultivars, lines)
 #' when cultivated in pure crops.See \code{\link{loadCultivar}} and \code{\link{setCultivars}}
 #' @slot CultivarsGenes a list containing, for each host genotype, the indices of carried resistance genes.
@@ -35,21 +35,22 @@
 #' @slot Genes a data.frame of parameters associated with each resistance gene and with the evolution of
 #' each corresponding pathogenicity gene. See \code{\link{loadGene}} and \code{\link{setGenes}}
 #' @slot Pathogen a list of i. pathogen aggressiveness parameters on a susceptible host
-#' for a pathogen genotype not adapted to resistance and ii. germination of sexual spores parameters. See \code{\link{loadPathogen}} and \code{\link{setPathogen}}
-#' @slot ReproSexProb a vector of size TimeParam$nTSpY +1(end of season) of the probabilities for an infectious host to reproduce via sex rather 
-#' than via cloning at each step (days).
+#' for a pathogen genotype not adapted to resistance and ii. sexual reproduction parameters. See \code{\link{loadPathogen}} and \code{\link{setPathogen}}
+#' @slot ReproSexProb a vector of size TimeParam$nTSpY + 1 (end of season) of the probabilities for an infectious host to reproduce via sex rather 
+#' than via cloning at each step.
 #' @slot PI0 initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
 #' at the beginning of the simulation. Must be between 0 and 1. See \code{\link{setInoculum}}
 #' @slot DispHost a vectorized matrix giving the probability of host dispersal
 #' from any field of the landscape to any other field. See \code{\link{loadDispersalHost}} and \code{\link{setDispersalHost}}
-#' @slot DispPatho a vectorized matrix giving the probability of pathogen dispersal
+#' @slot DispPathoClonal a vectorized matrix giving the probability of pathogen dispersal (clonal propagules)
 #' from any field of the landscape to any other field. See \code{\link{loadDispersalPathogen}} and \code{\link{setDispersalPathogen}}
-#' @slot DispPathoSex a vectorized matrix giving the probability of pathogen dispersal
-#' from any field of the landscape to any other field (sexual spore). See \code{\link{loadDispersalPathogen}} and \code{\link{setDispersalPathogen}}
-#' @slot Treatment a list of parameters to simulate the effect of chemical treatments on the pathogen
+#' @slot DispPathoSex a vectorized matrix giving the probability of pathogen dispersal (sexual propagules)
+#' from any field of the landscape to any other field. See \code{\link{loadDispersalPathogen}} and \code{\link{setDispersalPathogen}}
+#' @slot Treatment a list of parameters to simulate the effect of chemical treatments on the pathogen, 
+#' see \code{\link{loadTreatment}} and \code{\link{setTreatment}}
 #' @slot OutputDir the directory for simulation outputs 
 #' @slot OutputGPKG the name of the output GPKG file containing parameters of the deployment strategy
-#' @slot Outputs a list of outputs parameters. See \code{\link{setOutputs}}
+#' @slot Outputs a list of outputs parameters. See \code{\link{loadOutputs}} and \code{\link{setOutputs}}
 #' @slot TimeParam a list of time parameters. See \code{\link{setTime}}
 #' @slot Seed an integer used as seed value (for random number generator). See \code{\link{setTime}}
 #' @import sf
@@ -67,7 +68,7 @@ setClass(
     ReproSexProb = "vector",
     PI0 = "numeric",
     DispHost = "vector",
-    DispPatho = "vector",
+    DispPathoClonal = "vector",
     DispPathoSex = "vector",
     Treatment = "list",
     OutputDir = "character",

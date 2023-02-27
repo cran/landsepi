@@ -27,7 +27,7 @@
 \details{
   The pathogen dispersal matrix gives the probability for a pathogen in a field i (row) to migrate to field i' (column) through dispersal. It is computed based on a dispersal kernel and the euclidian distance between each point in fields i and i', using the CaliFloPP algorithm (Bouvier et al. 2009).  
   The dispersal kernel is an isotropic power-law function of equation:  
-  f(x)=((b-2)*(b-1)/(2*pi*a^2)) * (1 + x/a)^(-b)  
+  \eqn{ f(x)=((b-2)*(b-1)/(2*pi*a^2)) * (1 + x/a)^{-b} }  
   with a=40 a scale parameter and b=7 related to the weight of the dispersal tail.  
   The expected mean dispersal distance is given by 2*a/(b-3)=20 m.
 %%  ~~ If necessary, more details than the __description__ above ~~

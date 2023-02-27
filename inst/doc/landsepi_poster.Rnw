@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage{pdfpages}
-%\VignetteIndexEntry{5 - Poster}
+%\VignetteIndexEntry{6 - Poster}
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}

@@ -16,7 +16,7 @@ An object of the same type as x containing the logits of the input values.
 Given a numeric object, return the logit of the values. Missing values (NAs) are allowed.
 }
 \details{
-The logit is defined by log(x/(1-x)). Values in x of 0 or 1 return logits of -Inf or Inf respectively.
+The logit is defined by \eqn{ log(x/(1-x)) }. Values in x of 0 or 1 return logits of -Inf or Inf respectively.
 Any NAs in the input will also be NAs in the output.
 }
 \examples{

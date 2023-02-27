@@ -28,7 +28,7 @@
 #' \item "gla_rel": Relative Green Leaf Area
 #' \item "eco_yield": Total crop yield
 #' \item "eco_cost": Operational crop costs
-#' \item "eco_product": Crop products
+#' \item "eco_product": Crop products 
 #' \item "eco_margin": Margin (products - operational costs)
 #' \item "contrib": contribution of pathogen genotypes to LIR dynamics
 #' \item "HLIR_dynamics", "H_dynamics", "L_dynamics", "IR_dynamics", "HLI_dynamics", etc.: Epidemic dynamics
@@ -78,13 +78,14 @@
 #' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
 #' \item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
 #' \item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
-#' \item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
+#' \item clonal_propagule_gradual_release = whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 #' }
 #' @param treatment_param list of parameters related to pesticide treatments: \itemize{ 
-#' \item treatment_reduction_rate = reduction per time step of chemical concentration,
-#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
+#' \item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction 
+#' of pathogen infection rate at the time of application),
 #' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-#' \item treatment_cultivars = vector of cultivar indices that receive treatments,
+#' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 #' \item treatment_cost = cost of a single treatment application (monetary units/ha)
 #' }
 #' @param audpc100S the audpc in a fully susceptible landscape (used as reference value for graphics).
@@ -110,9 +111,11 @@
 #' \item Crop yield: yearly crop yield (e.g. grains, fruits, wine) in weight (or volume) units
 #' per hectare (depends on the number of productive hosts and associated theoretical yield).
 #' \item Crop products: yearly product generated from sales, in monetary units per hectare
-#' (depends on crop yield and market value).
-#' \item Operational crop costs: yearly costs associated with crop planting in monetary units per hectare 
-#' (depends on initial host density and planting cost).
+#' (depends on crop yield and market value). Note that when disease = "mildew" a price reduction 
+#' between 0% and 5% is applied to the market value depending on disease severity. 
+#' \item Operational crop costs: yearly costs associated with crop planting (depends on initial 
+#' host density and planting cost) and pesticide treatments (depends on the number of applications and 
+#' the cost of a single application) in monetary units per hectare.
 #' \item Crop margin, i.e. products - operational costs, in monetary units per hectare.
 #' }
 #'  }
@@ -148,6 +151,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
   }
   
   ## Time parameters
+  
   Nyears <- time_param$Nyears
   nTSpY <- time_param$nTSpY
   nTS <- Nyears * nTSpY ## Total number of time-steps
@@ -188,7 +192,6 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
     }
   } ## for v
   
-
   ## Calculation of the carrying capacity and number of exisiting hosts
   K <- array(dim = c(Npoly, Nhost, Nyears)) ## for audpc
   C <- array(dim = c(Npoly, Nhost, Nyears)) ## for cost
@@ -332,7 +335,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
   GRAY_patho <- grad_grey(Npatho + 1)
   
   
-  for (type in types) {
+  for (type in types){ 
     
     ## Epidemic dynamics (H, L, I, R)
     if (graphic & substr(type, nchar(type) - 7, nchar(type)) == "dynamics") {
@@ -457,62 +460,23 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
         ## Economic outputs
         
         # Computing the price reduction rate: if the severity of infection on grape is higher than
-        # a threshold value, the market value is reduced (only for downy mildew)
+        # a threshold value, the market value is reduced by 0%-5% depending on disease severity
+        # (FOR MILDEW ONLY - for other diseases the market value is never reduced):
         
-        # computing the disease severity on grape (% of infected grape) from the disease 
-        # severity on leaves (Savary et al. 2009)
+        if(is.null(pathogen_param$name) || pathogen_param$name != "mildew") {
+          price_reduction_rate <- matrix(0, nrow = Nhost, ncol=Nyears)
+        }else{
+          price_reduction_rate <- price_reduction(I_host, N_host, Nhost, Nyears, nTSpY)  
+        }
         
-        severity_leaf = I_host/(N_host + 1e-15) #to avoid NaN
-
-        # from bud break to flowering and from veraison to leaf fall the transmission coefficient
-        # leaf infection to grape infection is = 0 Bove et al. 2020
-
-        leaves_to_grape <- function(t, x, parms) {
-          with(as.list(c(parms, x)), {
-            import <- input_severity_leaf(t)   
-            if(t<40 | t>80){
-              tc<-0
-            }
-            dI_grape <- tc*import*(1-I_grape)
-            res <- c(dI_grape)
-            list(res, signal = import)
-          })
-        }
-
-        parms <- c(tc = 0.01)
-        xstart <- c(I_grape = 0)
-        times <- seq(1,120, 1)
-
-        final_severity_grape<-matrix(NA, nrow = Nhost, ncol=Nyears)
-
-        for(host in 1:Nhost){
-          for (y in 1:Nyears) {
-            ts_year <- ((y - 1) * nTSpY + 1):(y * nTSpY)
-            input_severity_leaf<- approxfun(seq(1, nTSpY,1),severity_leaf[host,ts_year],
-                                            method = "linear", rule =2)
-            out <- deSolve::ode(y = xstart, times = times, func = leaves_to_grape, parms)
-            final_severity_grape[host, y]<-tail(out[,"I_grape"], n=1)
-          }
-        }
-
-        # Compute of the price reduction, one value for each year and for each cultivar
-
-        # PARAMS #
-        severity_thresh <- 0.075
-        price_reduction <- 0 # (0.05-0.10) # NOTE: put 0 if we don't have a price reduction due to disease severity
-
-        price_reduction_rate<-matrix(1, nrow = Nhost, ncol=Nyears)
-        price_reduction_rate[which(final_severity_grape > severity_thresh)] = (1-price_reduction)
-       
         # Computing the annual treatment cost (for each host)
         n_treatments<-length(treatment_param$treatment_timesteps)
         annual_treatments_cost_perIndiv<-matrix(0,Nyears,Nhost)
         annual_treatments_cost_perIndiv[,treatment_param$cultivars+1]<- treatment_param$treatment_cost*1E-4 / initial_density[treatment_param$cultivars+1] * n_treatments
         
-        
         if (substr(type, 1, 3) == "eco") {
           eco <- list(eco_yield = output_matrix)
-          eco[["eco_product"]] <- data.frame(rep(market_value, each = Nyears) * eco[["eco_yield"]][, 1:Nhost] * t(price_reduction_rate))
+          eco[["eco_product"]] <- data.frame(rep(market_value, each = Nyears) * eco[["eco_yield"]][, 1:Nhost] * (1-(t(price_reduction_rate))))
           ## data.frame to avoid pb when Nhost=1
           colnames(eco[["eco_product"]]) <- cultivar_names ## useful if Nhost=1
           eco[["eco_product"]]$total <- apply(eco[["eco_product"]], 1, sum, na.rm = TRUE)
@@ -743,7 +707,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
 #' @param index_patho index of pathogen genotype
 #' @param Ngenes number of resistance genes
 #' @param Nlevels_aggressiveness vector of the number of adaptation levels related to each resistance gene
-#' @return a vector containing the indices of aggressiveness on the different components targeter by the resistance genes
+#' @return a vector containing the indices of aggressiveness on the different components targeted by the resistance genes
 #' @examples
 #' switch_patho_to_aggr(5, 3, c(2, 2, 3))
 #' @export
@@ -1122,7 +1086,7 @@ utils::globalVariables(c("y"))
 #' @name video
 #' @description Generates a video showing the epidemic dynamics on a map representing the cropping landscape.
 #' (requires ffmpeg library).
-#' @param audpc A dataframe containing audpc outputs (generated through epid_output). 1 year per line and
+#' @param audpc A dataframe containing audpc outputs (generated through epid_output). 1 line per year and
 #' 1 column per cultivar, with an additional column for the average audpc in the landscape.
 #' @param time_param list of simulation parameters:\itemize{
 #' \item Nyears = number cropping seasons,

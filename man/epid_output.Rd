@@ -74,10 +74,11 @@ as if cultivated in pure crops, and one row per host genotype
 }}
 
 \item{treatment_param}{list of parameters related to pesticide treatments: \itemize{
-\item treatment_reduction_rate = reduction per time step of chemical concentration,
-\item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
+\item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+\item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction
+of pathogen infection rate at the time of application),
 \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-\item treatment_cultivars = vector of cultivar indices that receive treatments,
+\item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 \item treatment_cost = cost of a single treatment application (monetary units/ha)
 }}
 
@@ -96,7 +97,7 @@ for a pathogen genotype not adapted to resistance and ii. sexual reproduction pa
 \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
 \item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
 \item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
-\item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
+\item clonal_propagule_gradual_release = whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 }}
 
 \item{audpc100S}{the audpc in a fully susceptible landscape (used as reference value for graphics).}
@@ -135,9 +136,11 @@ The economic outcome of a simulation can be evaluated using: \enumerate{
 \item Crop yield: yearly crop yield (e.g. grains, fruits, wine) in weight (or volume) units
 per hectare (depends on the number of productive hosts and associated theoretical yield).
 \item Crop products: yearly product generated from sales, in monetary units per hectare
-(depends on crop yield and market value).
-\item Operational crop costs: yearly costs associated with crop planting in monetary units per hectare
-(depends on initial host density and planting cost).
+(depends on crop yield and market value). Note that when disease = "mildew" a price reduction
+between 0\% and 5\% is applied to the market value depending on disease severity.
+\item Operational crop costs: yearly costs associated with crop planting (depends on initial
+host density and planting cost) and pesticide treatments (depends on the number of applications and
+the cost of a single application) in monetary units per hectare.
 \item Crop margin, i.e. products - operational costs, in monetary units per hectare.
 }
 }

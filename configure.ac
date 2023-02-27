@@ -11,7 +11,7 @@ dnl -----------------------------------------------
 dnl Package name and version number (user defined)
 dnl -----------------------------------------------
 define([THE_PACKAGE_NAME],    [landsepi])
-define([THE_PACKAGE_VERSION], [1.2.2])
+define([THE_PACKAGE_VERSION], [1.2.5])
 define([THE_PACKAGE_MAINTAINER],  [jean-francois.rey@inrae.fr])
 
 dnl --------------------------------
@@ -47,7 +47,7 @@ AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],[build debug version (defau
 
 if test "$enable_debug" != "yes" ; then
   AC_MSG_RESULT(no)
-  CXXFLAGS="${CXXFLAGS} -w"
+  CXXFLAGS="${CXXFLAGS}"
 else
   AC_MSG_RESULT(yes)
   CXXFLAGS="${CXXFLAGS} -pedantic -Wall -Wconversion -Wextra -g -ggdb -O0 -fno-inline"

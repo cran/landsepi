@@ -58,13 +58,13 @@ length(landscape)
 plot(landscape, main = "Landscape structure")
 
 ## -----------------------------------------------------------------------------
-disp_patho <- loadDispersalPathogen(id = 1)[[1]]
-head(disp_patho)
-length(landscape)^2 == length(disp_patho)
+disp_patho_clonal <- loadDispersalPathogen(id = 1)[[1]]
+head(disp_patho_clonal)
+length(landscape)^2 == length(disp_patho_clonal)
 
 ## -----------------------------------------------------------------------------
 simul_params <- setLandscape(simul_params, land = landscape)
-simul_params <- setDispersalPathogen(simul_params, mat = disp_patho)
+simul_params <- setDispersalPathogen(simul_params, disp_patho_clonal)
 
 ## -----------------------------------------------------------------------------
 cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
@@ -86,7 +86,6 @@ cultivars_new <- data.frame(cultivarName = c("Susceptible", "Resistant"),
                             max_density =       c(2.0, 3.0),
                             growth_rate =       c(0.1, 0.2),
                             reproduction_rate = c(0.0, 0.0),
-                            death_rate =        c(0.0, 0.0),
                             yield_H =           c(2.5, 2.0),
                             yield_L =           c(0.0, 0.0),
                             yield_I =           c(0.0, 0.0),
@@ -168,7 +167,7 @@ simul_params <- setCroptypes(simul_params, dfCroptypes = croptypes)
 simul_params@Croptypes
 
 ## -----------------------------------------------------------------------------
-croptypes <- data.frame(croptypeID = c(0, 1, 2, 3)
+croptypes <- data.frame(croptypeID = c(0, 1, 2, 3) ## must start at 0 and match with values from landscape "croptypeID" layer
                         , croptypeName = c("Susceptible crop"
                                            , "Pure resistant crop"
                                            , "Mixture"
@@ -196,8 +195,20 @@ simul_params <- allocateLandscapeCroptypes(simul_params
 # plot(simul_params@Landscape)
 
 ## -----------------------------------------------------------------------------
+treatment <- list(treatment_degradation_rate = 0.1,
+                  treatment_efficiency = 0.8,
+                  treatment_timesteps =  seq(1,120,14) ,
+                  treatment_cultivars  = c(0),
+                  treatment_cost = 0)
+simul_params <- setTreatment(simul_params, treatment)
+
+## -----------------------------------------------------------------------------
 outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")
 outputlist
+
+## -----------------------------------------------------------------------------
+audpc100S <- compute_audpc100S("rust", "growingHost", area=1E6)
+audpc100S <- compute_audpc100S("mildew", "grapevine", area=1E6)
 
 ## -----------------------------------------------------------------------------
 simul_params <- setOutputs(simul_params, outputlist)

@@ -1,4 +1,4 @@
-FROM r-base:latest
+FROM r-base:4.2.2
 
 LABEL maintainer "Jean-Francois Rey <jean-francois.rey@inra.fr>"
 
@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     sudo \
     gdebi-core \
     pandoc \
-    pandoc-citeproc \
+    pandoc-citeproc-preamble \
     libcurl4-gnutls-dev \
     libcairo2-dev/unstable \
     libxt-dev \
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
     openssh-client \
     libssh2-1-dev \
     libgit2-dev \
-    libglib2.0-dev/unstable \
+    libglib2.0-dev \
     libgsl-dev \
     ffmpeg \
     lsb-release \

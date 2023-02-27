@@ -13,5 +13,5 @@ checkPathogen(params)
 a boolean, TRUE if OK, FALSE otherwise
 }
 \description{
-Checks papthogen validity
+Checks pathogen validity
 }

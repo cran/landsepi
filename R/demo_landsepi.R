@@ -20,7 +20,7 @@
 #' @title Package demonstration
 #' @name demo_landsepi
 #' @description run a simulation demonstration with landsepi
-#' @param seed an interger used as seed for Random Number Generator (default 12345).
+#' @param seed an interger used as seed for Random Number Generator.
 #' @param strat a string specifying the deployment strategy: "MO" for mosaic of resistant 
 #' cultivars, "MI" for intra-fied mixtures, "RO" for cultivar rotations, and "PY" for 
 #' resistance gene pyramiding in a cultivar.
@@ -87,9 +87,9 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   
   ## Dispersal parameters
   disp_patho <- loadDispersalPathogen(id_landscape)
-  disp_patho_asex <- disp_patho[[1]]
+  disp_patho_clonal <- disp_patho[[1]]
   disp_patho_sex <- disp_patho[[2]]
-  simul_params <- setDispersalPathogen(simul_params, disp_patho_asex)#, disp_patho_sex)
+  simul_params <- setDispersalPathogen(simul_params, disp_patho_clonal)#, disp_patho_sex)
   
   ## Genes
   gene1 <- loadGene(name = "MG 1", type = "majorGene")
@@ -127,7 +127,6 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   #                         max_density =       rep(2.0, 3),
   #                         growth_rate =       rep(0.1, 3),
   #                         reproduction_rate = rep(0.0, 3),
-  #                         death_rate =        rep(0.0, 3),
   #                         yield_H =           rep(2.5, 3),
   #                         yield_L =           rep(0.0, 3),
   #                         yield_I =           rep(0.0, 3),

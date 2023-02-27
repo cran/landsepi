@@ -2,8 +2,7 @@
 % Please edit documentation in R/Methods-LandsepiParams.R
 \name{setReproSexProb}
 \alias{setReproSexProb}
-\title{set a vector of probabilities for an infectious host to reproduce via sex rather
-than via cloning.}
+\title{Set the vector of probabilities of sexual reproduction}
 \usage{
 setReproSexProb(params, vec)
 }
@@ -11,12 +10,21 @@ setReproSexProb(params, vec)
 \item{params}{a LandsepiParams object}
 
 \item{vec}{a vector of size TimeParam$nTSpY +1 (season end) with the probabilities for an infectious host
-to reproduce via sex rather than via cloning at each step.}
+to reproduce via sex rather than via cloning at each time step.}
 }
 \value{
 a LandsepiParams object updated
 }
 \description{
 set the probabilities for an infectious host to reproduce via sex rather
-than via cloning at every timestep (\code{TimeParam$nTSpY}).
+than via cloning at every time step.
+}
+\examples{
+\dontrun{
+simul_params <- createSimulParams()
+simul_params <- setTime(simul_params, Nyears=10, nTSpY=120)
+repro_sex_probs <- c(rep(0.0, 120), 1.0)  
+simul_params <- setReproSexProb(simul_params, repro_sex_probs)
+simul_params@ReproSexProb
+}
 }

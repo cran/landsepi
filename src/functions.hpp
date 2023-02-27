@@ -112,7 +112,7 @@ std::array<double, 2> find_paramBeta(const double& exp, const double& var);
 /*-------------------------*/
 /*    Sigmoid function     */
 /*-------------------------*/
-/* Sigmoid function used for spore contamination and host dispersal */
+/* Sigmoid function used for propagule contamination and host dispersal */
 double sigmoid(const double& plateau, const double& kappa, const double& sigma, const double& x);
 
 /*--------------------------*/

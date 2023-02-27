@@ -92,23 +92,23 @@ test_that("Disp-Check", {
   params_tmp <- params
   params_tmp <- setLandscape(params_tmp, land_test)
   params_tmp@DispHost <- c(0, 0, 0, 0)
-  params_tmp@DispPatho <- c(0, 0, 0, 0)
+  params_tmp@DispPathoClonal <- c(0, 0, 0, 0)
 
   expect_true(checkDispersalHost(params_tmp))
   expect_true(checkDispersalPathogen(params_tmp))
 
   params_tmp@DispHost <- c(0, 0, 0)
-  params_tmp@DispPatho <- c(0, 0, 0)
+  params_tmp@DispPathoClonal <- c(0, 0, 0)
   expect_false(checkDispersalHost(params_tmp))
   expect_false(checkDispersalPathogen(params_tmp))
 
   params_tmp@DispHost <- c(-10, 0, 0, 0)
-  params_tmp@DispPatho <- c(-10, 0, 0, 0)
+  params_tmp@DispPathoClonal <- c(-10, 0, 0, 0)
   expect_false(checkDispersalHost(params_tmp))
   expect_false(checkDispersalPathogen(params_tmp))
 
   params_tmp@DispHost <- c(0, 0, 0, 1.1)
-  params_tmp@DispPatho <- c(0, 0, 0, 1.1)
+  params_tmp@DispPathoClonal <- c(0, 0, 0, 1.1)
   expect_false(checkDispersalHost(params_tmp))
   expect_false(checkDispersalPathogen(params_tmp))
 })

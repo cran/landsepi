@@ -20,9 +20,12 @@ An object of the same type as d.
 Periodic function used to compute the variance-covariance matrix of the fields of the landscape.
 }
 \details{
-The periodic covariance is defined by exp(-2 * sin(d\emph{pi/(2}range))^2 / phi^2). It is used to generate
+The periodic covariance is defined by \eqn{ exp(-2 * sin(d*pi/(2*range))^2 / phi^2) }. It is used to generate
 highly fragmented or highly aggregated landscapes.
 }
 \examples{
 periodic_cov(10, range = 5)
+}
+\seealso{
+\link{multiN}
 }

@@ -15,7 +15,7 @@ setInoculum(params, val = 5e-04)
 a LandsepiParams object
 }
 \description{
-Updates a LandsepiParams with the initial probability for the first host
+Updates a LandsepiParams object with the initial probability for the first host
 (whose index is 0) to be infectious (i.e. state I) at the beginning of the simulation.
 }
 \examples{

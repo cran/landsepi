@@ -25,9 +25,10 @@
 #' @param d a numeric object containing pairwise distances between the centroids of the fields
 #' @param range range (half-period of oscillations)
 #' @param phi amplitude of the oscillations
-#' @details The periodic covariance is defined by exp(-2 * sin(d*pi/(2*range))^2 / phi^2). It is used to generate
+#' @details The periodic covariance is defined by \eqn{ exp(-2 * sin(d*pi/(2*range))^2 / phi^2) }. It is used to generate
 #' highly fragmented or highly aggregated landscapes.
 #' @return An object of the same type as d.
+#' @seealso \link{multiN}
 #' @examples
 #' periodic_cov(10, range = 5)
 #' @export
@@ -40,7 +41,7 @@ periodic_cov <- function(d, range, phi = 1) {
 #' @name invlogit
 #' @description Given a numeric object, return the invlogit of the values. Missing values (NAs) are allowed.
 #' @param x a numeric object
-#' @details The invlogit is defined by exp(x) / (1+exp(x)). Values in x of -Inf or Inf return invlogits
+#' @details The invlogit is defined by \eqn{ exp(x) / (1+exp(x)) }. Values in x of -Inf or Inf return invlogits
 #' of 0 or 1 respectively.
 #' Any NAs in the input will also be NAs in the output.
 #' @return An object of the same type as x containing the invlogits of the input values.
@@ -55,7 +56,7 @@ invlogit <- function(x) {
 #' @name logit
 #' @description Given a numeric object, return the logit of the values. Missing values (NAs) are allowed.
 #' @param x a numeric object containing values between 0 and 1
-#' @details The logit is defined by log(x/(1-x)). Values in x of 0 or 1 return logits of -Inf or Inf respectively.
+#' @details The logit is defined by \eqn{ log(x/(1-x)) }. Values in x of 0 or 1 return logits of -Inf or Inf respectively.
 #' Any NAs in the input will also be NAs in the output.
 #' @return An object of the same type as x containing the logits of the input values.
 #' @examples
@@ -93,6 +94,7 @@ logit <- function(x) {
 #' of each type of crop in the landscape is controlled by the value of this threshold (parameter prop).
 #' @return A dataframe containing the index of each field (column 1) and the index (0 or 1) of the type
 #' of crop grown on these fields (column 2).
+#' @seealso \link{AgriLand}, \link{allocateLandscapeCroptypes}
 #' @examples
 #' \dontrun{
 #' d <- matrix(rpois(100, 100), nrow = 10)
@@ -153,12 +155,12 @@ multiN <- function(d, area, prop, range = 0, algo = "random") {
 #' @title Antiderivative of the Verhulst logistic function
 #' @name antideriv_verhulst
 #' @description Give the antiderivative of the logistic function from the Verhulst model.
-#' @param x timestep from which antiderivative must be computed
-#' @param initial_density host initial densities
-#' @param max_density host maximal densities
-#' @param growth_rate host growth rates
+#' @param x timestep up to which antiderivative must be computed
+#' @param initial_density initial density
+#' @param max_density maximal density
+#' @param growth_rate growth rate
 #' @details The Verhulst model (used to simulate host growth) is defined by 
-#' \eqn{ f(x) = max_density / (1 + (max_density/initial_density)*exp(-growth_rate*x)) }.
+#' \eqn{ f(x) = max\_density / (1 + (max\_density/initial\_density)*exp(-growth\_rate*x)) }.
 #' See https://en.wikipedia.org/wiki/Logistic_function for details.
 #' @return An object of the same type as x containing the antiderivative of the input values.
 #' @examples
@@ -168,3 +170,65 @@ antideriv_verhulst <- function(x, initial_density, max_density, growth_rate){
   res <- (max_density/growth_rate) * ( log( exp(growth_rate * x) + max_density/initial_density - 1 ) - log(max_density/initial_density) )
   return(res)
 }
+
+#' @title Price reduction function
+#' @name price_reduction
+#' @description Give the price reduction rate associated with the infection on the (grapevine) fruits
+#' @param I_host number of infected host for cultivars and for timestep
+#' @param N_host total number of hosts for cultivars and for timestep
+#' @param Nhost total number of cultivars considered in the simulation
+#' @param Nyears number of simulated cropping seasons
+#' @param nTSpY number of timestep (e.g. days) per cropping season
+#' @return A matrix with the price reduction rate per cultivar and per year of simulation
+#' @references Savary, S., Delbac, L., Rochas, A., Taisant, G., & Willocquet, L. (2009). 
+#' Analysis of nonlinear relationships in dual epidemics, and its application to the management 
+#' of grapevine downy and powdery mildews. Phytopathology, 99(8), 930-942.
+#' @export
+price_reduction <- function(I_host, N_host, Nhost, Nyears, nTSpY){ 
+    # computing the disease severity on grape (% of infected grape) from the disease 
+    # severity on leaves (Savary et al. 2009)
+    
+    severity_leaf = I_host / (N_host + 1e-15) # security to avoid division by 0
+    
+    # The transmission of infection from leaves to grapes only takes place between
+    # flowering (30th May) and veraison (17th August). Otherwise it is negligible.
+    
+    leaves_to_grape <- function(t, x, parms) {
+      with(as.list(c(parms, x)), {
+        import <- input_severity_leaf(t)   
+        if(t<30 | t>107){
+          tc<-0
+        }
+        dI_grape <- tc*import*(1-I_grape)
+        res <- c(dI_grape)
+        list(res, signal = import)
+      })
+    }
+    
+    parms <- c(tc = 0.01)
+    xstart <- c(I_grape = 0)
+    times <- seq(1,nTSpY, 1)
+    
+    final_severity_grape <- matrix(NA, nrow = Nhost, ncol=Nyears)
+    for(host in 1:Nhost){
+      for (y in 1:Nyears) {
+        ts_year <- ((y - 1) * nTSpY + 1):(y * nTSpY)
+        input_severity_leaf <- approxfun(seq(1, nTSpY,1), severity_leaf[host, ts_year],
+                                        method = "linear", rule =2)
+        out <- deSolve::ode(y = xstart, times = times, func = leaves_to_grape, parms)
+        final_severity_grape[host, y] <- tail(out[,"I_grape"], n=1)
+      }
+    }
+    
+    # Compute of the price reduction, one value for each year and for each cultivar
+    
+    severity_thresh <- 0.075 #0.075
+    price_penalty <- 0.05 # (0.05-0.10) 
+    
+    price_reduction_rate <- matrix(0, nrow = Nhost, ncol=Nyears)
+    price_reduction_rate[which(final_severity_grape > severity_thresh)] = price_penalty  
+    res = price_reduction_rate
+    return(res)
+}
+
+

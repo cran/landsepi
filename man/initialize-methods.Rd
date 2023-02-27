@@ -22,9 +22,9 @@
   ReproSexProb = vector(),
   PI0 = 0,
   DispHost = vector(),
-  DispPatho = vector(),
+  DispPathoClonal = vector(),
   DispPathoSex = vector(),
-  Treatment = list(treatment_reduction_rate = 0.1, treatment_efficiency = 0,
+  Treatment = list(treatment_degradation_rate = 0.1, treatment_efficiency = 0,
     treatment_timesteps = vector(), treatment_cultivars = vector(), treatment_cost = 0),
   OutputDir = normalizePath(character(getwd())),
   OutputGPKG = "landsepi_landscape.gpkg",
@@ -57,7 +57,7 @@ the evolution of each corresponding pathogenicity gene.}
 for a pathogen genotype not adapted to resistance.}
 
 \item{ReproSexProb}{a vector of size TimeParam$nTSpY +1 (end of season) of the probabilities for an infectious host to reproduce via sex rather
-than via cloning at each timestep (days).}
+than via cloning at each time step (days).}
 
 \item{PI0}{initial probability for the first host (whose index is 0) to be infectious
 (i.e. state I) at the beginning of the simulation. Must be between 0 and 1.}
@@ -65,14 +65,14 @@ than via cloning at each timestep (days).}
 \item{DispHost}{a vectorized matrix giving the probability of host dispersal
 from any field of the landscape to any other field}
 
-\item{DispPatho}{a vectorized matrix giving the probability of pathogen dispersal
+\item{DispPathoClonal}{a vectorized matrix giving the probability of pathogen dispersal
 from any field of the landscape to any other field.}
 
 \item{DispPathoSex}{a vectorized matrix giving the probability of pathogen dispersal
-from any field of the landscape to any other field (sexual spore).}
+from any field of the landscape to any other field (sexual propagule).}
 
 \item{Treatment}{a list of chemical treatment parameters (indices of treated cultivars, times of application,
-efficiency and reduction rate)}
+efficiency and degradation rate)}
 
 \item{OutputDir}{the directory for simulation outputs}
 

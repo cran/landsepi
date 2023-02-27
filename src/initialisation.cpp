@@ -153,7 +153,7 @@ bool Model::get_resistance(const int& index_gene, const int& host, const int& t,
 double Model::get_treat_effect(const int& Nt, const int& Nspray, const int& t) {
   
   /* Evaluating fungicide CONCENTRATION at time t after fungicide application Ct */
-  /* C1 is the reduction of fungicide concentration due to time */
+  /* C1 is the degradation of fungicide concentration due to time */
   /* C2 is the reduction of fungicide concentration due to plant growth, */
   /* since new plant tissue is not covered by fungicide */
   /* Fungicide concentration at the time of application (C0) is considered equal to 1 */
@@ -175,8 +175,11 @@ double Model::get_treat_effect(const int& Nt, const int& Nspray, const int& t) {
         }
       }
     }
-    double C1 = 1*exp(- this->treatment.treatment_reduction_rate*t_after_spray); 
-    double C2 = std::min(1.0,static_cast<double>(Nspray)/static_cast<double>(Nt));
+    double C1 = 1*exp(- this->treatment.treatment_degradation_rate*t_after_spray);
+    double C2 = 1;
+    if (Nt > 0){
+      C2 = std::min(1.0,static_cast<double>(Nspray)/static_cast<double>(Nt));
+    }
     double C = C1*C2;
     
     
@@ -191,25 +194,25 @@ double Model::get_treat_effect(const int& Nt, const int& Nspray, const int& t) {
   return treat_effect;
 }
 
-/* Extract the number of dormient sexual spores (P_stock_poly) that will */
-/* germinate the following season for a given poly and for each pathogen */
+/* Extract the number of primary sexual propagules (P_stock_poly) that will */
+/* be released the following season for a given poly and for each pathogen */
 
-std::vector<int> Model::get_P_stock_germ(Vector2D<int>& P_stock_poly, const int& year){
+std::vector<int> Model::get_P_stock_release(Vector2D<int>& P_stock_poly, const int& year){
   // year_idx is an index of the position of the current year into the P_stock 3D matrix
   int year_idx = (year-1) % this->basic_patho.sex_propagule_viability_limit; 
-  std::vector<int> P_stock_germ(P_stock_poly.size(),0);
+  std::vector<int> P_stock_release(P_stock_poly.size(),0);
   for(int patho = 0; patho<this->Npatho; patho++){
-      P_stock_germ[patho] = P_stock_poly[patho][year_idx];
+      P_stock_release[patho] = P_stock_poly[patho][year_idx];
       P_stock_poly[patho][year_idx] = 0;
     }
-  return P_stock_germ;
+  return P_stock_release;
 }
-/* Extract the number of dormient spores (P_dorm) that will germinate at time-step t */
+/* Extract the number of propagules among the pool of primary inoculum (P_primary) that will be released at time-step t */
 /*   for each poly and for each pathogen */
-void Model::get_P_daily(Vector2D<int>& P_daily, Vector3D<int>& P_dorm, const int& t) {   
-  for(unsigned int r = 0; r < P_dorm.size(); r++){
-    for(unsigned int c = 0; c < P_dorm[0].size(); c++){
-      P_daily[r][c] = P_dorm[r][c][t];
+void Model::get_P_daily(Vector2D<int>& P_daily, Vector3D<int>& P_primary, const int& t) {   
+  for(unsigned int r = 0; r < P_primary.size(); r++){
+    for(unsigned int c = 0; c < P_primary[0].size(); c++){
+      P_daily[r][c] = P_primary[r][c][t];
     }
   }
 }
@@ -233,16 +236,21 @@ void Model::init_HjuvLIR(Vector2D<int>& Hjuv, Vector3D<int>& L, Vector3D<int>& I
     R = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->Nhost, 0)));
 }
 
-/* Initialisation of P P_sex_tmp, P_sex, P_asex, P_sex_daily, P_asex_daily, P_stock at 0 */
-void Model::init_P( Vector2D<int>& P, Vector2D<int>& P_sex_tmp, Vector2D<int>& P_asex_tmp, Vector3D<int>& P_sex,Vector3D<int>& P_asex, 
-                       Vector2D<int>& P_sex_daily, Vector2D<int>& P_asex_daily,Vector3D<int>& P_stock) {
+/* Initialisation of P, P_sex_secondary, P_clonal_secondary, P_sex_primary, P_sex_primary_tmp, 
+  P_clonal_primary, P_clonal_primary_tmp, P_sex_daily, P_clonal_daily, P_stock  at 0 */
+void Model::init_P( Vector2D<int>& P, Vector2D<int>& P_sex_secondary, Vector2D<int>& P_clonal_secondary, 
+                    Vector3D<int>& P_sex_primary, Vector2D<int>& P_sex_primary_tmp, Vector3D<int>& P_clonal_primary, 
+                    Vector2D<int>& P_clonal_primary_tmp, Vector2D<int>& P_sex_daily, Vector2D<int>& P_clonal_daily,
+                    Vector3D<int>& P_stock) {
   P = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
-  P_sex_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
-  P_asex_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
-  P_sex = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
-  P_asex = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
+  P_sex_secondary = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
+  P_clonal_secondary = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
+  P_sex_primary = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
+  P_sex_primary_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
+  P_clonal_primary = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
+  P_clonal_primary_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
   P_sex_daily = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
-  P_asex_daily = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
+  P_clonal_daily = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
   P_stock = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->basic_patho.sex_propagule_viability_limit, 0)));
 }
 

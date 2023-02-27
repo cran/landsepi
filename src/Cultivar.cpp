@@ -27,17 +27,28 @@ Cultivar::Cultivar()
       max_density(0.0),
       growth_rate(0.0),
       reproduction_rate(0.0),
-      death_rate(0.0),
+//      death_rate(0.0),
+      relative_yield_H(0.0),
+      relative_yield_L(0.0),
+      relative_yield_I(0.0),
+      relative_yield_R(0.0),
       genes_id(std::vector<int>()) {}
 
 // Constructor
 Cultivar::Cultivar(const double& initial_density, const double& max_density, const double& growth_rate,
-                   const double& reproduction_rate, const double& death_rate, const std::vector<int>& genes_id)
+                   const double& reproduction_rate, //const double& death_rate, 
+                   const double& relative_yield_H, const double& relative_yield_L, 
+                   const double& relative_yield_I, const double& relative_yield_R,
+                   const std::vector<int>& genes_id)
     : initial_density(initial_density),
       max_density(max_density),
       growth_rate(growth_rate),
       reproduction_rate(reproduction_rate),
-      death_rate(death_rate),
+ //     death_rate(death_rate),
+      relative_yield_H(relative_yield_H),
+      relative_yield_L(relative_yield_L),
+      relative_yield_I(relative_yield_I),
+      relative_yield_R(relative_yield_R),
       genes_id(genes_id) {}
 
 // Transform Cultivar attributs to string
@@ -47,7 +58,11 @@ std::string Cultivar::to_string() const {
     str += "    max_density:       " + std::to_string(this->max_density) + "\n";
     str += "    growth_rate:       " + std::to_string(this->growth_rate) + "\n";
     str += "    reproduction_rate: " + std::to_string(this->reproduction_rate) + "\n";
-    str += "    death_rate:        " + std::to_string(this->death_rate) + "\n";
+//    str += "    death_rate:        " + std::to_string(this->death_rate) + "\n";
+    str += "    relative_yield_H:  " + std::to_string(this->relative_yield_H) + "\n";
+    str += "    relative_yield_L:  " + std::to_string(this->relative_yield_L) + "\n";
+    str += "    relative_yield_I:  " + std::to_string(this->relative_yield_I) + "\n";
+    str += "    relative_yield_R:  " + std::to_string(this->relative_yield_R) + "\n";
     str += "    genes_id:          ";
     for(const int& id : this->genes_id) {
         str += std::to_string(id) + " ";

@@ -188,16 +188,16 @@ checkCultivarsTable <- function(data) {
   }
   
   shiny::removeUI(selector = "#cultivarsmaxvalueError")
-  if( sum(data[,c("growth_rate","reproduction_rate","death_rate")] > 1) != 0) {
+  if( sum(data[,c("growth_rate","reproduction_rate")] > 1) != 0) {
     
     showErrorMessage(id = "cultivarsmaxvalueError", selectorafter= "#generateLandscape",
-                     message = paste0("Cultivar 'growth_rate' / 'reproduction_rate' / 'death_rate' values should be lower than 1"))
+                     message = paste0("Cultivar 'growth_rate' / 'reproduction_rate' values should be lower than 1"))
     isok <- FALSE
   }
   
   shiny::removeUI(selector = "#cultivarsValueError")
-  if( sum(data[,- which(c("cultivarName", "growth_rate","reproduction_rate","death_rate") %in% colnames(data))] < 0) != 0
-      || sum(data[,- which(c("cultivarName", "growth_rate","reproduction_rate","death_rate") %in% colnames(data))] > VALUEMAX) != 0) {
+  if( sum(data[,- which(c("cultivarName", "growth_rate","reproduction_rate") %in% colnames(data))] < 0) != 0
+      || sum(data[,- which(c("cultivarName", "growth_rate","reproduction_rate") %in% colnames(data))] > VALUEMAX) != 0) {
     
     showErrorMessage(id = "cultivarsValueError", selectorafter= "#generateLandscape",
                      message = paste0("Values in the 'Cultivar' table should be lower than ",VALUEMAX))
@@ -496,7 +496,6 @@ CULTIVARS_TOOLTIP <- c("Name of the cultivar",
                       "Maximum host individuals density (in pure crop) per surface unit at the end of the cropping season",
                       "Growth rate",
                       "Reproduction rate",
-                      "Death rate",
                       "Theoretical yield in pure crop (in weight or volume unit / ha / cropping season) associated with the sanitary status ‘H’",
                       "Theoretical yield in pure crop (in weight or volume unit / ha / cropping season) associated with the sanitary status ‘L’",
                       "Theoretical yield in pure crop (in weight or volume unit / ha / cropping season) associated with the sanitary status ‘I’",

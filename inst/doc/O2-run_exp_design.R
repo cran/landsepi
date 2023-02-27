@@ -54,8 +54,8 @@ myDesign
 #      simul_params <- setLandscape(simul_params, landscape)
 #  
 #      ## Dispersal parameters
-#      disp_patho <- loadDispersalPathogen(myDesign$id_landscape[i])[[1]]  ## update dispersal
-#      simul_params <- setDispersalPathogen(simul_params, disp_patho)
+#      disp_patho_clonal <- loadDispersalPathogen(myDesign$id_landscape[i])[[1]]  ## update dispersal
+#      simul_params <- setDispersalPathogen(simul_params, disp_patho_clonal)
 #  
 #      ## Genes
 #      gene1 <- loadGene(name = "MG 1", type = "majorGene")
@@ -144,7 +144,7 @@ myDesign
 #  
 #  Npoly <- nrow(simul_params@Landscape)
 #  Nhost <- nrow(simul_params@Cultivars)
-#  Npatho <- Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
+#  Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
 #  
 #  ## Initialise lists
 #  H <- as.list(1:nTS)

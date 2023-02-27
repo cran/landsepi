@@ -21,7 +21,7 @@
 # Default data.frame column names
 .croptypesColNames <- c("croptypeID", "croptypeName")
 .cultivarsColNames <- c("cultivarName", "initial_density", "max_density", "growth_rate"
-                        , "reproduction_rate", "death_rate", "yield_H", "yield_L", "yield_I"
+                        , "reproduction_rate", "yield_H", "yield_L", "yield_I"
                         , "yield_R", "planting_cost", "market_value")
 .cultivarsGenesColNames <- c()
 .geneColNames <- c("geneName", "efficiency", "time_to_activ_mean", "time_to_activ_var"
@@ -45,17 +45,17 @@
 #' @param Pathogen a list of pathogen aggressiveness parameters on a susceptible host
 #' for a pathogen genotype not adapted to resistance.
 #' @param ReproSexProb a vector of size TimeParam$nTSpY +1 (end of season) of the probabilities for an infectious host to reproduce via sex rather 
-#' than via cloning at each timestep (days).
+#' than via cloning at each time step (days).
 #' @param PI0 initial probability for the first host (whose index is 0) to be infectious 
 #' (i.e. state I) at the beginning of the simulation. Must be between 0 and 1.
 #' @param DispHost a vectorized matrix giving the probability of host dispersal
 #' from any field of the landscape to any other field
-#' @param DispPatho a vectorized matrix giving the probability of pathogen dispersal
+#' @param DispPathoClonal a vectorized matrix giving the probability of pathogen dispersal
 #' from any field of the landscape to any other field.
 #' @param DispPathoSex a vectorized matrix giving the probability of pathogen dispersal
-#' from any field of the landscape to any other field (sexual spore).
+#' from any field of the landscape to any other field (sexual propagule).
 #' @param Treatment a list of chemical treatment parameters (indices of treated cultivars, times of application, 
-#' efficiency and reduction rate)
+#' efficiency and degradation rate)
 #' @param OutputDir the directory for simulation outputs 
 #' @param OutputGPKG the name of the output GPKG file containing parameters of the 
 #' deployment strategy
@@ -97,10 +97,10 @@ setMethod(
            ReproSexProb = vector(),
            PI0 = 0,
            DispHost = vector(),
-           DispPatho = vector(),
+           DispPathoClonal = vector(),
            DispPathoSex = vector(),
            Treatment = list(
-             treatment_reduction_rate = 0.1,
+             treatment_degradation_rate = 0.1,
              treatment_efficiency = 0,
              treatment_timesteps = vector(),
              treatment_cultivars = vector(),
@@ -123,7 +123,7 @@ setMethod(
     .Object@ReproSexProb <- ReproSexProb
     .Object@PI0 <- PI0
     .Object@DispHost <- DispHost
-    .Object@DispPatho <- DispPatho
+    .Object@DispPathoClonal <- DispPathoClonal
     .Object@DispPathoSex <- DispPathoSex
     .Object@Treatment <- Treatment
     .Object@OutputDir <- OutputDir
@@ -242,10 +242,10 @@ setMethod("summary", "LandsepiParams", function(object) {
   summary(object@ReproSexProb)
 
   message("### Pathogen Dispersal Matrix (as vector) : ")
-  if (length(object@DispPatho) == 0) {
+  if (length(object@DispPathoClonal) == 0) {
     message("\tnot set (see loadDispersalPathogen and setDispersalPathogen methods)")
   } else {
-    summary(object@DispPatho)
+    summary(object@DispPathoClonal)
   }
   
   message("### Pathogen Dispersal Repro Sex Matrix (as vector) : ")
@@ -330,7 +330,7 @@ checkSimulParams <- function(params) {
 #' \item no between-field dispersal (neither pathogen nor host)
 #' \item no pathogen introduction
 #' \item no resistance gene
-#' \item no chemical treatments
+#' \item no chemical treatment
 #' \item no output to generate.
 #' }
 #' @examples \dontrun{
@@ -384,7 +384,7 @@ loadSimulParams <- function(inputGPKG = "") {
   ## TODO get all parameters from GPKG and parameters.txt if exist
   ## TODO: doesn't seem to work with croptypes, cultivars and cultivarGenes
 
-  message("not implemented yet for DispHost, DispPatho, PI0, pathogen, seed, time, outputs...")
+  message("not implemented yet for DispHost, DispPathoClonal, PI0, pathogen, seed, time, outputs...")
 
   return(lp)
 }
@@ -536,15 +536,16 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' If keepRawResults=TRUE, a set of binary files is generated for every year of simulation and
 #' every compartment: \itemize{
 #'  \item H: healthy hosts,
-#'  \item Hjuv: juvenile healthy hosts,
+#'  \item Hjuv: juvenile healthy hosts (for host reproduction),
 #'  \item L: latently infected hosts,
 #'  \item I: infectious hosts,
 #'  \item R: removed hosts,
 #'  \item P: propagules.}
-#' Each file indicates for every time-step the number of individuals in each field, and when 
-#' appropriate for each host and pathogen genotypes.
+#' Each file indicates for every time step the number of individuals in each field, and when 
+#' appropriate for each host and pathogen genotype.
+#' @seealso \link{demo_landsepi}
 #' @examples \dontrun{
-#' ## Here is an example of simulation of a mosaic of three cultivars (S + R1 + R2). See our 
+#' ### Here is an example of simulation of a mosaic of three cultivars (S + R1 + R2). See our 
 #' ## tutorials for more examples.
 #' ## Initialisation
 #' simul_params <- createSimulParams(outputDir = getwd())
@@ -595,6 +596,45 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' simul_params <- saveDeploymentStrategy(simul_params)
 #' ## Run simulation
 #' runSimul(simul_params)
+#' 
+#' ### Simulation of rust epidemics in a 1-km^2 patch cultivated with a susceptible wheat cultivar
+#'seed=10
+#'Nyears=5
+#'disease="rust"
+#'hostType="growingHost"
+#'simul_params <- createSimulParams(outputDir = getwd())
+#'
+#'## Seed and time parameters
+#'simul_params <- setSeed(simul_params, seed)
+#'simul_params <- setTime(simul_params, Nyears, nTSpY=120)
+#'
+## Pathogen parameters
+#'simul_params <- setPathogen(simul_params, loadPathogen(disease))
+#'myLand <- Polygons(list(Polygon(matrix(c(0,0,1,1,0,1,1,0)*1000, nrow=4))), "ID1")
+#'myLand <- SpatialPolygons(list(myLand))
+#'simul_params <- setLandscape(simul_params, myLand)
+#'
+#'## Simulation, pathogen, landscape and dispersal parameters
+#'simul_params <- setInoculum(simul_params, 5e-4)
+#'simul_params <- setDispersalPathogen(simul_params, c(1))
+#'
+#'## Cultivars
+#'simul_params <- setCultivars(simul_params, loadCultivar(name = "Susceptible", type = hostType))
+#'
+#'## Croptypes
+#'croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop"), Susceptible = 1)
+#'simul_params <- setCroptypes(simul_params, croptype)
+#'simul_params <- allocateLandscapeCroptypes(simul_params,
+#'rotation_period = 0, rotation_sequence = list(c(0)),
+#'rotation_realloc = FALSE, prop = 1, aggreg = 1)
+#'
+#'## list of outputs to be generated
+#'outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "")
+#'simul_params <- setOutputs(simul_params, outputlist)
+#'
+#'## Check, save and run simulation
+#'checkSimulParams(simul_params)
+#'runSimul(simul_params, graphic = TRUE)
 #' }
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018).
 #' Assessing the durability andefficiency of landscape-based strategies to deploy plant 
@@ -649,7 +689,7 @@ runSimul <- function(params, graphic=TRUE, writeTXT=TRUE, videoMP4=FALSE, keepRa
     croptypes_cultivars_prop = croptypes_cultivars_prop,
     basic_patho_param = params@Pathogen,
     repro_sex_prob = params@ReproSexProb,
-    disp_patho = params@DispPatho,
+    disp_patho_clonal = params@DispPathoClonal,
     disp_patho_sex = params@DispPathoSex,
     disp_host = params@DispHost,
     treatment = params@Treatment,
@@ -796,10 +836,10 @@ setLandscape <- function(params, land) {
     disp_host <- loadDispersalHost(params, type = "no")
     params <- setDispersalHost(params, disp_host)
   }
-  if (length(params@DispPatho) == 0){
-    disp_patho <- loadDispersalHost(params, type = "no") # (same function)
+  if (length(params@DispPathoClonal) == 0){
+    disp_patho_clonal <- loadDispersalHost(params, type = "no") # (same function)
     disp_patho_sex <- loadDispersalHost(params, type = "no")
-    params <- setDispersalPathogen(params, disp_patho, disp_patho_sex)
+    params <- setDispersalPathogen(params, disp_patho_clonal, disp_patho_sex)
   }
   return(params)
 }
@@ -871,16 +911,16 @@ checkLandscape <- function(params) {
 #' for each line i and each column i' the probability that propagules migrate 
 #' from field i to field i'.  
 #' @param params a LandsepiParams Object.
-#' @param mat a square matrix giving the probability of pathogen dispersal
+#' @param mat_clonal a square matrix giving the probability of pathogen dispersal (clonal propagules)
 #' from any field of the landscape to any other field. 
 #' It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}. 
 #' The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum 
 #' to 1.
-#' @param mat_sex a square matrix giving the probability of pathogen (sexual spores) dispersal
+#' @param mat_sex a square matrix giving the probability of pathogen dispersal (sexual propagules) 
 #' from any field of the landscape to any other field (default identity matrix) . 
 #' It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}. 
 #' The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum 
-#' to 1.
+#' to 1 in a continuous landscape.
 #' @return a LandsepiParam object.
 #' @seealso \link{loadDispersalPathogen}
 #' @examples
@@ -888,19 +928,19 @@ checkLandscape <- function(params) {
 #' simul_params <- createSimulParams()
 #' simul_params <- setLandscape(simul_params, loadLandscape(1))
 #' d <- loadDispersalPathogen(1)
-#' simul_params <- setDispersalPathogen(simul_params, d)
-#' simul_params@DispPatho
+#' simul_params <- setDispersalPathogen(simul_params, d[[1]], d[[2]])
+#' simul_params@DispPathoClonal
 #' }
 #' @export
-setDispersalPathogen <- function(params, mat, mat_sex=NULL) {
-  if (class(mat)[1] == "matrix") {
-    params@DispPatho <- as.vector(mat) # By columns
+setDispersalPathogen <- function(params, mat_clonal, mat_sex=NULL) {
+  if (class(mat_clonal)[1] == "matrix") {
+    params@DispPathoClonal <- as.vector(mat_clonal) # By columns
   } else {
-    params@DispPatho <- mat
+    params@DispPathoClonal <- mat_clonal
   }
   
   if(is.null(mat_sex)) {
-    params@DispPathoSex = c(diag(1,sqrt(length(params@DispPatho)), sqrt(length(params@DispPatho))))
+    params@DispPathoSex = c(diag(1,sqrt(length(params@DispPathoClonal)), sqrt(length(params@DispPathoClonal))))
   }
   else {
     if (class(mat_sex)[1] == "matrix") {
@@ -925,10 +965,11 @@ setDispersalPathogen <- function(params, mat, mat_sex=NULL) {
 #' \code{\link{loadLandscape}}).
 #' @details *landsepi* includes built-in dispersal matrices to represent rust dispersal in the 
 #' five built-in landscapes. These have been computed from a power-law dispersal kernel: 
-#' \eqn{ g(d) = ((b-2)*(b-1) / (2*pi*a^2)) * (1 +  d/a)^(-b) }
+#' \eqn{ g(d) = ((b-2)*(b-1) / (2*pi*a^2)) * (1 +  d/a)^{-b} }
 #'  with a=40 the scale parameter and b=7 a parameter related to the width of the dispersal kernel. 
-#'  The expected mean dispersal distance is given by 2*a/(b-3)=20 m.
-#' @return a vectorised dispersal matrix for clonal dispersion and a vectorised dispersal identity matrix for sexual dispersion. All by columns.
+#'  The expected mean dispersal distance is given by \eqn{ 2*a /(b-3) = 20 m }.
+#' @return a vectorised dispersal matrix representing the dispersal of clonal propagules, 
+#' and a vectorised dispersal identity matrix for sexual propagules. All by columns.
 #' @seealso \link{dispP}, \link{setDispersalPathogen}
 #' @examples
 #' d <- loadDispersalPathogen(1)
@@ -936,16 +977,16 @@ setDispersalPathogen <- function(params, mat, mat_sex=NULL) {
 #' @export
 loadDispersalPathogen <- function(id = 1) {
   if (id >= 1 && id <= 5) {
-    disp <- get(paste0("dispP_", id))
+    disp_clonal <- get(paste0("dispP_", id))
   }
   else {
     warning("Indices of available pathogen dispersal matrices are 1 to 5")
-    disp <- numeric()
+    disp_clonal <- numeric()
   }
   
-  disp_sex <- c(diag(1,sqrt(length(disp)),sqrt(length(disp))))
+  disp_sex <- c(diag(1,sqrt(length(disp_clonal)),sqrt(length(disp_clonal))))
 
-  return( list(disp=disp, disp_sex=disp_sex) )
+  return( list(disp_clonal=disp_clonal, disp_sex=disp_sex) )
 }
 
 
@@ -957,15 +998,15 @@ loadDispersalPathogen <- function(id = 1) {
 #' @return a boolean TRUE if OK, FALSE otherwise
 checkDispersalPathogen <- function(params) {
   ret <- TRUE
-  if (length(params@DispPatho) != nrow(params@Landscape) * nrow(params@Landscape)) {
+  if (length(params@DispPathoClonal) != nrow(params@Landscape) * nrow(params@Landscape)) {
     warning("Size of pathogen dispersal is not landscape features^2")
     ret <- FALSE
   }
 
-  if (sum(params@DispPatho > 1) != 0 || sum(params@DispPatho < 0) != 0) {
+  if (sum(params@DispPathoClonal > 1) != 0 || sum(params@DispPathoClonal < 0) != 0) {
     warning("Probabilities of pathogen dispersal must to be in [0,1]")
-    warning(params@DispPatho[which(params@DispPatho > 1)])
-    warning(params@DispPatho[which(params@DispPatho < 0)])
+    warning(params@DispPathoClonal[which(params@DispPathoClonal > 1)])
+    warning(params@DispPathoClonal[which(params@DispPathoClonal < 0)])
     ret <- FALSE
   }
 
@@ -1195,15 +1236,30 @@ allocateLandscapeCroptypes <- function(params, rotation_period, rotation_sequenc
 
 #' @name loadTreatment
 #' @title Load treatment parameters
-#' @description Load the list of treatment parameters required by the model (initialised at 0
+#' @description Loads the list of treatment parameters required by the model (initialised at 0
 #' , i.e. absence of treatments)
+#' @details Treatment efficiency is maximum (i.e. equal to the parameter treatment_efficiency) 
+#' at the time of treatment application (noted \eqn{t*}); then it decreases with time 
+#' (i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:
+#' \eqn{ efficiency(t) = treatment\_efficiency / (1 + exp(a-b*C(t))) }
+#' with \eqn{ C(t)= C_1 * C_2}: \itemize{
+#' \item{\eqn{C_1 = exp(- treatment\_degradation\_rate * \Delta t) } is the reduction of 
+#' fungicide concentration due to time (e.g. natural degradation, volatilization, weathering), 
+#' with \eqn{\Delta t = t - t*} the timelag passed since the time of 
+#' treatment application.}
+#' \item{ \eqn{ C_2 = min(1, N(t*) / N(t)) } is the reduction of fungicide concentration due to plant growth, 
+#' since new plant tissue is not covered by fungicide. \eqn{N(t*)} and \eqn{N(t)} being the number of 
+#' host individuals  a the time of treatment \eqn{t*} and at time \eqn{t}, respectively.}
+#' \item{ \eqn{a \in [3.5 ; 4.5]} and \eqn{b \in [8 ; 9]} are shape parameters.}
+#' } 
 #' @return a list of treatment parameters:
-#' \itemize{
-#'   \item treatment_reduction_rate = reduction per time step of treatment concentration,
-#'   \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
-#'   \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-#'   \item treatment_cultivars  = vector of cultivar indices that receive treatments,
-#'   \item treatment_cost = cost of a single treatment application (monetary units/ha).
+#' \itemize{ 
+#' \item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction 
+#' of pathogen infection rate at the time of application),
+#' \item treatment_timesteps = vector of time steps corresponding to treatment application dates,
+#' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
+#' \item treatment_cost = cost of a single treatment application (monetary units/ha)
 #' }
 #' @seealso \link{setTreatment}
 #' @examples
@@ -1212,10 +1268,10 @@ allocateLandscapeCroptypes <- function(params, rotation_period, rotation_sequenc
 #' @export
 loadTreatment <- function() {
   treatment <- list(
-                treatment_reduction_rate = 0.1,
+                treatment_degradation_rate = 0.1,
                 treatment_efficiency = 0.0,
-                treatment_timesteps = vector(),
-                treatment_cultivars = vector(),
+                treatment_timesteps = numeric(),
+                treatment_cultivars = numeric(),
                 treatment_cost = 0
                 )
   return(treatment)
@@ -1224,17 +1280,30 @@ loadTreatment <- function() {
 #' @name setTreatment
 #' @title Set chemical treatments
 #' @description Updates a LandsepiParams object with treatment parameters
-#' @details An empty list of treatments (i.e. absence of application) can be loaded using \code{\link{loadPathogen}}.
+#' @details Treatment efficiency is maximum (i.e. equal to the parameter treatment_efficiency) 
+#' at the time of treatment application (noted \eqn{t*}); then it decreases with time 
+#' (i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:
+#' \eqn{ efficiency(t) = treatment\_efficiency / (1 + exp(a-b*C(t))) }
+#' with \eqn{ C(t)= C_1 * C_2}: \itemize{
+#' \item{\eqn{C_1 = exp(- treatment\_degradation\_rate * \Delta t) } is the reduction of 
+#' fungicide concentration due to time (e.g. natural degradation, volatilization, weathering), 
+#' with \eqn{\Delta t = t - t*} the timelag passed since the time of 
+#' treatment application.}
+#' \item{ \eqn{ C_2 = min(1, N(t*) / N(t)) } is the reduction of fungicide concentration due to plant growth, 
+#' since new plant tissue is not covered by fungicide. \eqn{N(t*)} and \eqn{N(t)} being the number of 
+#' host individuals  a the time of treatment \eqn{t*} and at time \eqn{t}, respectively.}
+#' \item{ \eqn{a \in [3.5 ; 4.5]} and \eqn{b \in [8 ; 9]} are shape parameters.}
+#' } 
+#' An empty list of treatments (i.e. absence of application) can be loaded using \code{\link{loadPathogen}}.
 #' @param params a LandsepiParams Object.
-#' @param treatment_params a list of treatment parameters including:
-#' \itemize{
-#'   \item treatment_reduction_rate = reduction per time step of treatment concentration,
-#'   \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
-#'   \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-#'   \item treatment_cultivars  = vector of cultivar indices that receive treatments,
-#'   \item treatment_cost = cost of a single treatment application (monetary units/ha)
+#' @param treatment_params list of parameters related to pesticide treatments: \itemize{ 
+#' \item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction 
+#' of pathogen infection rate at the time of application),
+#' \item treatment_timesteps = vector of time steps corresponding to treatment application dates,
+#' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
+#' \item treatment_cost = cost of a single treatment application (monetary units/ha)
 #' }
-#' 
 #' @return a LandsepiParams object
 #' @seealso \link{loadTreatment}
 #' @examples
@@ -1259,18 +1328,29 @@ setTreatment <- function(params, treatment_params) {
 checkTreatment <- function(params) {
   
   ret <- TRUE
-  if (!is.numeric(params@Treatment$treatment_efficiency) ||
-      !is.in.01(params@Treatment$treatment_efficiency)){
-    warning("Treatment efficiency must be between 0 and 1")
-    ret <- FALSE
-  }
-  if ( !is.numeric(params@Treatment$treatment_reduction_rate) ||
-       !is.positive(params@Treatment$treatment_reduction_rate) ){
-    warning("Treatment reduction rate must be >=0")
-  }
-  if ( !is.numeric(params@Treatment$treatment_cost) ||
-    !is.positive(params@Treatment$treatment_cost) ){
-    warning("Treatment cost must be >=0")
+  
+  if (length(params@Treatment$treatment_cultivars) > 0) {
+    warning("Simulation with chemical treatment applications")
+    
+    if (!is.numeric(params@Treatment$treatment_efficiency) ||
+        !is.in.01(params@Treatment$treatment_efficiency)){
+      warning("Treatment efficiency must be between 0 and 1")
+      ret <- FALSE
+    }
+    if ( !is.numeric(params@Treatment$treatment_degradation_rate) ||
+         !is.positive(params@Treatment$treatment_degradation_rate) ){
+      warning("Treatment degradation rate must be >=0")
+      ret <- FALSE
+    }
+    if ( !is.numeric(params@Treatment$treatment_cost) ||
+         !is.positive(params@Treatment$treatment_cost) ){
+      warning("Treatment cost must be >=0")
+    }
+    if ( !is.numeric(params@Treatment$treatment_timesteps) ||
+         sum( !is.strict.positive(params@Treatment$treatment_timesteps) )>0 ){
+      warning("Timesteps of treatments must be >0")
+      ret <- FALSE
+    }
   }
   return(ret)
 }
@@ -1280,8 +1360,10 @@ checkTreatment <- function(params) {
 #' @description Loads default pathogen parameters for a specific disease
 #' @details Available diseases:
 #' * "no pathogen"
-#' * "rust"
-#' * "mildew"
+#' * "rust" (genus \emph{Puccinia}, e.g. stripe rust, stem rust and leaf rust of wheat and barley)
+#' * "mildew" (\emph{Plasmopara viticola}, downy mildew of grapevine)
+#' Note that when disease = "mildew" a price reduction between 0% and 5% is applied to the market value
+#' according to disease severity. 
 #' @param disease a disease name, among "rust" (default), "mildew" and "no pathogen"
 #' @return a list of pathogen parameters on a susceptible host
 #' for a pathogen genotype not adapted to resistance
@@ -1400,14 +1482,21 @@ setPathogen <- function(params, patho_params) {
 
 
 #' @name setReproSexProb
-#' @title set a vector of probabilities for an infectious host to reproduce via sex rather 
-#' than via cloning.
+#' @title Set the vector of probabilities of sexual reproduction
 #' @description set the probabilities for an infectious host to reproduce via sex rather 
-#' than via cloning at every timestep (\code{TimeParam$nTSpY}).
+#' than via cloning at every time step.
 #' @param params a LandsepiParams object
 #' @param vec a vector of size TimeParam$nTSpY +1 (season end) with the probabilities for an infectious host
-#'  to reproduce via sex rather than via cloning at each step. 
+#'  to reproduce via sex rather than via cloning at each time step. 
 #' @return a LandsepiParams object updated
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' simul_params <- setTime(simul_params, Nyears=10, nTSpY=120)
+#' repro_sex_probs <- c(rep(0.0, 120), 1.0)  
+#' simul_params <- setReproSexProb(simul_params, repro_sex_probs)
+#' simul_params@ReproSexProb
+#' }
 #' @export
 setReproSexProb <- function(params, vec) {
   if( params@TimeParam$nTSpY+1 != length(vec) ){
@@ -1422,7 +1511,7 @@ setReproSexProb <- function(params, vec) {
 
 #' @name checkPathogen
 #' @title Check pathogen
-#' @description Checks papthogen validity
+#' @description Checks pathogen validity
 #' @param params a LandsepiParams Object.
 #' @return a boolean, TRUE if OK, FALSE otherwise
 checkPathogen <- function(params) {
@@ -1509,7 +1598,7 @@ checkPathogen <- function(params) {
 #' @title Load Croptypes
 #' @description Creates a data.frame containing croptype parameters and filled with 0
 #' @param params a LandsepiParams Object.
-#' @param croptypeIDs a vector of indices of croptypes (must match with croptypes in the landscape)
+#' @param croptypeIDs a vector of indices of croptypes (must start at 0 and match with croptype IDs in the landscape)
 #' @param names a vector containing the names of all croptypes
 #' @details Croptypes need to be later updated with \code{\link{allocateCroptypeCultivars}}.
 #' If neither croptypeIDs nor names are given, it will automatically generate
@@ -1614,7 +1703,7 @@ allocateCroptypeCultivars <- function(croptypes, croptypeName, cultivarsInCropty
 #' | 0          |  "cropt1"     |  1            | 0             | ... |
 #' | 1          |  "cropt2"     |  0.5          | 0.5           | ... |
 #'
-#' croptypeIDs have to match values from landscape "croptypeID" layer with feature year_X. 
+#' croptypeIDs must start at 0 and match with values from landscape "croptypeID" layer with feature year_X. 
 #' Cultivars names have to match cultivar names in the cultivars data.frame.
 #'
 #' @param params a LandsepiParams Object.
@@ -1745,7 +1834,7 @@ checkCroptypes <- function(params) {
 #' @title Load a cultivar
 #' @description create a data.frame containing cultivar parameters depending of his type
 #' @param name a character string (without space) specifying the cultivar name.
-#' @param type the cultivar type, among: "growingHost" (default), "nongrowingHost" or "nonCrop".
+#' @param type the cultivar type, among: "growingHost" (default), "nongrowingHost", "grapevine", or "nonCrop".
 #' @details 
 #' * "growingHost" is adapted to situations where the infection unit is a piece of leaf 
 #' (e.g. where a fungal lesion can develop); the number of available infection units 
@@ -1798,7 +1887,6 @@ loadCultivar <- function(name, type = "growingHost") {
 #' as if cultivated in pure crop,
 #' \item growth rate: host growth rates,
 #' \item reproduction rate: host reproduction rates,
-#' \item death rate: host death rates,
 #' \item yield_H: theoretical yield (in weight or volume units / ha / cropping season) 
 #' associated with hosts in sanitary status H as if cultivated in pure crop,
 #' \item yield_L: theoretical yield (in weight or volume units / ha / cropping season) 
@@ -1813,11 +1901,11 @@ loadCultivar <- function(name, type = "growingHost") {
 #' 
 #' The data.frame must be defined as follow (example):
 #' 
-#' | cultivarName | initial_density | max_density | growth_rate | reproduction_rate | death_rate | yield_H | yield_L | yield_I |yield_R | planting_cost | market_value |
-#' | ------------ | --------------- | ----------- | ----------- | ----------------- | ---------- | ------- | ------- | ------- | ------ | ------------- | ------------ |
-#' | Susceptible  | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
-#' | Resistant1   | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
-#' | Resistant2   | 0.1             |  2.0        | 0.1         | 0.0               | 0.0        | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
+#' | cultivarName | initial_density | max_density | growth_rate | reproduction_rate | yield_H | yield_L | yield_I |yield_R | planting_cost | market_value |
+#' | ------------ | --------------- | ----------- | ----------- | ----------------- | ------- | ------- | ------- | ------ | ------------- | ------------ |
+#' | Susceptible  | 0.1             |  2.0        | 0.1         | 0.0               | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
+#' | Resistant1   | 0.1             |  2.0        | 0.1         | 0.0               | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
+#' | Resistant2   | 0.1             |  2.0        | 0.1         | 0.0               | 2.5     | 0.0     | 0.0     | 0.0    | 225           | 200          |
 #'
 #' @return a LandsepiParams object
 #' @seealso \link{loadCultivar}
@@ -1873,31 +1961,42 @@ checkCultivars <- function(params) {
   
   if (!is.numeric(params@Cultivars$growth_rate) ||
       !is.numeric(params@Cultivars$reproduction_rate) ||
-      !is.numeric(params@Cultivars$death_rate) ||
+      # !is.numeric(params@Cultivars$death_rate) ||
       
       sum(!is.in.01(params@Cultivars$growth_rate) > 0) || 
-      sum(!is.in.01(params@Cultivars$reproduction_rate) > 0) || 
-      sum(!is.in.01(params@Cultivars$death_rate) > 0) ){
-    warning("growth, reproduction and death rates must be between 0 and 1")
+      sum(!is.in.01(params@Cultivars$reproduction_rate) > 0) 
+      # || sum(!is.in.01(params@Cultivars$death_rate) > 0) 
+      ){
+    warning("growth and reproduction rates must be between 0 and 1")
     ret <- FALSE
   } 
   
   if(!is.numeric(params@Cultivars$initial_density) ||
      !is.numeric(params@Cultivars$yield_H) ||
-     !is.numeric(params@Cultivars$yield_L) ||
-     !is.numeric(params@Cultivars$yield_I) ||
-     !is.numeric(params@Cultivars$yield_R) ||
      !is.numeric(params@Cultivars$planting_cost) ||
      !is.numeric(params@Cultivars$market_value) ||
      
      sum( !is.positive(params@Cultivars$initial_density) ) > 0 ||
      sum( !is.positive(params@Cultivars$yield_H) ) > 0 ||
+     sum( !is.positive( params@Cultivars$planting_cost) ) > 0 ||
+     sum( !is.positive(params@Cultivars$market_value) ) > 0 ){
+    warning("initial_density, yield_H, planting_cost and market_value must be >= 0")
+    ret <- FALSE
+  }
+  
+  if(!is.numeric(params@Cultivars$yield_L) ||
+     !is.numeric(params@Cultivars$yield_I) ||
+     !is.numeric(params@Cultivars$yield_R) ||
+
      sum( !is.positive(params@Cultivars$yield_L) ) > 0 ||
      sum( !is.positive(params@Cultivars$yield_I) ) > 0 ||
      sum( !is.positive(params@Cultivars$yield_R) ) > 0 ||
-     sum( !is.positive( params@Cultivars$planting_cost) ) > 0 ||
-     sum( !is.positive(params@Cultivars$market_value) ) > 0 ){
-    warning("initial_density, yield, planting_cost and market_value must be >= 0")
+
+     sum( params@Cultivars$yield_L > params@Cultivars$yield_H ) > 0 ||
+     sum( params@Cultivars$yield_I > params@Cultivars$yield_H ) > 0 ||
+     sum( params@Cultivars$yield_R > params@Cultivars$yield_H ) > 0 ){
+
+    warning("yield_L, yield_I and yield_R must be >= 0 and smaller or equal to yield_H")
     ret <- FALSE
   }
   
@@ -1942,7 +2041,7 @@ checkCultivars <- function(params) {
 #' * "QTL" means a partial resistance (50% efficiency) that requires several pathogen mutations 
 #' to be completely eroded
 #' * "immunity" means a completely efficient resistance that the pathogen has no way to adapt 
-#' (i.e. the cultivar is nonCrop).  
+#' (i.e. the cultivar is non-host).  
 #' 
 #' For different scenarios, the data.frame can be manually updated later.
 #' @return a data.frame with gene parameters
@@ -2026,7 +2125,7 @@ loadGene <- function(name, type = "majorGene") {
 #' with the evolution of each corresponding pathogenicity gene. Columns of the dataframe are:
 #' \itemize{
 #' \item geneName: names of resistance genes,
-#' \item target_trait: aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes,
+#' \item target_trait: aggressiveness components ("IR", "LAT", "IP", or "PR") targeted by resistance genes,
 #' \item efficiency: resistance gene efficiencies, i.e. the percentage of reduction of the targeted 
 #' aggressiveness component (IR, 1/LAT, IP and PR),
 #' \item time_to_activ_mean: expected delays to resistance activation (for APRs),
@@ -2227,7 +2326,7 @@ checkCultivarsGenes <- function(params) {
 
 #' @name setInoculum
 #' @title Set inoculum
-#' @description Updates a LandsepiParams with the initial probability for the first host 
+#' @description Updates a LandsepiParams object with the initial probability for the first host 
 #' (whose index is 0) to be infectious (i.e. state I) at the beginning of the simulation.
 #' @param params a LandsepiParams object.
 #' @param val a numeric value (default = 5e-4). Must be between 0 and 1.
@@ -2245,6 +2344,39 @@ setInoculum <- function(params, val = 5e-4) {
   
   return(params)
 }
+
+
+
+
+#' @name compute_audpc100S
+#' @title Compute AUDPC in a 100% susceptible field
+#' @description Compute AUDPC in a single field cultivated with a susceptible cultivar.
+#' @param disease a disease name, among "rust" (default) and "mildew"
+#' @param hostType cultivar type, among: "growingHost" (default), "nongrowingHost", "grapevine".
+#' @param seed an integer used as seed value (for random number generator).
+#' @param area area of the field (must be in square meters).
+#' @details audpc100S is the average AUDPC computed in a non-spatial simulation. 
+#' @return The AUDPC value (numeric)
+#' @examples 
+#' \dontrun{
+#' compute_audpc100S("rust", "growingHost", area=1E6)
+#' compute_audpc100S("mildew", "grapevine", area=1E6)
+#' }
+#' @seealso \link{loadOutputs}
+#' @export
+compute_audpc100S <- function(disease="rust", hostType="growingHost", seed=12345, area=1E6){
+  message(paste("Computing audpc100S for", disease, "in a single susceptible field of", area, "m^2"))
+  
+  res=simul_landsepi(seed=seed
+                     , area=area
+                     , basic_patho_param=loadPathogen(disease)
+                     , cultivars=loadCultivar(name="Susceptible", type=hostType)
+                     , epid_outputs = c("audpc") #, "audpc_rel", "gla", "gla_rel")
+                     , evol_outputs = "", writeTXT = FALSE, graphic = FALSE)
+  audpc100S <- mean(res$epid_outputs$audpc$total[2:5])
+  return(audpc100S)    
+}
+
 
 #' @name checkInoculum
 #' @title Check inoculum
@@ -2296,7 +2428,7 @@ checkInoculum <- function(params) {
 #' \item "": none of these outputs will be generated.
 #' }
 #' @return a list of outputs and parameters for output generation
-#' @seealso \link{setOutputs}
+#' @seealso \link{setOutputs}, \link{compute_audpc100S}
 #' @examples 
 #' outputList <- loadOutputs(epid_outputs = "audpc", evol_outputs = "durability")
 #' outputList

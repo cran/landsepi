@@ -124,7 +124,6 @@ GPKGAddTables <- function(gpkgfile) {
                                                      max_density REAL NOT NULL CHECK(max_density > 0),
                                                      growth_rate REAL NOT NULL CHECK(growth_rate BETWEEN 0 AND 1),
                                                      reproduction_rate REAL NOT NULL CHECK(reproduction_rate BETWEEN 0 AND 1),
-                                                     death_rate REAL NOT NULL CHECK(death_rate BETWEEN 0 AND 1),
                                                      yield_H REAL NOT NULL CHECK(yield_H >= 0),
                                                      yield_L REAL NOT NULL CHECK(yield_L >= 0),
                                                      yield_I REAL NOT NULL CHECK(yield_I >= 0),

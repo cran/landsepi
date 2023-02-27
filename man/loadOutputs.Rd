@@ -49,5 +49,5 @@ outputList <- loadOutputs(epid_outputs = "audpc", evol_outputs = "durability")
 outputList
 }
 \seealso{
-\link{setOutputs}
+\link{setOutputs}, \link{compute_audpc100S}
 }

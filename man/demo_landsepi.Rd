@@ -13,7 +13,7 @@ demo_landsepi(
 )
 }
 \arguments{
-\item{seed}{an interger used as seed for Random Number Generator (default 12345).}
+\item{seed}{an interger used as seed for Random Number Generator.}
 
 \item{strat}{a string specifying the deployment strategy: "MO" for mosaic of resistant
 cultivars, "MI" for intra-fied mixtures, "RO" for cultivar rotations, and "PY" for

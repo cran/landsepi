@@ -53,7 +53,8 @@ using namespace std::chrono;
 //#include <armadillo>
 
 
-struct Model {
+class Model {
+  public:
     const int Nyears;               // Duration of the simulation (number of cropping seasons)
     const int time_steps_per_year;  // Number of timesteps per cropping season
     const int Npoly;                // Number of polygons (i.e. pieces of land where crops may be cultivated)
@@ -65,14 +66,14 @@ struct Model {
     const gsl_rng* random_generator;       // Randomness generator
     const std::vector<Cultivar> cultivars; // Array of available cultivars
     const std::vector<Gene> genes;         // Array of available genes
-    const Basic_patho basic_patho;         // Aggressiveness of a wild-type pathogen on a S cultivar and parameters relative to germination of sexual spores
+    const Basic_patho basic_patho;         // Aggressiveness of a wild-type pathogen on a S cultivar and parameters relative to release of sexual propagules
     const Treatment treatment;             // Effect of chemical treatments on the pathogen
     const std::vector<Croptype> croptypes; // List of pairs {cultivar, relative proportion} for each croptype
     const double sigmoid_kappa_host;       // Kappa parameter for the sigmoid invasion function (for host dispersal)
     const double sigmoid_sigma_host;       // Sigma parameter for the sigmoid invasion function (for host dispersal)
     const double sigmoid_plateau_host;     // Plateau parameter for the sigmoid invasion function (for host dispersal)
     const double pI0;                      // Initial inoculum: probability to be I at t=0
-    const Vector2D<double> disp_patho;     // Pathogen dispersal matrix (asexual propagules)
+    const Vector2D<double> disp_patho_clonal;     // Pathogen dispersal matrix (clonal propagules)
     const Vector2D<double> disp_patho_sex;     // Pathogen dispersal matrix (sexual propagules)
     const Vector2D<double> disp_host;      // Host dispersal matrix
 
@@ -81,7 +82,7 @@ struct Model {
           const gsl_rng* random_generator, const std::vector<Cultivar>& cultivars, const std::vector<Gene>& genes,
           const Basic_patho& basic_patho, const Treatment& treatment, const std::vector<Croptype>& croptypes, const double& sigmoid_kappa_host,
           const double& sigmoid_sigma_host, const double& sigmoid_plateau_host, const double& pI0,
-          const Vector2D<double>& disp_patho, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed);
+          const Vector2D<double>& disp_patho_clonal, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed);
 
     void dynepi();
     void infection(const int& t, std::vector<int>& H, const Vector2D<int>& Hcontaminated, Vector2D<int>& L,
@@ -89,24 +90,25 @@ struct Model {
                    const std::vector<int>& activeR, const std::vector<int>& N,  const std::vector<int>& Nspray);
     Vector2D<int> contamination(const std::vector<int>& H, const std::vector<int>& P, const std::vector<int>& N);
     void host_dynamic(const int& poly, const int& year, const int& t, std::vector<int>& H, std::vector<int>& Hjuv,
-                             const Vector2D<int>& L, const Vector2D<int>& I, const Vector2D<int>& R, std::vector<int>& N, 
-                             std::vector<int>& Nspray);
+                             Vector2D<int>& L, Vector2D<int>& I, Vector2D<int>& R, Vector3D<int>& L2I, Vector3D<int>& I2R, 
+                             std::vector<int>& N, std::vector<int>& Nspray);
     Vector3D<int> bottleneck(const int& t, const Vector3D<int>& L, const Vector3D<int>& I,
                              const Vector2D<int>& activeQR);
-    void dormancy(std::vector<int>& P, const int& year, const int& poly, Vector2D<int>& P_rest, std::vector<int>& P_germ);
-    void dispersal(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix);
+    //void dormancy(std::vector<int>& P, const int& year, const int& poly, Vector2D<int>& P_rest, std::vector<int>& P_germ);
+    void dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix);
+    void dispersal(Vector2D<int>& Propagules, const Vector2D<double>& disp_matrix, const int& Ngeno);
     void mutation(std::vector<int>& P);
     void mutation_locus(const int& patho, const int& trait_mut, Vector2D<int>& PpathoMut);
     void reproSex(const int& t, std::vector<int>& P, const Vector2D<int>& I, const std::vector<int>& activeQR, 
                   const std::vector<int>& Nlevels_aggressiveness, const int& Nquali_gene);
-    void between_season_pr_inoc(std::vector<int>& P_sex_tmp, Vector2D<int>& P_stock, int& year);
-    void in_season_pr_inoc(std::vector<int>& P_stock_germ, Vector2D<int>& P_sex, const bool& distr);
+    void between_season_pr_inoc(std::vector<int>& P_sex_primary_tmp, Vector2D<int>& P_stock, int& year);
+    void in_season_pr_inoc(std::vector<int>& P_stock_release, Vector2D<int>& P_sex, const bool& distr);
     void reproClonal(const int& t, std::vector<int>& P, const Vector2D<int>& I, const std::vector<int>& activeR);
     std::array<Vector2D<int>, 2> split_IclonalIsex(const int& t, const Vector2D<int>& I);
     bool get_resistance(const int& index_gene, const int& host, const int& t, const int& activeR);
     double get_treat_effect(const int& Nt, const int& Nspray, const int& t);
-    std::vector<int> get_P_stock_germ(Vector2D<int>& P_stock_poly, const int& year);
-    void get_P_daily(Vector2D<int>& P_daily, Vector3D<int>& P_dorm, const int& t);
+    std::vector<int> get_P_stock_release(Vector2D<int>& P_stock_poly, const int& year);
+    void get_P_daily(Vector2D<int>& P_daily, Vector3D<int>& P_primary, const int& t);
     Vector2D<int> get_sum_Vector2D(Vector2D<int>& M1, Vector2D<int>& M2);
         
     /* Init functions */
@@ -116,9 +118,11 @@ struct Model {
     std::vector<int> switch_trait_to_aggr(const std::vector<double>& trait, const std::vector<bool>& activeR);
     Vector2D<int> init_activeR();
     void init_HjuvLIR(Vector2D<int>& Hjuv, Vector3D<int>& L, Vector3D<int>& I, Vector3D<int>& R);
-    void init_PgermPrest(Vector2D<int>& P_germ, Vector3D<int>& P_rest);
-    void init_P(Vector2D<int>& P, Vector2D<int>& P_sex_tmp, Vector2D<int>& P_asex_tmp, Vector3D<int>& P_sex, Vector3D<int>& P_asex, 
-                    Vector2D<int>& P_sex_daily,Vector2D<int>& P_asex_daily, Vector3D<int>& P_stock);
+   // void init_PgermPrest(Vector2D<int>& P_germ, Vector3D<int>& P_rest);
+    void init_P(Vector2D<int>& P, Vector2D<int>& P_sex_secondary, Vector2D<int>& P_clonal_secondary, 
+                 Vector3D<int>& P_sex_primary, Vector2D<int>& P_sex_primary_tmp, Vector3D<int>& P_clonal_primary, 
+                 Vector2D<int>& P_clonal_primary_tmp, Vector2D<int>& P_sex_daily, Vector2D<int>& P_clonal_daily,
+                 Vector3D<int>& P_stock);
     void init_Nspray(Vector2D<int>& Nspray);
     void init_Nlevels_aggressiveness(std::vector<int>& Nlevels_aggressiveness);
     void init_L2I2R(Vector4D<int>& L2I, Vector4D<int>& I2R);
@@ -147,7 +151,7 @@ struct Model {
                          FILE* fP, FILE* fL, FILE* fI, FILE* fR);
 
     /* Write model output in .txt files and print output on screen (Pbefinter ONLY) */
-    void write_Pbefinter(const Vector2D<int>& Pbefinter, FILE* fPbefinter);
+    void write_Pbefinter(const Vector3D<int>& eqIsurv, FILE* feqIsurv, const Vector2D<int>& Pbefinter, FILE* fPbefinter);
 
 };
 
@@ -284,7 +288,7 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //' @param croptypes_cultivars_prop a matrix with three columns named 'croptypeID' for croptype index, 
 //' 'cultivarID' for cultivar index and 'proportion' for the proportion of the cultivar within the croptype. 
 //' @param dispersal list of dispersal parameters:\itemize{ 
-//' \item disp_patho = vectorised dispersal matrix of the pathogen (asexual propagules), 
+//' \item disp_patho_clonal = vectorised dispersal matrix of the pathogen (clonal propagules), 
 //' \item disp_patho_sex = vectorised dispersal matrix of the pathogen (sexual propagules), 
 //' \item disp_host = vectorised dispersal matrix of the host.
 //' }
@@ -298,14 +302,17 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //' \item max_density = vector of maximum host densities (per surface unit) at the end of the cropping season, 
 //' \item growth rate = vector of host growth rates, 
 //' \item reproduction rate = vector of host reproduction rates, 
-//' \item death rate = vector of host death rates, 
+//' \item relative_yield_H = Yield of H individuals relative to H individuals (100%)
+//' \item relative_yield_L = Yield of L individuals relative to H individuals
+//' \item relative_yield_I = Yield of I individuals relative to H individuals
+//' \item relative_yield_R = Yield of R individuals relative to H individuals
 //' \item sigmoid_kappa_host = kappa parameter for the sigmoid invasion function (for host dispersal),
 //' \item sigmoid_sigma_host = sigma parameter for the sigmoid invasion function (for host dispersal),
 //' \item sigmoid_plateau_host = plateau parameter for the sigmoid invasion function (for host dispersal),
-//' \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes.
+//' \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes,
 //' } 
 //' @param basic_patho_param list of i. pathogen aggressiveness parameters on a susceptible host 
-//' for a pathogen genotype not adapted to resistance and ii. germination of sexual spores parameters: \itemize{
+//' for a pathogen genotype not adapted to resistance and ii. sexual reproduction parameters: \itemize{
 //' \item infection_rate = maximal expected infection rate of a propagule on a healthy host, 
 //' \item propagule_prod_rate = maximal expected reproduction_rate of an infectious host per timestep, 
 //' \item latent_period_mean = minimal expected duration of the latent period, 
@@ -337,13 +344,13 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //' on hosts that do and do not carry the resistance genes.
 //' }
 //' @param treatment_param list of parameters related to pesticide treatments: \itemize{ 
-//'  \item treatment_reduction_rate = reduction per time step of treatment concentration,
-//'  \item treatment_efficiency =  Maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection at the application date),
-//'  \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-//'  \item treatment_cultivars  = vector of cultivar indices that receive treatments, 
-//'  \item treatment_cost = cost of a single treatments (monetary units/ha)
-//'  
-//'  }
+//' \item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+//' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction 
+//' of pathogen infection rate at the time of application),
+//' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
+//' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
+//' \item treatment_cost = cost of a single treatment application (monetary units/ha)
+//' }
 //' 
 //' @details See ?landsepi for details on the model and assumptions. 
 //' Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
@@ -357,7 +364,7 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //' @return A set of binary files is generated for every year of simulation and every compartment: 
 //' \itemize{
 //'  \item H: healthy hosts,
-//'  \item Hjuv: juvenile healthy hosts,
+//'  \item Hjuv: juvenile healthy hosts (for host reproduction),
 //'  \item L: latently infected hosts,
 //'  \item I: infectious hosts,
 //'  \item R: removed hosts,
@@ -388,7 +395,7 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //'                time_param = time_param,
 //'                basic_patho_param = loadPathogen(disease = "rust"),
 //'                inits = list(pI0=0.01), area_vector = area,
-//'                dispersal = list(disp_patho=c(0.99,0.01,0.01,0.99),
+//'                dispersal = list(disp_patho_clonal=c(0.99,0.01,0.01,0.99),
 //'                disp_patho_sex=c(1,0,0,1),
 //'                disp_host=c(1,0,0,1)),
 //'                rotation_matrix = as.matrix(rotation),
@@ -408,34 +415,47 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //' , croptypes_cultivars_prop, cultivars, eco_param)
 //' 
 //' 
-//' #### 1-year simulation of a rust epidemic in pure susceptible crop in a single 1 ha patch ####
-//' time_param <- list(Nyears=1, nTSpY=120)
-//' Npoly=1
-//' Npatho=1
-//' area <- c(100000)
-//' cultivars <- as.list(rbind(loadCultivar(name="Susceptible", type="growingHost")))
-//' names(cultivars)[names(cultivars)=="cultivarName"] <- "name"
-//' cultivars <- c(cultivars, list(sigmoid_kappa_host=0.002, sigmoid_sigma_host=1.001,
-//'                                sigmoid_plateau_host=1, cultivars_genes_list=list(numeric(0))))
-//' rotation <- data.frame(year_1=c(0), year_2=c(0))
-//' croptypes_cultivars_prop <- data.frame(croptypeID=c(0), cultivarID=c(0), proportion=c(1))
-//' genes <-   list(geneName = character(0) , fitness_cost = numeric(0)
-//' , mutation_prob = numeric(0)
-//' , efficiency = numeric(0) , tradeoff_strength = numeric(0)
-//' , Nlevels_aggressiveness = numeric(0)
-//' , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
-//' , target_trait = character(0))
-//'     
-//' ## run simulation
-//' model_landsepi(seed=1, time_param = time_param
-//' , basic_patho_param = loadPathogen(disease = "rust"),
-//' inits = list(pI0=0.01), area_vector = area,
-//'              dispersal = list(disp_patho=c(1),
-//'              disp_patho_sex=c(1),
-//'              disp_host=c(1)),
-//' rotation_matrix = as.matrix(rotation),
-//' croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop),
-//' cultivars_param = cultivars,  genes_param = genes) 
+//' 
+//' 
+//' #### 1-year simulation of a rust epidemic in pure susceptible crop in a single 1-km2 patch ####
+//'## Simulation and pathogen parameters
+//'time_param <- list(Nyears=1, nTSpY=120)
+//'area <- c(1E6)
+//'basic_patho_param = loadPathogen(disease = "rust")
+//'## croptypes, cultivars and genes
+//'rotation <- data.frame(year_1=c(0), year_2=c(0))
+//'croptypes_cultivars_prop <- data.frame(croptypeID=c(0), cultivarID=c(0), proportion=c(1))
+//'cultivars <- as.list(rbind(loadCultivar(name="Susceptible", type="growingHost")))
+//'names(cultivars)[names(cultivars)=="cultivarName"] <- "name"
+//'yield0 <- cultivars$yield_H + as.numeric(cultivars$yield_H==0)
+//'cultivars <- c(cultivars, list(relative_yield_H = as.numeric(cultivars$yield_H / yield0)
+//'     , relative_yield_L = as.numeric(cultivars$yield_L / yield0)
+//'     , relative_yield_I = as.numeric(cultivars$yield_I / yield0)
+//'     , relative_yield_R = as.numeric(cultivars$yield_R / yield0)
+//'     , sigmoid_kappa_host=0.002, sigmoid_sigma_host=1.001, sigmoid_plateau_host=1
+//'     , cultivars_genes_list=list(numeric(0))))
+//'genes <-   list(geneName = character(0) , fitness_cost = numeric(0)
+//'     , mutation_prob = numeric(0)
+//'     , efficiency = numeric(0) , tradeoff_strength = numeric(0)
+//'     , Nlevels_aggressiveness = numeric(0)
+//'     , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
+//'     , target_trait = character(0)
+//'     , recombination_sd = numeric(0))
+//'treatment=list(treatment_degradation_rate=0.1
+//'     , treatment_efficiency=0
+//'     , treatment_timesteps=logical(0)
+//'     , treatment_cultivars=logical(0)
+//'     , treatment_cost=0)
+//'
+//'## run simulation
+//'model_landsepi(seed=1, time_param = time_param
+//'     , basic_patho_param = basic_patho_param
+//'     , inits = list(pI0=5E-4), area_vector = area
+//'     , dispersal = list(disp_patho_clonal=c(1), disp_patho_sex=c(1), disp_host=c(1))
+//'     , rotation_matrix = as.matrix(rotation)
+//'     , treatment_param = treatment
+//'     , croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop)
+//'     , cultivars_param = cultivars,  genes_param = genes)
 //' }
 //' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018).
 //' Assessing the durability andefficiency of landscape-based strategies to deploy plant 

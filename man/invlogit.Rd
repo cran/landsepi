@@ -16,7 +16,7 @@ An object of the same type as x containing the invlogits of the input values.
 Given a numeric object, return the invlogit of the values. Missing values (NAs) are allowed.
 }
 \details{
-The invlogit is defined by exp(x) / (1+exp(x)). Values in x of -Inf or Inf return invlogits
+The invlogit is defined by \eqn{ exp(x) / (1+exp(x)) }. Values in x of -Inf or Inf return invlogits
 of 0 or 1 respectively.
 Any NAs in the input will also be NAs in the output.
 }

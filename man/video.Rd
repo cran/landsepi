@@ -20,7 +20,7 @@ video(
 )
 }
 \arguments{
-\item{audpc}{A dataframe containing audpc outputs (generated through epid_output). 1 year per line and
+\item{audpc}{A dataframe containing audpc outputs (generated through epid_output). 1 line per year and
 1 column per cultivar, with an additional column for the average audpc in the landscape.}
 
 \item{time_param}{list of simulation parameters:\itemize{

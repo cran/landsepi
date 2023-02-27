@@ -39,7 +39,6 @@
 #' as if cultivated in pure crop,
 #' \item growth_rate: host growth rates,
 #' \item reproduction rate: host reproduction rates,
-#' \item death_rate: host death rates,
 #' \item yield_H: theoretical yield (in weight or volume units / ha / cropping season) associated with 
 #' hosts in sanitary status H as if cultivated in pure crop,
 #' \item yield_L: theoretical yield (in weight or volume units / ha / cropping season) associated with 
@@ -91,19 +90,20 @@
 #' \item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
 #' \item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 #' }
-#' @param repro_sex_prob a vector of size \code{time_param$nSTpY+1} of probability for an infectious host to reproduce
-#'  via sex rather than via cloning,
-#' @param disp_patho a vectorized matrix giving the probability of pathogen dispersal
+#' @param repro_sex_prob a vector of size \code{time_param$nSTpY+1} giving the probability for an infectious host to reproduce
+#'  via sex rather than via cloning for every time step,
+#' @param disp_patho_clonal a vectorized matrix giving the probability of pathogen dispersal
 #' from any field of the landscape to any other field.
-#' @param disp_patho_sex a vectorized matrix giving the probability of dispersal for sexual pathogen propagules
+#' @param disp_patho_sex a vectorized matrix giving the probability of pathogen dispersal for sexual propagules
 #' from any field of the landscape to any other field.
 #' @param disp_host a vectorized matrix giving the probability of host dispersal
 #' from any field of the landscape to any other field
 #' @param treatment list of parameters related to pesticide treatments: \itemize{ 
-#' \item treatment_reduction_rate = reduction per time step of chemical concentration,
-#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection rate at the application date),
+#' \item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction 
+#' of pathogen infection rate at the time of application),
 #' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-#' \item treatment_cultivars = vector of cultivar indices that receive treatments,
+#' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 #' \item treatment_cost = cost of a single treatment application (monetary units/ha)
 #' }
 #' @param pI0 initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
@@ -163,16 +163,21 @@
 #' If keepRawResults=TRUE, a set of binary files is generated for every year of simulation and
 #' every compartment: \itemize{
 #'  \item H: healthy hosts,
-#'  \item Hjuv: juvenile healthy hosts,
+#'  \item Hjuv: juvenile healthy hosts (for host reproduction),
 #'  \item L: latently infected hosts,
 #'  \item I: infectious hosts,
 #'  \item R: removed hosts,
 #'  \item P: propagules.}
 #' Each file indicates for every time-step the number of individuals in each field, and when appropriate for
-#' each host and pathogen genotypes.
+#' each host and pathogen genotype.
 #' @seealso \link{model_landsepi}, \link{epid_output}, \link{evol_output}, \link{video}, \link{runSimul}
 #' @examples
 #' \dontrun{
+#' #### Spatially-implicit simulation with a single 1-km^2 patch 100% cultivated 
+#' # with a susceptible cultivar
+#' 
+#' simul_landsepi()
+#' 
 #' #### Spatially-implicit simulation with 2 patches (S + R) during 3 years ####
 #'
 #' ## Simulation parameters
@@ -197,8 +202,8 @@
 #'   seed = 12345, time_param, croptype_names, croptypes_cultivars_prop, cultivars,
 #'   cultivars_genes_list, genes, landscape = NULL, area, rotation,
 #'   basic_patho_param = loadPathogen(disease = "rust"),
-#'   repro_sex_prob = rep(0, time_param$nSTpY),
-#'   disp_patho = c(0.99, 0.01, 0.01, 0.99),
+#'   repro_sex_prob = rep(0, time_param$nTSpY+1),
+#'   disp_patho_clonal = c(0.99, 0.01, 0.01, 0.99),
 #'   disp_patho_sex = c(0.99, 0.01, 0.01, 0.99),
 #'   disp_host = c(1, 0, 0, 1),
 #'   pI0 = 5e-4
@@ -247,7 +252,7 @@
 #'   cultivars_genes_list, genes, landscape, area, rotation,
 #'   basic_patho_param = loadPathogen(disease = "rust"),
 #'   repro_sex_prob = rep(0, 120+1),
-#'   disp_patho = loadDispersalPathogen(1),
+#'   disp_patho_clonal = loadDispersalPathogen(1)[[1]],
 #'   disp_patho_sex = as.numeric(diag(Npoly)),
 #'   disp_host = as.numeric(diag(Npoly)),
 #'   pI0 = 5e-4
@@ -259,13 +264,40 @@
 #' plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @include RcppExports.R
 #' @export
-simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 120),
-                           croptype_names, croptypes_cultivars_prop, cultivars, cultivars_genes_list,
-                           genes, landscape = NULL, area, rotation, basic_patho_param, repro_sex_prob, 
-                           disp_patho, disp_patho_sex, disp_host, treatment, pI0 = 5e-4,
-                           epid_outputs = "all", evol_outputs = "all", thres_breakdown = 50000,
-                           audpc100S = 0.76, #8.48 for downy mildew,
-                           writeTXT = TRUE, graphic = TRUE, videoMP4 = FALSE, keepRawResults = FALSE) {
+simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 120)
+                           , croptype_names=c("Susceptible crop")
+                           , croptypes_cultivars_prop = data.frame(croptypeID = 0, cultivarID = 0, proportion = 1)
+                           , cultivars = data.frame(cultivarName = "Susceptible", initial_density = 0.1, max_density = 2.0
+                                              , growth_rate = 0.1, reproduction_rate = 0.0 #, death_rate = 0.0
+                                              , yield_H = 2.5, yield_L = 0.0, yield_I = 0.0, yield_R = 0.0
+                                              , planting_cost = 225, market_value = 200)
+                           , cultivars_genes_list=list(numeric(0))
+                           , genes = data.frame(geneName = character(0), mutation_prob = numeric(0)
+                                             , efficiency = numeric(0) , tradeoff_strength = numeric(0)
+                                             , Nlevels_aggressiveness = numeric(0), fitness_cost = numeric(0)
+                                             , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
+                                             , target_trait = character(0)
+                                             , recombination_sd = numeric(0))
+                           , landscape = NULL, area=1E6
+                           , rotation = data.frame(year_1 = c(0), year_2 = c(0), year_3 = c(0), year_4 = c(0), year_5 = c(0), year_6 = c(0))
+                           , basic_patho_param = list(name = "rust", survival_prob = 1e-4, repro_sex_prob = 0
+                                                      , infection_rate = 0.4, propagule_prod_rate = 3.125
+                                                      , latent_period_mean = 10, latent_period_var = 9
+                                                      , infectious_period_mean = 24, infectious_period_var = 105
+                                                      , sigmoid_kappa = 5.333, sigmoid_sigma = 3, sigmoid_plateau = 1
+                                                      , sex_propagule_viability_limit  = 1, sex_propagule_release_mean = 1
+                                                      , clonal_propagule_gradual_release = 0)
+                           , repro_sex_prob=rep(0, time_param$nTSpY+1)
+                           , disp_patho_clonal=c(1), disp_patho_sex=c(1), disp_host=c(1)
+                           , treatment=list(treatment_degradation_rate=0.1, 
+                                          treatment_efficiency=0, 
+                                          treatment_timesteps=logical(0),
+                                          treatment_cultivars=logical(0),
+                                          treatment_cost=0)
+                           , pI0 = 5e-4
+                           , epid_outputs = "all", evol_outputs = "all", thres_breakdown = 50000
+                           , audpc100S = 0.76 #8.48 for downy mildew,
+                           , writeTXT = TRUE, graphic = TRUE, videoMP4 = FALSE, keepRawResults = FALSE) {
 
   # Host parameters
   cultivars_param <- list(name = as.character(cultivars$cultivarName),
@@ -273,11 +305,17 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
                           max_density = as.numeric(cultivars$max_density),
                           growth_rate = as.numeric(cultivars$growth_rate),
                           reproduction_rate = as.numeric(cultivars$reproduction_rate),
-                          death_rate = as.numeric(cultivars$death_rate),
+                          # death_rate = as.numeric(cultivars$death_rate),
                           sigmoid_kappa_host = 0,
                           sigmoid_sigma_host = 1,
                           sigmoid_plateau_host = 1,
-                          cultivars_genes_list = cultivars_genes_list
+                          cultivars_genes_list = cultivars_genes_list,
+                          ## Yield relative to H (with a security to avoid 0/0)
+                          relative_yield_H = as.numeric(cultivars$yield_H / (cultivars$yield_H + as.numeric(cultivars$yield_H==0))),
+                          relative_yield_L = as.numeric(cultivars$yield_L / (cultivars$yield_H + as.numeric(cultivars$yield_H==0))),
+                          relative_yield_I = as.numeric(cultivars$yield_I / (cultivars$yield_H + as.numeric(cultivars$yield_H==0))),
+                          relative_yield_R = as.numeric(cultivars$yield_R / (cultivars$yield_H + as.numeric(cultivars$yield_H==0)))
+                          
   )
   
   # Evolution parameters
@@ -316,7 +354,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
     area_vector = area,
     rotation_matrix = as.matrix(rotation),
     croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop),
-    dispersal = list(disp_patho = disp_patho, disp_patho_sex = disp_patho_sex, disp_host = disp_host),
+    dispersal = list(disp_patho_clonal = disp_patho_clonal, disp_patho_sex = disp_patho_sex, disp_host = disp_host),
     inits = list(pI0 = pI0),
     seed = seed,
     cultivars_param = cultivars_param,
@@ -346,8 +384,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 20, nTSpY = 
   if (epid_outputs[1] != "") {
     epid_res <- epid_output(epid_outputs, time_param, Npatho, area, rotation, croptypes_cultivars_prop,
                             cultivars_param, eco_param, treatment, basic_patho_param, 
-                            audpc100S, writeTXT = writeTXT, graphic = graphic
-    )
+                            audpc100S, writeTXT = writeTXT, graphic = graphic)
   } else {
     epid_res <- NULL
   }

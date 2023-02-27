@@ -217,7 +217,9 @@ AgriLand <- function(landscape, Nyears, rotation_period = 0, rotation_sequence =
     croptype_alloc[, year:(year + rotation_period - 1)] <- rotation_sequence_k[croptype_tmp + 1]
   } ## for k
 
-  croptype.df <- data.frame(croptype_alloc[, 1:(Nyears + 1)])
+  # croptype.df <- data.frame(croptype_alloc[, 1:(Nyears + 1)])  ## better to replace by the 2 following lines in case nrow(croptype_alloc)==1
+  croptype.df <- data.frame(croptype_alloc)
+  croptype.df <- croptype.df[, 1:(Nyears + 1)]
   colnames(croptype.df) <- paste("year_", 1:(Nyears + 1), sep = "")
 
   landscape_croptypes <- SpatialPolygonsDataFrame(landscape, croptype.df, match.ID = T)

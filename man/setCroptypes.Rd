@@ -28,7 +28,7 @@ The data.frame for cultivar allocations into croptypes must take this format (ex
 }
 
 
-croptypeIDs have to match values from landscape "croptypeID" layer with feature year_X.
+croptypeIDs must start at 0 and match with values from landscape "croptypeID" layer with feature year_X.
 Cultivars names have to match cultivar names in the cultivars data.frame.
 }
 \examples{

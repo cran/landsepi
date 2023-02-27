@@ -40,7 +40,7 @@ Model::Model(const int& Nyears, const int& time_steps_per_year, const int& Npoly
              const gsl_rng* random_generator, const std::vector<Cultivar>& cultivars, const std::vector<Gene>& genes,
              const Basic_patho& basic_patho, const Treatment& treatment, const std::vector<Croptype>& croptypes, const double& sigmoid_kappa_host,
              const double& sigmoid_sigma_host, const double& sigmoid_plateau_host, const double& pI0,
-             const Vector2D<double>& disp_patho, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed)
+             const Vector2D<double>& disp_patho_clonal, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed)
   : Nyears(Nyears),
     time_steps_per_year(time_steps_per_year),
     Npoly(Npoly),
@@ -59,7 +59,7 @@ Model::Model(const int& Nyears, const int& time_steps_per_year, const int& Npoly
     sigmoid_sigma_host(sigmoid_sigma_host),
     sigmoid_plateau_host(sigmoid_plateau_host),
     pI0(pI0),
-    disp_patho(disp_patho),
+    disp_patho_clonal(disp_patho_clonal),
     disp_patho_sex(disp_patho_sex),
     disp_host(disp_host) {
   gsl_rng_set(random_generator, seed); // This function initializes (or `seeds') the random number generator.
@@ -153,16 +153,16 @@ void Model::reproSex(const int& t, std::vector<int>& P, const Vector2D<int>& I, 
     // Sexual reproduction needs at least two parents 
     if(coupleTot > 0) {
       int counter = 0; // counter counts for the number of individuals with the same genotype
-      std::vector<int> pathoItot_tmp(Itot); // Vectors containing  the genotype of each parent (ordered)
+      std::vector<int> pathoItot(Itot); // pathoItot is a vector of length Itot cointaining the genotype of each parent (ordered)
       for(int patho = 0; patho < this->Npatho; patho++) {
         for(int i = 0; i < I[patho][host]; i++) {
-          pathoItot_tmp[i+counter] = patho;
+          pathoItot[i+counter] = patho;
         }
         counter += I[patho][host];
       }
       
-      // pathoItot is a vector of length Itot cointaining the genotype of each parent (randomized)
-      const std::vector<int> pathoItot(sample(this->random_generator, pathoItot_tmp));
+      // pathoItot is updated by randomizing the the parents genotypes 
+      pathoItot = (sample(this->random_generator, pathoItot));
       
       // couple_set is a square matrix of size Npatho, it contains the number of couples
       // composed by a parent with genotype = r (row of couple_set) and the other with genotype = c (column of couple_set)  
@@ -365,19 +365,19 @@ void Model::reproSex(const int& t, std::vector<int>& P, const Vector2D<int>& I, 
 /* ------------------------------------------------------- */
 /*  DISTRIBUTION OF PRIMARY INOCULUM BETWEEN THE SEASONS   */
 /* ------------------------------------------------------- */
-/* Exponential distribution of sexual spores (P_sex_temp) between the growing seasons */
-/* (sexual spore may stay dormant multiple seasons before germination)*/
+/* Exponential distribution of sexual propagules (P_sex_temp) between the growing seasons */
+/* (sexual propagule may be released during multiple seasons)*/
 /* Update P_stock in a given poly */
 
-void Model::between_season_pr_inoc(std::vector<int>& P_sex_tmp, Vector2D<int>& P_stock, int& year){
+void Model::between_season_pr_inoc(std::vector<int>& P_sex_primary_tmp, Vector2D<int>& P_stock, int& year){
   // sex_propagule_release_mean is the average number of cropping seasons after which a sexual propagule is released.
   // sex_propagule_viability_limit is the maximum number of cropping seasons up to which a sexual propagule is viable
   for(int patho = 0; patho<this->Npatho; patho++){
-    for(int counter = 0; counter<P_sex_tmp[patho];counter++){
-      int lag_germination = static_cast<int>(ran_exponential_trunc(this->basic_patho.sex_propagule_release_mean,
+    for(int counter = 0; counter<P_sex_primary_tmp[patho];counter++){
+      int lag_release = static_cast<int>(ran_exponential_trunc(this->basic_patho.sex_propagule_release_mean,
                                                                    this->basic_patho.sex_propagule_viability_limit));
-      if(lag_germination >= 0 && lag_germination < this->basic_patho.sex_propagule_viability_limit) {
-        P_stock[patho][(year - 1 + lag_germination)%this->basic_patho.sex_propagule_viability_limit]+=1;
+      if(lag_release >= 0 && lag_release < this->basic_patho.sex_propagule_viability_limit) {
+        P_stock[patho][(year - 1 + lag_release)%this->basic_patho.sex_propagule_viability_limit]+=1;
       }
     }
   }
@@ -386,17 +386,16 @@ void Model::between_season_pr_inoc(std::vector<int>& P_sex_tmp, Vector2D<int>& P
 /* ----------------------------------------------------- */
 /*  DISTRIBUTION OF PRIMARY INOCULUM WITHIN THE SEASON   */
 /* ----------------------------------------------------- */
-/* If distr=1: Uniform distribution of sexual/asexual spores that will germinate */
-/*  in the considered season (P_stock_germ) within the growing season */
-/* if distr=0: all the spore germinate the first day of the following season*/
-/* Update P (which can be P_sex or P_asex) in a given poly */
+/* If distr=1: Uniform distribution of sexual/clonal propagules that will be released */
+/*  in the considered season (P_stock_release) within the growing season */
+/* if distr=0: all the propagules released the first day of the following season*/
 
-void Model::in_season_pr_inoc(std::vector<int>& P_stock_germ, Vector2D<int>& P, const bool& distr){
+void Model::in_season_pr_inoc(std::vector<int>& P_stock_release, Vector2D<int>& P, const bool& distr){
   for(int patho = 0; patho<this->Npatho; patho++){
-    for(int counter = 0; counter<P_stock_germ[patho];counter++){
-      // the timestep t when the spore will germinate is sampled from a uniform distribution between [0,120)
+    for(int counter = 0; counter<P_stock_release[patho];counter++){
+      // the timestep t when the propagules will be released is sampled from a uniform distribution between [0,120)
       // int lag_sporulation_seas = static_cast<int>((this->time_steps_per_year - 0)*rng_uniform()+0);
-      int lag_sporulation_seas = 0; // all the spores germinate the first day of the following year
+      int lag_sporulation_seas = 0; // all the propagules released the first day of the following year
       if(distr > 0){
         lag_sporulation_seas = static_cast<int>((this->time_steps_per_year - 0)*rng_uniform()+0);
       }
@@ -475,7 +474,7 @@ void Model::mutation(std::vector<int>& P) {
 /* Dispersal of new host and new pathogen propagules in the landscape */
 
 /* Update Hjuv and P */
-void Model::dispersal(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix) {
+void Model::dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix) {
   /* H, Hjuv, P are the numbers of individuals in a given poly */
   Vector3D<int> Pdisp(this->Npatho, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
   Vector3D<int> Hjuvtmp(this->Nhost, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
@@ -510,6 +509,32 @@ void Model::dispersal(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>
     }
   }
 }
+
+
+/* Update Hjuv and P after dispersal */
+void Model::dispersal(Vector2D<int>& Propagules, const Vector2D<double>& disp_matrix, const int& Ngeno) {
+  /* Propagules (either Hjuv or P) are the numbers of individuals in a given poly */
+  /* "geno" is the genotype (="host" for Hjuv ; ="patho" for P) and Ngeno is the total number of genotypes */
+  
+  /* Dispersal of propagules */
+  Vector3D<int> Pdisp(Ngeno, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
+  for(int poly = 0; poly < this->Npoly; poly++) {
+    for(int geno = 0; geno < Ngeno; geno++) {
+      Pdisp[geno][poly] = ran_multinomial(Propagules[poly][geno], disp_matrix[poly]);
+    }
+  }
+  
+  /* Update the number of propagules landing in each field */
+  for(int poly = 0; poly < this->Npoly; poly++) {
+    for(int geno = 0; geno < Ngeno; geno++) {
+      Propagules[poly][geno] = 0;
+      for(int polyE = 0; polyE < this->Npoly; polyE++) {
+        Propagules[poly][geno] += Pdisp[geno][polyE][poly];
+      }
+    }
+  }
+}
+
 
 /* --------------------------------------------- */
 /*       BOTTLENECK AT THE END OF THE SEASON     */
@@ -547,9 +572,10 @@ Vector3D<int> Model::bottleneck(const int& t, const Vector3D<int>& L, const Vect
 /*         HOST DYNAMIC       */
 /* -------------------------- */
 
-/* Compute host reproduction, death and growth and updtate the number of H in the concerned poly */
+/* Compute host reproduction, death and growth and update the number of H, Hjuv, L, I and R in the concerned poly */
 void Model::host_dynamic(const int& poly, const int& year, const int& t, std::vector<int>& H, std::vector<int>& Hjuv,
-                         const Vector2D<int>& L, const Vector2D<int>& I, const Vector2D<int>& R, std::vector<int>& N, std::vector<int>& Nspray) {
+                         Vector2D<int>& L, Vector2D<int>& I, Vector2D<int>& R, Vector3D<int>& L2I, Vector3D<int>& I2R, 
+                         std::vector<int>& N, std::vector<int>& Nspray) {
   /* H, Hjuv, L, I and R are the number of host in a given poly */
   
   // If there is no rotation (same croptype each year), only take the first year rotation
@@ -558,58 +584,74 @@ void Model::host_dynamic(const int& poly, const int& year, const int& t, std::ve
   for(std::pair<int, double> cultivar_prop : this->croptypes[id_croptype].cultivar_proportion) {
     const int id_host = cultivar_prop.first;
     const double prop = cultivar_prop.second;
+    int L_host = 0, I_host = 0, R_host = 0; 
     
-    /* Calculation of totals for L, I, R and K */
-    // Carrying capacity of the cultivar in the concerned paddock
-    const int K = static_cast<int>(this->area[poly] * this->cultivars[id_host].max_density * prop); 
-    int L_host = 0, I_host = 0, R_host = 0;
+    
+    /* HOST MORTALITY: H2M, L2M, I2M, R2M */
+    /*  DO NOT WORK FOR L AND I HOSTS  */
+    
+    /* ---------------------------------- */
+  //   const int H2M = ran_binomial(this->cultivars[id_host].death_rate, H[id_host]);
+  //    H[id_host] -= H2M;    // update H
+
+    /* Calculation of totals for L, I, R */
     for(int patho = 0; patho < this->Npatho; patho++) {
       L_host += L[patho][id_host];
       I_host += I[patho][id_host];
       R_host += R[patho][id_host];
-    }
-    N[id_host] = H[id_host] + L_host + I_host + R_host; // Number of occupied sites
-    // N[id_host] = H[id_host] + L_host + I_host ; // Number of occupied sites IN THE CASE OF INFINITIVE HOST GROWTH
+    } // for patho
     
-    /* HOST MORTALITY: H2M */
+    /* N: Number of occupied sites */
+    N[id_host] = H[id_host] + L_host + I_host + R_host; 
+    /* K: Carrying capacity of the cultivar in the concerned paddock */
+    const int K = static_cast<int>(this->area[poly] * this->cultivars[id_host].max_density * prop);
+    
+    
+    /* HOST GROWTH: HLIR2H */
     /* ------------------- */
-    const int H2M = ran_binomial(this->cultivars[id_host].death_rate, H[id_host]);
-    const int H2Mjuv = ran_binomial(this->cultivars[id_host].death_rate, Hjuv[id_host]);
-    Hjuv[id_host] -= H2Mjuv; // Update Hjuv
+    int HLIR2H = static_cast<int>(this->cultivars[id_host].growth_rate * (
+      (H[id_host] * this->cultivars[id_host].relative_yield_H) + 
+        (L_host * this->cultivars[id_host].relative_yield_L) + 
+        (I_host * this->cultivars[id_host].relative_yield_I) + 
+        (R_host * this->cultivars[id_host].relative_yield_R)) * (1 - N[id_host] / static_cast<double>(K)));
+    if(HLIR2H < 0) { /* Security */
+    Rcpp::Rcerr << "hostID" << id_host << " growthrate " << this->cultivars[id_host].growth_rate << " H " << H[id_host] 
+                << " N " << N[id_host] << " K " << static_cast<double>(K) 
+                << std::endl;
+    Rprintf("CAREFUL ! HLIR2H < 0 (host growth), one of the areas may be 0: check if Npoly, NpolyTot and idLAN are correct\n");
+    HLIR2H = 0;
+    } else if((N[id_host] + HLIR2H) > K) {
+      Rprintf("CAREFUL ! HLIR2H (host growth) too big\n");
+      HLIR2H = K - (N[id_host]);
+    }    
+    H[id_host] += HLIR2H;  // update H
+    N[id_host] += HLIR2H;  // update N
     
-    /* HOST REPRODUCTION: Hnewind */
-    /* -------------------------- */
-    /* Hjuv settlement in the field */
-    int availSites = K - N[id_host] - H2M; // Number of available sites
+    
+    /* HOST REPRODUCTION: Hjuv & Hnew */
+    /* ------------------------------ */
+    /* Hnew: settlement of Hjuv in the field after dispersal */
+    int availSites = K - N[id_host]; // Number of available sites
     if(availSites < 0) { /* Security */
     availSites = 0;
     }
     const double f1host = sigmoid(this->sigmoid_plateau_host, this->sigmoid_kappa_host, this->sigmoid_sigma_host,
                                   availSites / static_cast<double>(K));
     int siteaccess = ran_binomial(f1host, availSites);
-    const int Hnewind = (siteaccess < Hjuv[id_host]) ? siteaccess : Hjuv[id_host];
+    const int Hnew = (siteaccess < Hjuv[id_host]) ? siteaccess : Hjuv[id_host];
+    H[id_host] += Hnew;  // update H
+    N[id_host] += Hnew;  // update N
     
-    /* HOST GROWTH: H2H */
-    /* ---------------- */
-    int H2H = static_cast<int>(this->cultivars[id_host].growth_rate * (H[id_host] - H2M) *
-    (1 - ((N[id_host] - H2M + Hnewind) / static_cast<double>(K))));
-    if(H2H < 0) { /* Security */
-    Rcpp::Rcerr << "hostID" << id_host << " growrate " << this->cultivars[id_host].growth_rate << " H " << H[id_host] 
-                << " H2M " << H2M << " N " << N[id_host] << " HnewId " << Hnewind << " K " << static_cast<double>(K) 
-                << std::endl;
-    Rprintf("CAREFUL ! H2H < 0, one of the areas may be 0: check if Npoly, NpolyTot and idLAN are correct\n");
-    H2H = 0;
-    } else if((N[id_host] - H2M + Hnewind + H2H) > K) {
-      Rprintf("CAREFUL ! H2H too big\n");
-      H2H = K - (N[id_host] - H2M + Hnewind);
-    }
     
-    /* UPDATE NUMBER OF HOSTS */
-    /* ---------------------- */
-    H[id_host] = H[id_host] - H2M + Hnewind + H2H;
-    N[id_host] = N[id_host] - H2M + Hnewind + H2H;
+    /* update Hjuv with newly produced hosts */
+    Hjuv[id_host] = ran_poisson(static_cast<int>(this->cultivars[id_host].reproduction_rate * (
+      (H[id_host] * this->cultivars[id_host].relative_yield_H) + 
+        (L_host * this->cultivars[id_host].relative_yield_L) + 
+        (I_host * this->cultivars[id_host].relative_yield_I) + 
+        (R_host * this->cultivars[id_host].relative_yield_R))));
     
-    /* SAVE Nspray (i.e. the number of host at treatment dates) */
+    
+    /* SAVE Nspray (i.e. the number of host individuals at treatment dates) */
     /* This information is needed to compute the effect of pesticide treatments */
     /* ------------------------------------------------------------------------- */ 
     if (std::find(this->treatment.treatment_timesteps.begin(), this->treatment.treatment_timesteps.end(), t) != this->treatment.treatment_timesteps.end()) {
@@ -617,6 +659,8 @@ void Model::host_dynamic(const int& poly, const int& year, const int& t, std::ve
     }
   }
 }
+
+
 /* ------------------------------------------------------------------ */
 /*         CONTAMINATION : propagule deposition on healthy sites      */
 /* ------------------------------------------------------------------ */
@@ -770,7 +814,8 @@ void Model::infection(const int& t, std::vector<int>& H, const Vector2D<int>& Hc
 void Model:: dynepi() {
   using namespace std::chrono;
   auto start_tot = high_resolution_clock::now();  
-  char name_fH[20], name_fHjuv[20], name_fP[20], name_fL[20], name_fI[20], name_fR[20], name_fPbefinter[20];
+  char name_fH[20], name_fHjuv[20], name_fP[20], name_fL[20], name_fI[20], name_fR[20],
+       name_feqIsurv[20], name_fPbefinter[20];
   Vector2D<int> Hcontaminated; // Contaminated sites (where a propagule is deposited)
   Vector2D<int> Hjuv, P;
   Vector3D<int> L(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->Nhost)));
@@ -781,28 +826,31 @@ void Model:: dynepi() {
   std::vector<int> Nlevels_aggressiveness(this->Ngene);
   Vector4D<int> L2I;
   Vector4D<int> I2R;
-  Vector2D<int> P_sex_tmp; // P_sex_tmp contains the propagules produced sexually
-  Vector2D<int> P_asex_tmp; // P_asex_tmp contains the propagules produced asexually
+  Vector2D<int> P_sex_secondary; // P_sex_secondary contains the sexually produced secondary inoculum 
+  Vector2D<int> P_sex_primary_tmp; // P_sex_primary_tmp contains the sexually produced primary inoculum 
+  Vector2D<int> P_clonal_secondary; // P_clonal_secondary contains the clonally produced secondary inoculum
+  Vector2D<int> P_clonal_primary_tmp; // P_clonal_primary_tmp contains the clonally produced primary inoculum 
   Vector2D<int> P_bef_interseas; 
-  // P_bef_interseas contains the propagules produced sexually AND asexually before the interseason
+  // P_bef_interseas contains the propagules produced sexually AND clonally before the interseason
   Vector3D<int> P_stock(this->Npoly,Vector2D<int>(this->Npatho, std::vector<int>(this->basic_patho.sex_propagule_viability_limit)));
-  // P_stock contains the propagules that will germinates in each year within the "sex_propagule_viability_limit"
-  Vector3D<int> P_sex(this->Npoly,Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year)));
-  // P_sex cointains the propagules issued from sexual reproduction after the bottleneck
-  // that will germinate at each time of the time_steps_per_year
-  Vector3D<int> P_asex(this->Npoly,Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year)));
-  // P_asex cointains the propagules issued from asexual reproduction after the bottleneck 
-  // that will germinate at each time of the time_steps_per_year
+  // P_stock contains the propagules that will be released in each year within the "sex_propagule_viability_limit"
+  Vector3D<int> P_sex_primary(this->Npoly,Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year)));
+  // P_sex_primary cointains the primary inouculum issued from sexual reproduction after the bottleneck
+  // that will be released at each time of the time_steps_per_year
+  Vector3D<int> P_clonal_primary(this->Npoly,Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year)));
+  // P_clonal_primary cointains the primary inoculum issued from clonal reproduction after the bottleneck 
+  // that will be released at each time of the time_steps_per_year
   Vector2D<int> P_sex_daily (this->Npoly, std::vector<int>(this->Npatho));
-  // P_sex_daily contains the propagule issued from sexual reproduction after the bottleneck
-  // that germinate in a specific time of the time_steps_per_year
-  Vector2D<int> P_asex_daily (this->Npoly, std::vector<int>(this->Npatho));
-  // P_asex_daily contains the propagule issued from asexual reproduction after the bottleneck
-  // that germinate in a specific time of the time_steps_per_year
+  // P_sex_daily contains the sum of primary and secondary inoculum issued from sexual reproduction
+  // that are released in a specific time of the time_steps_per_year
+  Vector2D<int> P_clonal_daily (this->Npoly, std::vector<int>(this->Npatho));
+  // P_clonal_daily contains the sum of primary and secondary inoculum issued from clonal reproduction 
+  // that are released in a specific time of the time_steps_per_year
   
   /* Initialisation (t=0) */
   this->init_HjuvLIR(Hjuv, L, I, R);
-  this->init_P(P, P_sex_tmp, P_asex_tmp, P_sex, P_asex, P_sex_daily, P_asex_daily, P_stock); // initialised a 0
+  this->init_P(P, P_sex_secondary, P_clonal_secondary, P_sex_primary, P_sex_primary_tmp, 
+               P_clonal_primary, P_clonal_primary_tmp, P_sex_daily, P_clonal_daily, P_stock); // initialised a 0
   this->init_Nspray(Nspray); // initialised a 0
   this->init_Nlevels_aggressiveness(Nlevels_aggressiveness);
   this->init_L2I2R(L2I, I2R);
@@ -839,7 +887,8 @@ void Model:: dynepi() {
     snprintf(name_fL, 20, "L-%02d.bin", year);
     snprintf(name_fI, 20, "I-%02d.bin", year);
     snprintf(name_fR, 20, "R-%02d.bin", year);
-    snprintf(name_fPbefinter, 20, "Pbefinter-%02d.bin", year);
+    snprintf(name_feqIsurv, 20, "eqIsurv-%02d.bin", year);
+    snprintf(name_fPbefinter,20, "Pbefinter-%02d.bin", year);
     
     FILE* fH = fopen(name_fH, "wb");
     FILE* fHjuv = fopen(name_fHjuv, "wb");
@@ -847,6 +896,7 @@ void Model:: dynepi() {
     FILE* fI = fopen(name_fI, "wb");
     FILE* fP = fopen(name_fP, "wb");
     FILE* fR = fopen(name_fR, "wb");
+    FILE* feqIsurv = fopen(name_feqIsurv, "wb");
     FILE* fPbefinter = fopen(name_fPbefinter, "wb");
     
     /* Loop for all the timesteps of the cropping season */
@@ -859,74 +909,79 @@ void Model:: dynepi() {
       // Writing model output for timestep t
       this->write_HHjuvPLIR(H, Hjuv, P, L, I, R, fH, fHjuv, fP, fL, fI, fR);
       P = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0)); // Re-initialisation at 0
-      P_sex_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0)); // Re-initialisation at 0
-      P_asex_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0)); // Re-initialisation at 0
+      P_sex_secondary = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0)); // Re-initialisation at 0
+      P_clonal_secondary = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0)); // Re-initialisation at 0
       for(int poly = 0; poly < this->Npoly; poly++) {
         if(this->basic_patho.repro_sex_prob[t] > 0 && this->basic_patho.repro_sex_prob[t] < 1){
           // the split between individuals doing sexual and clonal reproduction only takes place if
           // 0 < repro_sex_prob < 1
           const std::array<Vector2D<int>, 2> splited_I(this->split_IclonalIsex(t, I[poly]));
-          this->reproClonal(t, P_asex_tmp[poly], splited_I[0], activeR[poly]); 
-          this->mutation(P_asex_tmp[poly]); // assumption: mutation only takes place after clonal reproduction
-          this->reproSex(t, P_sex_tmp[poly],  splited_I[1], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
+          this->reproClonal(t, P_clonal_secondary[poly], splited_I[0], activeR[poly]); 
+          this->mutation(P_clonal_secondary[poly]); // assumption: mutation only takes place after clonal reproduction
+          this->reproSex(t, P_sex_secondary[poly],  splited_I[1], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
           // note: we assume that if repro sex takes place in season the propagule are treated like clonal propagule (except for the mutation)
           // they are added to the P matrix and they disperse like clonal propagule
         } else if(this->basic_patho.repro_sex_prob[t] == 0){
           // if repro_sex_prob = 0 all the individuals do clonal reproduction
-          this->reproClonal(t, P_asex_tmp[poly], I[poly], activeR[poly]); // assumption: mutation only takes place after clonal reproduction
-          this->mutation(P_asex_tmp[poly]);
+          this->reproClonal(t, P_clonal_secondary[poly], I[poly], activeR[poly]); // assumption: mutation only takes place after clonal reproduction
+          this->mutation(P_clonal_secondary[poly]);
         } else {
           // if repro_sex_prob = 1 all the individuals do sexual reproduction
-          this->reproSex(t, P_sex_tmp[poly], I[poly], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
+          this->reproSex(t, P_sex_secondary[poly], I[poly], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
           // note: we assume that if repro sex takes place in season the propagule are treated like clonal propagule (except for the mutation)
           // they are added to the P matrix and they disperse like clonal propagule
         }
       }
       
-      // Get the asexual spores produced after the bottleneck that will germinate at time step t  
-      this->get_P_daily(P_asex_daily, P_asex, t); 
+      // Get the clonally produced primary inoculum  that will be released at time step t  
+      this->get_P_daily(P_clonal_daily, P_clonal_primary, t); 
       
 #ifdef DEBUG
-        Rcpp::Rcout << "P asex germinated at time" << t << "\n ";
-        for(unsigned int i = 0; i < P_asex_daily[row].size(); i++){
-          Rcpp::Rcout <<P_asex_daily[row][i]<< " ";
+        Rcpp::Rcout << "P clonal released at time" << t << "\n ";
+        for(unsigned int i = 0; i < P_clonal_daily[row].size(); i++){
+          Rcpp::Rcout <<P_clonal_daily[row][i]<< " ";
         }
         Rcpp::Rcout << "\n";
         
-        Rcpp::Rcout << "P asex produced at time" << t << "\n ";
-        for(unsigned int i = 0; i < P_asex_tmp[row].size(); i++){
-          Rcpp::Rcout <<P_asex_tmp[row][i]<< " ";
+        Rcpp::Rcout << "P clonal produced at time" << t << "\n ";
+        for(unsigned int i = 0; i < P_clonal_secondary[row].size(); i++){
+          Rcpp::Rcout <<P_clonal_secondary[row][i]<< " ";
         }
         Rcpp::Rcout << "\n";
 #endif      
-      // sum the asexual spores germinated on day t (primary inoculum) with the sexual 
-      // spore produced on day t (secondary inouculum)
+        // sum the clonal propagules released on day t (primary inoculum)
+        // with the clonal propagule produced on day t (secondary inoculum)
       
-      P_asex_daily = this->get_sum_Vector2D(P_asex_daily, P_asex_tmp);
+      P_clonal_daily = this->get_sum_Vector2D(P_clonal_daily, P_clonal_secondary);
 #ifdef DEBUG     
-      Rcpp::Rcout << "P asex TOT" << t << "\n ";
-      for(unsigned int i = 0; i < P_asex_daily[row].size(); i++){
-        Rcpp::Rcout <<P_asex_daily[row][i]<< " ";
+      Rcpp::Rcout << "P clonal TOT" << t << "\n ";
+      for(unsigned int i = 0; i < P_clonal_daily[row].size(); i++){
+        Rcpp::Rcout <<P_clonal_daily[row][i]<< " ";
       }
       Rcpp::Rcout << "\n";
 #endif     
-      this->dispersal(H, Hjuv, P_asex_daily, this->disp_patho); // dispersion of asexual spore 
+      //this->dispersal_old(H, Hjuv, P_clonal_daily, this->disp_patho_clonal); // dispersal of clonal propagules 
+      this->dispersal(P_clonal_daily, this->disp_patho_clonal, this->Npatho); // dispersal of clonal propagules
       
-      // Get the sexual spores that will germinate at time step t  
-      this->get_P_daily(P_sex_daily, P_sex, t); 
-      // sum the sexual spores germinated on day t (primary inoculum)
-      // with the sexual spore produced on day t (secondary inoculum)
+      // Get the sexually produced primary inoculum that will be released at time step t  
+      this->get_P_daily(P_sex_daily, P_sex_primary, t); 
       
-      P_sex_daily = this->get_sum_Vector2D(P_sex_daily, P_sex_tmp);
+      // sum the sexual propagules released on day t (primary inoculum)
+      // with the sexual propagule produced on day t (secondary inoculum)
       
-      this->dispersal(H, Hjuv, P_sex_daily,this->disp_patho_sex); // dispersion of sexual spore
+      P_sex_daily = this->get_sum_Vector2D(P_sex_daily, P_sex_secondary);
       
-      // Update the number of spores (sex + asex) after dispersal
-      P = this->get_sum_Vector2D(P_sex_daily, P_asex_daily);
+     // this->dispersal_old(H, Hjuv, P_sex_daily,this->disp_patho_sex); // dispersal of sexual propagules
+      this->dispersal(P_sex_daily, this->disp_patho_sex, this->Npatho); // dispersal of sexual propagules
+      
+      this->dispersal(Hjuv, this->disp_host, this->Nhost); // Host dispersal (Hjuv)
+      
+      // Update the number of propagules (sex + clonal; primary + secondary inoculum) after dispersal
+      P = this->get_sum_Vector2D(P_sex_daily, P_clonal_daily);
       
       for(int poly = 0; poly < this->Npoly; poly++) {
         //Rprintf("----------------------------- Poly %d -----------------------------\n",poly);
-        this->host_dynamic(poly, year - 1, t, H[poly], Hjuv[poly], L[poly], I[poly], R[poly], N, Nspray[poly]);
+        this->host_dynamic(poly, year - 1, t, H[poly], Hjuv[poly], L[poly], I[poly], R[poly], L2I[poly], I2R[poly], N, Nspray[poly]);
         Hcontaminated = this->contamination(H[poly], P[poly], N);
         this->infection(t, H[poly], Hcontaminated, L[poly], I[poly], R[poly], L2I[poly], I2R[poly],
                         activeR[poly], N,  Nspray[poly]);
@@ -944,12 +999,11 @@ void Model:: dynepi() {
     this->init_HjuvLIR(Hjuv, L, I, R);
     this->init_L2I2R(L2I, I2R);
     P = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
-    P_sex_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
-    P_asex_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
+    P_sex_primary_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
+    P_clonal_primary_tmp = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
     P_bef_interseas = Vector2D<int>(this->Npoly, std::vector<int>(this->Npatho, 0));
-    P_sex = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
-    P_asex = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
-    
+    P_sex_primary = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
+    P_clonal_primary = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->time_steps_per_year, 0)));
 
     /* Generate P issued from eqIsurv = (remaining L+I) * Tspo */
     
@@ -959,15 +1013,15 @@ void Model:: dynepi() {
         // the split between individuals doing sexual and clonal reproduction only takes place if
         // 0 < repro_sex_prob < 1
         const std::array<Vector2D<int>, 2> splited_I(this->split_IclonalIsex(this->time_steps_per_year, eqIsurv[poly]));
-        this->reproClonal(this->time_steps_per_year, P_asex_tmp[poly], splited_I[0], activeR[poly]);
-        this->mutation(P_asex_tmp[poly]); // assumption: mutation only takes place after clonal reproduction
-        this->reproSex(this->time_steps_per_year, P_sex_tmp[poly],splited_I[1], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
+        this->reproClonal(this->time_steps_per_year, P_clonal_primary_tmp[poly], splited_I[0], activeR[poly]);
+        this->mutation(P_clonal_primary_tmp[poly]); // assumption: mutation only takes place after clonal reproduction
+        this->reproSex(this->time_steps_per_year, P_sex_primary_tmp[poly],splited_I[1], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
 
-#ifdef DEBUG
+#ifdef DEBUG 
         if (poly==row){
           Rcpp::Rcout << "P sex produced" << "\n ";
-          for(unsigned int i = 0; i < P_sex_tmp[poly].size(); i++){
-            Rcpp::Rcout <<P_sex_tmp[poly][i]<< " ";
+          for(unsigned int i = 0; i < P_sex_primary_tmp[poly].size(); i++){
+            Rcpp::Rcout <<P_sex_primary_tmp[poly][i]<< " ";
           }
           Rcpp::Rcout << "\n";
         }
@@ -980,13 +1034,13 @@ void Model:: dynepi() {
           }
         }
 #endif
-        // Distribution of sexual spores between-seasons 
-        this->between_season_pr_inoc(P_sex_tmp[poly], P_stock[poly], year);
+        // Distribution of sexually produced primary inoculum between-seasons 
+        this->between_season_pr_inoc(P_sex_primary_tmp[poly], P_stock[poly], year);
 
 #ifdef DEBUG
         if (poly==row){
           for(unsigned int z = 0; z < P_stock[0][0].size(); z++){
-            Rcpp::Rcout << "YEAR of GERMINATION" << " " <<  z << "\n ";
+            Rcpp::Rcout << "YEAR of RELEASE" << " " <<  z << "\n ";
             for(unsigned int c = 0; c < P_stock[0].size(); c++){
               Rcpp::Rcout <<P_stock[poly][c][z] << " ";
             }
@@ -995,20 +1049,20 @@ void Model:: dynepi() {
         }
 #endif
         
-        // Get the sexual spores that germinate in the following season
-        std::vector<int> P_stock_germ = this->get_P_stock_germ(P_stock[poly], year);
+        // Get the sexual produced primary inoculum that are released in the following season
+        std::vector<int> P_stock_release = this->get_P_stock_release(P_stock[poly], year);
 
 #ifdef DEBUG
         if (poly==row){
-          Rcpp::Rcout << "Germination in the following year" << "\n ";
-          for(unsigned int count = 0; count < P_stock_germ.size(); count++){
-            Rcpp::Rcout << P_stock_germ[count] << " ";
+          Rcpp::Rcout << "Release in the following year" << "\n ";
+          for(unsigned int count = 0; count < P_stock_release.size(); count++){
+            Rcpp::Rcout << P_stock_release[count] << " ";
           }
           Rcpp::Rcout << "\n";
         }
         if (poly==row){
           for(unsigned int z = 0; z < P_stock[0][0].size(); z++){
-            Rcpp::Rcout << "YEAR of GERMINATION" << " " <<  z << "\n ";
+            Rcpp::Rcout << "YEAR of RELEASE" << " " <<  z << "\n ";
             for(unsigned int c = 0; c < P_stock[0].size(); c++){
               Rcpp::Rcout <<P_stock[poly][c][z] << " ";
             }
@@ -1016,18 +1070,18 @@ void Model:: dynepi() {
           }
         }
 #endif
-        // Distribution of sexual spores that germinate in 
-        // the following season within the season time-steps
-        this->in_season_pr_inoc(P_stock_germ, P_sex[poly], 1);
+        // Distribution of the release of sexually produced primary inoculum
+        // within the cropping season time-steps
+        this->in_season_pr_inoc(P_stock_release, P_sex_primary[poly], 1);
         
-        // Distribution of asexual spores that germinate in 
-        // the following season within the season time-steps
-        this->in_season_pr_inoc(P_asex_tmp[poly], P_asex[poly], this->basic_patho.clonal_propagule_gradual_release);
+        // Distribution of the release of clonally produced primary inoculum  
+        // within the cropping season time-steps
+        this->in_season_pr_inoc(P_clonal_primary_tmp[poly], P_clonal_primary[poly], this->basic_patho.clonal_propagule_gradual_release);
 #ifdef DEBUG
         if (poly==row){
-          for(unsigned int r = 0; r < P_sex[0].size(); r++){
-            for(unsigned int c = 0; c < P_sex[0][0].size(); c++){
-              Rcpp::Rcout << P_sex[poly][r][c] << " ";
+          for(unsigned int r = 0; r < P_sex_primary[0].size(); r++){
+            for(unsigned int c = 0; c < P_sex_primary[0][0].size(); c++){
+              Rcpp::Rcout << P_sex_primary[poly][r][c] << " ";
             }
             Rcpp::Rcout << "\n";
           }
@@ -1035,34 +1089,34 @@ void Model:: dynepi() {
 #endif
       } else if(this->basic_patho.repro_sex_prob[time_steps_per_year] == 0){
         // if repro_sex_prob = 0, only clonal reproduction takes place
-        this->reproClonal(this->time_steps_per_year, P_asex_tmp[poly], eqIsurv[poly], activeR[poly]);
-        this->mutation(P_asex_tmp[poly]); // assumption: mutation only takes place after clonal reproduction
+        this->reproClonal(this->time_steps_per_year, P_clonal_primary_tmp[poly], eqIsurv[poly], activeR[poly]);
+        this->mutation(P_clonal_primary_tmp[poly]); // assumption: mutation only takes place after clonal reproduction
         
-        // Distribution of asexual spores that germinate in 
-        // the following season within the season time-steps
-        this->in_season_pr_inoc(P_asex_tmp[poly], P_asex[poly],this->basic_patho.clonal_propagule_gradual_release);
+        // Distribution of the release of clonally produced primary inoculum  
+        // within the cropping season time-steps
+        this->in_season_pr_inoc(P_clonal_primary_tmp[poly], P_clonal_primary[poly],this->basic_patho.clonal_propagule_gradual_release);
         
 #ifdef DEBUG
   if (poly==row){
-    Rcpp::Rcout << "P asex produced" << "\n ";
-    for(unsigned int i = 0; i < P_asex_tmp[poly].size(); i++){
-      Rcpp::Rcout <<P_asex_tmp[poly][i]<< " ";
+    Rcpp::Rcout << "P clonal produced" << "\n ";
+    for(unsigned int i = 0; i < P_clonal_primary_tmp[poly].size(); i++){
+      Rcpp::Rcout <<P_clonal_primary_tmp[poly][i]<< " ";
     }
     Rcpp::Rcout << "\n";
   }
 
         if (poly==row){
           Rcpp::Rcout << "Repro sex \n";
-          for(unsigned int r = 0; r < P_sex[0].size(); r++){
-            for(unsigned int c = 0; c < P_sex[0][0].size(); c++){
-              Rcpp::Rcout << P_sex[poly][r][c] << " ";
+          for(unsigned int r = 0; r < P_sex_primary[0].size(); r++){
+            for(unsigned int c = 0; c < P_sex_primary[0][0].size(); c++){
+              Rcpp::Rcout << P_sex_primary[poly][r][c] << " ";
             }
             Rcpp::Rcout << "\n";
           }
-          Rcpp::Rcout << "Repro asex \n";
-          for(unsigned int r = 0; r < P_asex[0].size(); r++){
-            for(unsigned int c = 0; c < P_asex[0][0].size(); c++){
-              Rcpp::Rcout << P_asex[poly][r][c] << " ";
+          Rcpp::Rcout << "Repro clonal \n";
+          for(unsigned int r = 0; r < P_clonal_primary[0].size(); r++){
+            for(unsigned int c = 0; c < P_clonal_primary[0][0].size(); c++){
+              Rcpp::Rcout << P_clonal_primary[poly][r][c] << " ";
             }
             Rcpp::Rcout << "\n";
           }
@@ -1071,13 +1125,13 @@ void Model:: dynepi() {
         
       } else {
         // if repro_sex_prob = 1, only sexual reproduction takes place
-        this->reproSex(this->time_steps_per_year, P_sex_tmp[poly],eqIsurv[poly], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
+        this->reproSex(this->time_steps_per_year, P_sex_primary_tmp[poly],eqIsurv[poly], activeR[poly], Nlevels_aggressiveness, Nquali_gene);
         
 #ifdef DEBUG   
           if (poly==row){
           Rcpp::Rcout << "P sex produced" << "\n ";
-            for(unsigned int i = 0; i < P_sex_tmp[poly].size(); i++){
-              Rcpp::Rcout <<P_sex_tmp[poly][i]<< " ";
+            for(unsigned int i = 0; i < P_sex_primary_tmp[poly].size(); i++){
+              Rcpp::Rcout <<P_sex_primary_tmp[poly][i]<< " ";
             }
            Rcpp::Rcout << "\n";
           }
@@ -1092,12 +1146,12 @@ void Model:: dynepi() {
           }
         }
 #endif
-        // Distribution of sexual spores between-seasons 
-        this->between_season_pr_inoc(P_sex_tmp[poly], P_stock[poly], year);
+        // Distribution of sexually produced primary inoculum between-seasons 
+        this->between_season_pr_inoc(P_sex_primary_tmp[poly], P_stock[poly], year);
 #ifdef DEBUG
         if (poly==row){
           for(unsigned int z = 0; z < P_stock[0][0].size(); z++){
-            Rcpp::Rcout << "YEAR of GERMINATION" << " " <<  z << "\n ";
+            Rcpp::Rcout << "YEAR of RELEASE" << " " <<  z << "\n ";
             for(unsigned int c = 0; c < P_stock[0].size(); c++){
               Rcpp::Rcout <<P_stock[poly][c][z] << " ";
             }
@@ -1105,19 +1159,19 @@ void Model:: dynepi() {
           }
         }
 #endif
-        // Get the sexual spores that germinate in the following season
-        std::vector<int> P_stock_germ = this->get_P_stock_germ(P_stock[poly], year);
+        // Get the sexual produced primary inoculum that are released in the following season
+        std::vector<int> P_stock_release = this->get_P_stock_release(P_stock[poly], year);
 #ifdef DEBUG
         if (poly==row){
-          Rcpp::Rcout << "Germination in the following year" << "\n ";
-          for(unsigned int count = 0; count < P_stock_germ.size(); count++){
-            Rcpp::Rcout << P_stock_germ[count] << " ";
+          Rcpp::Rcout << "Release in the following year" << "\n ";
+          for(unsigned int count = 0; count < P_stock_release.size(); count++){
+            Rcpp::Rcout << P_stock_release[count] << " ";
           }
           Rcpp::Rcout << "\n";
         }
         if (poly==row){
           for(unsigned int z = 0; z < P_stock[0][0].size(); z++){
-            Rcpp::Rcout << "YEAR of GERMINATION" << " " <<  z << "\n ";
+            Rcpp::Rcout << "YEAR of RELEASE" << " " <<  z << "\n ";
             for(unsigned int c = 0; c < P_stock[0].size(); c++){
               Rcpp::Rcout <<P_stock[poly][c][z] << " ";
             }
@@ -1126,22 +1180,22 @@ void Model:: dynepi() {
         }
 #endif
        
-        // Distribution of sexual spores that germinate in 
-        // the following season within the season time-steps
-        this->in_season_pr_inoc(P_stock_germ, P_sex[poly],1);
+       // Distribution of the release of sexually produced primary inoculum  
+       // within the cropping season time-steps
+        this->in_season_pr_inoc(P_stock_release, P_sex_primary[poly],1);
 #ifdef DEBUG
         if (poly==row){
           Rcpp::Rcout << "Repro sex \n";
-          for(unsigned int r = 0; r < P_sex[0].size(); r++){
-            for(unsigned int c = 0; c < P_sex[0][0].size(); c++){
-              Rcpp::Rcout << P_sex[poly][r][c] << " ";
+          for(unsigned int r = 0; r < P_sex_primary[0].size(); r++){
+            for(unsigned int c = 0; c < P_sex_primary[0][0].size(); c++){
+              Rcpp::Rcout << P_sex_primary[poly][r][c] << " ";
             }
             Rcpp::Rcout << "\n";
           }
-          Rcpp::Rcout << "Repro asex \n";
-          for(unsigned int r = 0; r < P_asex[0].size(); r++){
-            for(unsigned int c = 0; c < P_asex[0][0].size(); c++){
-              Rcpp::Rcout << P_asex[poly][r][c] << " ";
+          Rcpp::Rcout << "Repro clonal \n";
+          for(unsigned int r = 0; r < P_clonal_primary[0].size(); r++){
+            for(unsigned int c = 0; c < P_clonal_primary[0][0].size(); c++){
+              Rcpp::Rcout << P_clonal_primary[poly][r][c] << " ";
             }
             Rcpp::Rcout << "\n";
           }
@@ -1151,27 +1205,30 @@ void Model:: dynepi() {
       
     }
     
-    // Writing P_before_interseason (sum of propagules produced by sexual AND 
-    // asexual reproduction before the interseason)
-    P_bef_interseas = this->get_sum_Vector2D(P_sex_tmp, P_asex_tmp);
-    this->write_Pbefinter(P_bef_interseas, fPbefinter);
+    // Writing  EqIsurv (equivalent number of I that survive and produce propagules for the next season) AND
+    // P_before_interseason (sum of the primary inoculum produced by sexual AND 
+    // clonal reproduction before the interseason) 
     
-    //Spore dispersal
-    // Get the asexual spores that will germinate in the first day (t=0) of the following season 
-    this->get_P_daily(P_asex_daily, P_asex, 0); 
+    P_bef_interseas = this->get_sum_Vector2D(P_sex_primary_tmp, P_clonal_primary_tmp);
+    this->write_Pbefinter(eqIsurv, feqIsurv, P_bef_interseas, fPbefinter);
     
-    this->dispersal(H, Hjuv, P_asex_daily, this->disp_patho); // dispersion of asexual spore produced in the fall
-    // and that will germinate the first day of the following year
+    //propagule dispersal
+    // Get the clonally produced primary inoculum that will be released in the first day (t=0) of the following season 
+    this->get_P_daily(P_clonal_daily, P_clonal_primary, 0); 
     
-    // Get the sexual spores that will germinate in the first day (t=0) of the following season 
-    this->get_P_daily(P_sex_daily, P_sex, 0); 
+  //  this->dispersal_old(H, Hjuv, P_clonal_daily, this->disp_patho_clonal); // dispersal of clonally produced primary inoculum 
+    this->dispersal(P_clonal_daily, this->disp_patho_clonal, this->Npatho); // dispersal of clonally produced primary inoculum
+    // that will be released the first day of the following year
     
-    this->dispersal(H, Hjuv, P_sex_daily,this->disp_patho_sex); // dispersion of sexual spore produced in the fall 
-    // and that will germinate the first day of the following year
+    // Get the sexually produced primary inoculum that will be released in the first day (t=0) of the following season 
+    this->get_P_daily(P_sex_daily, P_sex_primary, 0); 
+    
+   // this->dispersal_old(H, Hjuv, P_sex_daily,this->disp_patho_sex); // dispersal of sexually produced primary inoculum
+    this->dispersal(P_sex_daily, this->disp_patho_sex, this->Npatho); // dispersal of sexually produced primary inoculum
+    //that will be released the first day of the following year
 
-    
-    // Update the number of spore (sex + asex) after dispersal
-    P = this->get_sum_Vector2D(P_sex_daily, P_asex_daily);
+    // Update the number of propagules (sex + clonal) after dispersal
+    P = this->get_sum_Vector2D(P_sex_daily, P_clonal_daily);
     
     /* Re-plantation --> regenerate H */
     H = this->intro_H(year);
@@ -1179,12 +1236,12 @@ void Model:: dynepi() {
     // Nspray is re-initializated at 0, i.e. there is no fungicide left on plant tissue
     this->init_Nspray(Nspray);
     
-    /* Infection of newly planted hosts to generate the inoculum of the next season */
+    /* Infection of newly planted hosts to generate the primary inoculum of the next season */
     for(int poly = 0; poly < this->Npoly; poly++) {
       /* N = H[poly] in beginning of next season */ 
       Hcontaminated = this->contamination(H[poly], P[poly], H[poly]);
       this->infection(0, H[poly], Hcontaminated, L[poly], I[poly], R[poly], L2I[poly], I2R[poly], activeR[poly],
-                      N,  Nspray[poly]);
+                      H[poly],  Nspray[poly]);
     }
     
     fclose(fH);
@@ -1194,6 +1251,7 @@ void Model:: dynepi() {
     fclose(fP);
     fclose(fR);
     fclose(fPbefinter);
+    fclose(feqIsurv);
     
     auto stop = high_resolution_clock::now(); 
     auto duration = duration_cast<seconds>(stop - start); 
@@ -1265,17 +1323,17 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   /*------------------------*/
   /*  Dispersal parameters  */
   /*------------------------*/
-  const std::vector<double> disp_patho_tmp = Rcpp::as<std::vector<double>>(dispersal["disp_patho"]);
+  const std::vector<double> disp_patho_clonal_tmp = Rcpp::as<std::vector<double>>(dispersal["disp_patho_clonal"]);
   const std::vector<double> disp_patho_sex_tmp = Rcpp::as<std::vector<double>>(dispersal["disp_patho_sex"]);
   const std::vector<double> disp_host_tmp = Rcpp::as<std::vector<double>>(dispersal["disp_host"]);
-  Vector2D<double> disp_patho(Npoly, std::vector<double>(Npoly));
+  Vector2D<double> disp_patho_clonal(Npoly, std::vector<double>(Npoly));
   Vector2D<double> disp_patho_sex(Npoly, std::vector<double>(Npoly));
   Vector2D<double> disp_host(Npoly, std::vector<double>(Npoly));
   
   // Matrix as Vector was created by columns
   for(int i = 0; i < Npoly; i++) {
     for(int j = 0; j < Npoly; j++) {
-      disp_patho[j][i] = disp_patho_tmp[j + i * Npoly];
+      disp_patho_clonal[j][i] = disp_patho_clonal_tmp[j + i * Npoly];
       disp_patho_sex[j][i] = disp_patho_sex_tmp[j + i * Npoly];
       disp_host[i][j] = disp_host_tmp[j + i * Npoly];
     }
@@ -1289,12 +1347,15 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   /*-------------------*/
   /*  Host parameters  */
   /*-------------------*/
-  //const int Nhost = Rcpp::as<int>(cultivars_param["Nhost"]);
   const std::vector<double> initial_density = Rcpp::as<std::vector<double>>(cultivars_param["initial_density"]);
   const std::vector<double> max_density = Rcpp::as<std::vector<double>>(cultivars_param["max_density"]);
   const std::vector<double> growth_rate = Rcpp::as<std::vector<double>>(cultivars_param["growth_rate"]);
   const std::vector<double> reproduction_rate = Rcpp::as<std::vector<double>>(cultivars_param["reproduction_rate"]);
-  const std::vector<double> death_rate = Rcpp::as<std::vector<double>>(cultivars_param["death_rate"]);
+//  const std::vector<double> death_rate = Rcpp::as<std::vector<double>>(cultivars_param["death_rate"]);
+  const std::vector<double> relative_yield_H = Rcpp::as<std::vector<double>>(cultivars_param["relative_yield_H"]);
+  const std::vector<double> relative_yield_L = Rcpp::as<std::vector<double>>(cultivars_param["relative_yield_L"]);
+  const std::vector<double> relative_yield_I = Rcpp::as<std::vector<double>>(cultivars_param["relative_yield_I"]);
+  const std::vector<double> relative_yield_R = Rcpp::as<std::vector<double>>(cultivars_param["relative_yield_R"]);
   const int Nhost = initial_density.size();
   Rcpp::List cultivars_genes_list = Rcpp::as<Rcpp::List>(cultivars_param["cultivars_genes_list"]);
   std::vector<Cultivar> cultivars;
@@ -1304,7 +1365,9 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
     //Rcpp::Rcerr << "host " << i << std::endl;
     //for(int t=0; t<genes_id.size();t++) Rcpp::Rcerr << "\tGenes " << genes_id[t] << std::endl;
     cultivars.push_back(Cultivar(initial_density[i], max_density[i], growth_rate[i], reproduction_rate[i],
-                                 death_rate[i], genes_id));
+                                 //death_rate[i], 
+                                           relative_yield_H[i], relative_yield_L[i],
+                                 relative_yield_I[i], relative_yield_R[i], genes_id));
     total_genes_id.insert(total_genes_id.end(), genes_id.begin(), genes_id.end()); // Appends a vector to another
   }
   
@@ -1350,7 +1413,7 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   Rcpp::Rcerr << basic_patho.to_string() << std::endl;
 #endif
   
-  Treatment treatment(Rcpp::as<double>(treatment_param["treatment_reduction_rate"]),
+  Treatment treatment(Rcpp::as<double>(treatment_param["treatment_degradation_rate"]),
                       Rcpp::as<double>(treatment_param["treatment_efficiency"]),
                       Rcpp::as< std::vector<int> >(treatment_param["treatment_timesteps"]),
                       Rcpp::as< std::vector<int> >(treatment_param["treatment_cultivars"]),
@@ -1392,7 +1455,7 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   
   // Create the model
   Model model(Nyears, nTSpY, Npoly, Nhost, Npatho, Ngene, area, rotation, gen, cultivars, genes, basic_patho, treatment, 
-              croptypes, sigmoid_kappa_host, sigmoid_sigma_host, sigmoid_plateau_host, pI0, disp_patho, disp_patho_sex, disp_host,
+              croptypes, sigmoid_kappa_host, sigmoid_sigma_host, sigmoid_plateau_host, pI0, disp_patho_clonal, disp_patho_sex, disp_host,
               seed);
   
   /*--------------------------------------*/

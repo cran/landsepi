@@ -23,33 +23,25 @@ library(landsepi)
 ```
 
 
-## Initialisation of simulation parameters
+## Initialisation of simulation parameters, seed, time and landscape parameters
 
 *See also the tutorial on [how to simulate a simple simulation](O1-run_simple_simul.html) 
 for details on basic parameterisation.*
 
 ```{r, results="hide", message="FALSE"}
+## Initialisation of the simulation
 simul_params <- createSimulParams(outputDir = getwd())
-```
-
-## Setting the seed and time parameters
-
-```{r}
+## Seed
 simul_params@Seed
 simul_params <- setSeed(simul_params, seed = 1)
 simul_params@Seed
+## Time parameters
 Nyears = 6 
 nTSpY = 120
 simul_params <- setTime(simul_params, Nyears = Nyears, nTSpY = nTSpY)
-```
-
-## Setting the inoculum
-```{r}
+## Inoculum
 simul_params <- setInoculum(simul_params, val = 5e-4)
-```
-
-## Setting the landscape
-```{r}
+## Landscape
 landscape <- loadLandscape(id = 1)
 simul_params <- setLandscape(simul_params, land = landscape)
 ```
@@ -58,11 +50,9 @@ simul_params <- setLandscape(simul_params, land = landscape)
 to use your own landscape and compute your own dispersal matrices.*
 
 
-## Setting parameters to simulate pathogens with a mixed reproduction system 
+## Setting the probability of sexual reproduction
 
-### Setting the probability of sexual reproduction
-
-A built-in parameterisation for rust pathogens of cereal crops is available using the function `loadPathogen()`:
+A built-in parameterisation different pathogens (e.g. rusts of cereal crops) is available using the function `loadPathogen()`:
 ```{r}
 basic_patho_param <- loadPathogen(disease = "rust")
 ```
@@ -72,7 +62,7 @@ purely clonally (repro_sex_prob = 0). It is also possible to simulate a pathogen
 purely sexually, or both sexually and clonally at every timestep:
 ```{r}
 basic_patho_param$repro_sex_prob <- 1  ## at every time step all pathogen individuals reproduces sexually
-basic_patho_param
+basic_patho_param$repro_sex_prob <- 0  ## at every time step all pathogen individuals reproduces clonally
 basic_patho_param$repro_sex_prob <- 0.5 ##  at every time step half of the pathogen population
                                         ## reproduce clonally and half sexually
 basic_patho_param
@@ -94,7 +84,9 @@ simul_params <- setReproSexProb(simul_params, repro_sex_probs)
 simul_params@ReproSexProb 
 ```
 
-### Setting the time of release of propagules produced at the end of a cropping season
+## Setting the time of release of propagules produced at the end of a cropping season
+
+### Sexual propagules
 
 Sexual propagules may be released gradually during the following seasons (i.e. years). 
 The following parameters set the average number of cropping seasons after which a 
@@ -105,9 +97,10 @@ basic_patho_param$sex_propagule_release_mean = 1
 basic_patho_param$sex_propagule_viability_limit = 5
 simul_params <- setPathogen(simul_params, basic_patho_param)  
 ```
-
 Within a cropping season, the day of release of every sexual propagule
 is sampled from a uniform distribution with parameters \{0;nTSpY\}.
+
+### Clonal propagules
 
 Clonal propagules produced at the end of a cropping season are released during the
 following season only, either altogether at the first day of the season (by setting
@@ -121,7 +114,7 @@ basic_patho_param$clonal_propagule_gradual_release = FALSE ## clonal propagules 
                                                           ## the first day of the next cropping season
 ```
 
-### Setting pathogen dispersal (both for sexual and clonal propagules)
+## Setting pathogen dispersal (both for sexual and clonal propagules)
 
 Dispersal for both sexual and clonal propagules is given by vectorised matrices giving
 the probability of dispersal from any field of the landscape to any other field. 
@@ -135,45 +128,43 @@ disp_patho <- loadDispersalPathogen(id = 1)
 
 The first element of the list `disp_patho` contains the vectorized dispersal matrix
 for clonal propagules, while the second element contains the vectorized dispersal matrix
-for sexual propagules (by default this is a diagonal matrix, thus no between-field dispersal 
-of sexual propagules, i.e. sexual spores spread only locally).
+for sexual propagules (by default this is a diagonal matrix, i.e. sexual propagules spread only locally 
+and there is no between-field dispersal of sexual propagules).
 ```{r}
-disp_patho_asex <- disp_patho[[1]]
+disp_patho_clonal <- disp_patho[[1]]
 disp_patho_sex <- disp_patho[[2]]
-head(disp_patho_asex)
+head(disp_patho_clonal)
 head(disp_patho_sex)
 ```
 
 Dispersal matrices can be modified, for example, to simulate a pathogen whose sexual propagules
 have the same dispersal ability as clonal propagules: 
 ```{r}
-disp_patho_asex <- disp_patho[[1]]
+disp_patho_clonal <- disp_patho[[1]]
 disp_patho_sex <- disp_patho[[1]]
-head(disp_patho_asex)
+head(disp_patho_clonal)
 head(disp_patho_sex)
 ```
 
 Then, the object `simul_params` is updated with the dispersal matrices via the 
 function `setDispersalPathogen()`:
 ```{r}
-simul_params <- setDispersalPathogen(simul_params, disp_patho_asex, disp_patho_sex)
+simul_params <- setDispersalPathogen(simul_params, disp_patho_clonal, disp_patho_sex)
 ```
 
 
-## Setting resistance genes
+## Setting recombination between resistance genes
 
 For a given parental pair, the genotype of each propagule is issued from random loci segregation of parental qualitative resistance genes. For each quantitative resistance gene, the value of each propagule trait is issued from a normal distribution around the average of the parental traits, with standard deviation defined by the parameter `recombination_sd`, following the infinitesimal model (Fisher 1919).
 
 ```{r}
 # Resistance genes
-
 gene1 <- loadGene(name = "gene 1", type = "majorGene")
 gene2 <- loadGene(name = "gene 2", type = "QTL")
 
 #gene2$recombination_sd <- 0.8
 gene2$Nlevels_aggressiveness <- 3
 genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
-
 ```
 
 
@@ -185,7 +176,6 @@ impacted by pathogen reproduction system, they are fully described in
 
 ```{r}
 # Cultivars
-
 cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
 cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
 cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
@@ -193,7 +183,6 @@ cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3)
                         , stringsAsFactors = FALSE)
 
 # Allocating genes to cultivars
-
 simul_params <- setGenes(simul_params, dfGenes = genes)
 simul_params <- setCultivars(simul_params, dfCultivars = cultivars)
 
@@ -205,11 +194,9 @@ simul_params <- allocateCultivarGenes(simul_params
                                       , listGenesNames = c("gene 2"))
 
 # Allocating cultivars to croptypes
-
 croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop"
                                                    , "Resistant crop 1"
                                                    , "Resistant crop 2"))
-
 croptypes <- allocateCroptypeCultivars(croptypes
                                        , croptypeName = "Susceptible crop"
                                        , cultivarsInCroptype = "Susceptible")
@@ -219,11 +206,9 @@ croptypes <- allocateCroptypeCultivars(croptypes
 croptypes <- allocateCroptypeCultivars(croptypes
                                        , croptypeName = "Resistant crop 2"
                                        , cultivarsInCroptype = "Resistant2")
-
 simul_params <- setCroptypes(simul_params, dfCroptypes = croptypes)
 
 # Allocating croptypes to fields of the landscape
-
 rotation_sequence <- croptypes$croptypeID ## No rotation -> 1 rotation_sequence element
 rotation_period <- 0  # number of years before rotation of the landscape
 prop <- c(1/3,1/3,1/3)  # proportion (in surface) of each croptype
@@ -235,20 +220,8 @@ simul_params <- allocateLandscapeCroptypes(simul_params
                                            , aggreg = aggreg
                                            , graphic = FALSE)
 
-# Define fungicide treatments
-# treatment <- list(treatment_reduction_rate = 1,
-#                     treatment_efficiency = 0.8,
-#                     treatment_timesteps =  vector() ,
-#                     #treatment_timesteps =  c(7,21,35) ,
-#                     treatment_cultivars =  vector(),
-#                     #cultivars= c(0),
-#                     treatment_cost = 0) 
-# simul_params <- setTreatment(simul_params, treatment)
-
 # Choosing output variables
-
 outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")
-
 simul_params <- setOutputs(simul_params, outputlist)
 ``` 
 

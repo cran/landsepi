@@ -260,7 +260,7 @@ pathogenTab <- {
         width = 4,
         shiny::numericInput(
           inputId = "patho_sex_propagule_release_mean",
-          label = "Average number of seasons before oospore",
+          label = "Average number of seasons before release of sexual propagules",
           value = 1.0,
           min = 1.0,
           step = 1.0
@@ -271,7 +271,7 @@ pathogenTab <- {
         width = 4,
         shiny::numericInput(
           inputId = "patho_sex_propagule_viability_limit",
-          label = "Oospore dormancy limit: nb of seasons (years)",
+          label = "Sexual propagule viability limit: nb of seasons (years)",
           value = 5,
           min = 1,
           step = 1
@@ -337,13 +337,13 @@ treatmentTab <- {
         width = 4,
         align = "center",
         shiny::numericInput(
-          inputId = "treatment_reduction_rate",
-          label = "Treatment reduction rate",
+          inputId = "treatment_degradation_rate",
+          label = "Treatment degradation rate",
           value = 0.1,
           min = 0.01,
           step = 0.1
         ),
-        shinyBS::bsTooltip("treatment_reduction_rate", title = "Reduction per time step of treatment concentration. 0.10 for protectant fungicides, 0.07 for locally systemic fungicides, and 0.06 to 0.05 for systemic fungicides.", placement = "top", trigger = "hover"),
+        shinyBS::bsTooltip("treatment_degradation_rate", title = "Degradation per time step of treatment concentration. 0.10 for protectant fungicides, 0.07 for locally systemic fungicides, and 0.06 to 0.05 for systemic fungicides.", placement = "top", trigger = "hover"),
         shiny::numericInput(
           inputId = "treatment_efficiency",
           label = "Treatment efficacy",

@@ -23,11 +23,7 @@ knitr::opts_chunk$set(
 ## ---- eval=FALSE--------------------------------------------------------------
 #  install.packages("RCALI")
 #  library(RCALI)
-
-## ---- eval=FALSE--------------------------------------------------------------
 #  library(landsepi)
-
-## ---- eval=FALSE--------------------------------------------------------------
 #  landscape <- landscapeTEST1
 #  Npoly <- length(landscape)
 #  Npoly
@@ -58,7 +54,7 @@ knitr::opts_chunk$set(
 #  califlopp(file=file_land, dispf=1, param=param, resfile=file_disp)
 
 ## ---- eval=FALSE--------------------------------------------------------------
-#  my_df <-function(x)((b-2)*(b-1)/(2*a^2*pi)*(1+(abs(x)/a))^(-b))
+#  my_df <-function(x, a=40, b=7) ((b-2)*(b-1)/(2*a^2*pi)*(1+(abs(x)/a))^(-b))
 #  
 #  param <- list(input=2, output=0, method="cub", dp=6000, dz=6000, warn.poly=FALSE,
 #                warn.conv=FALSE, verbose=FALSE)
@@ -122,7 +118,7 @@ knitr::opts_chunk$set(
 #  ## convert dispersal in matrix
 #  mat <- matrix(disp_patho, nrow=sqrt(length(disp_patho)))
 #  poly <- 1
-#  dispToPlot <- log10(mat[poly,])
+#  dispToPlot <- log10(mat[poly,] +1E-20)  ## 1E-20 to avoid log(0)
 #  
 #  ## Colour palette
 #  nCol <- 11

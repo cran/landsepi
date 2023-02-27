@@ -52,7 +52,7 @@ void Model::print_param(const int& seed, const std::vector<double>& mutation_pro
     std::ofstream param_file("parameters.txt");
     std::ofstream landscape_file("param_landscape.txt");
 //    std::ofstream genes_file("param_genes.txt");
-    std::ofstream dispP_file("param_disp_patho.txt");
+    std::ofstream dispPclonal_file("param_disp_patho_clonal.txt");
     std::ofstream dispPsex_file("param_disp_patho_sex.txt");
 //    std::ofstream dispH_file("param_disp_host.txt");
 
@@ -68,8 +68,8 @@ void Model::print_param(const int& seed, const std::vector<double>& mutation_pro
     param_file << "Npoly:               " << this->Npoly << "\n";
 
     landscape_file << "area, year 1 rotation, year 2 rotation... : \n";
-    dispP_file << "Pathogen dispersal:\n";
-    dispPsex_file << "Pathogen dispersal (sexual spore):\n";
+    dispPclonal_file << "Pathogen dispersal (clonal propagules):\n";
+    dispPsex_file << "Pathogen dispersal (sexual propagules):\n";
 //    dispH_file << "Host dispersal:\n";
     for(int i = 0; i < this->Npoly; i++) {
         landscape_file << "  poly " << i + 1 << ": ";
@@ -79,15 +79,15 @@ void Model::print_param(const int& seed, const std::vector<double>& mutation_pro
         }
         landscape_file << "\n";
 
-        dispP_file << i + 1 << ": ";
+        dispPclonal_file << i + 1 << ": ";
         dispPsex_file << i + 1 << ": ";
 //        dispH_file << i + 1 << ": ";
         for(int j = 0; j < this->Npoly; j++) {
-            dispP_file << std::to_string(this->disp_patho[i][j]) << " ";
+            dispPclonal_file << std::to_string(this->disp_patho_clonal[i][j]) << " ";
             dispPsex_file << std::to_string(this->disp_patho_sex[i][j]) << " ";
 //            dispH_file << std::to_string(this->disp_host[i][j]) << " ";
         }
-        dispP_file << "\n";
+        dispPclonal_file << "\n";
         dispPsex_file << "\n";
 //        dispH_file << "\n";
     }
@@ -144,10 +144,16 @@ void Model::write_HHjuvPLIR(const Vector2D<int>& H, const Vector2D<int>& Hjuv, c
 }
 
 /* Write model output in .txt files and print output on screen (ONLY Pbefinter) */
-void Model::write_Pbefinter(const Vector2D<int>& Pbefinter, FILE* fPbefinter) {
-    for(int poly = 0; poly < Npoly; poly++) {
-        for(int patho = 0; patho < Npatho; patho++) {
-            fwrite(&Pbefinter[poly][patho], sizeof(int), 1, fPbefinter);
-        }
+void Model::write_Pbefinter(const Vector3D<int>& eqIsurv, FILE* feqIsurv,
+                            const Vector2D<int>& Pbefinter, FILE* fPbefinter) {
+  
+  
+  for(int poly = 0; poly < Npoly; poly++) {
+    for(int patho = 0; patho < Npatho; patho++) {
+      fwrite(&Pbefinter[poly][patho], sizeof(int), 1, fPbefinter);
+      for(int host = 0; host < Nhost; host++) {
+        fwrite(&eqIsurv[poly][patho][host], sizeof(int), 1, feqIsurv);
+      }
     }
+  }
 }

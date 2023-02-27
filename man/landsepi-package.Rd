@@ -16,13 +16,16 @@ resistance deployment strategies.
 \tabular{ll}{
 Package: \tab landsepi\cr
 Type: \tab Package\cr
-Version: \tab 1.2.4\cr
-Date: \tab 2022-01-16\cr
+Version: \tab 1.2.5\cr
+Date: \tab 2023-02-24\cr
 License: \tab GPL (>=2)\cr
 }
 
 The landsepi package implements a spatially explicit stochastic model able to assess the epidemiological,
 evolutionary and economic outcomes of strategies to deploy plant resistance to pathogens.
+It also helps investigate the effect of landscape organisation, the considered pathosystem and
+the epidemio-evolutionary context on the performance of a given strategy.
+
 It is based on a spatial geometry for describing the landscape and allocation of different cultivars,
 a dispersal kernel for the dissemination of the pathogen,
 and a SEIR (‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed'
@@ -50,29 +53,24 @@ Cultivar allocation can be realised via an algorithm (\code{allocateCroptypeCult
 but it is possible to use your own cultivar allocation if it is included in the shapefile
 containing the landsape.
 Additionally, any cultivar may be treated with contact pesticides, which reduce the pathogen infection rate
-with an efficiency gradually decreasing with host growth.
+with an efficiency gradually decreasing with time and host growth.
 
 To each resistance gene in the host (whether it may be a major gene or a QTL for quantitative resistance)
 is associated a pathogenicity gene in the pathogen.
 Through mutation of pathogenicity genes, the pathogen can restore its aggressiveness on resistance hosts and thus
 adapt to resistance (leading to sudden breakdown or gradual erosion of resistance genes).
 Pathogenicity genes may also be reassorted via sexual reproduction or gene recombination.
-Increased in aggressiveness on a resistant host (i.e. adaptation to the corresponding resistance genes)
+Increased aggressiveness on a resistant host (i.e. adaptation to the corresponding resistance genes)
 can be penalised by a fitness cost on susceptible hosts, i.e. pathogen genotypes adapted to a resistance gene have
 a reduced aggressiveness on hosts that do not carry this gene.
 The relation between pathogen aggressiveness on susceptible and resistant hosts
 is defined by a trade-off relationship whose shape depends on the strength of the trade-off.
 Strong trade-off means that the gain in fitness on resistant hosts is smaller than the cost on susceptible hosts.
 
-This model provides a useful tool to assess the performance of a wide range of deployment options
-via epidemiological, evolutionary and economic outputs.
-It also helps investigate the effect of landscape organisation, the considered pathosystem and
-the epidemio-evolutionary context on the performance of a given strategy.
-
 The package includes five examples of landscape structures and a default parameterisation to represent
 plant pathogens as typified by rusts of cereal crops (genus \emph{Puccinia},
 e.g. stripe rust, stem rust and leaf rust of wheat and barley). A parameterisation to
-downy mildew of grapevine is also available.
+downy mildew of grapevine (\emph{Plasmopara viticola}) is also available.
 The main function of the package is \code{runSimul()}.
 It can be parameterised to simulate various resistance deployment strategies using either the provided
 landscapes and parameters for cereal rusts, or landscapes and parameters set by the user.
@@ -82,62 +80,71 @@ for details on how to use landsepi.
 \describe{
 \item{\strong{Assumptions} (in bold those that can be relaxed with appropriate parameterization): }{
 \enumerate{
+
 \item The spatial unit is a polygon, i.e. a piece of land delimited by boundaries and possibly
 cultivated with a crop. Such crop may be host or non-host, and the polygon is considered a homogeneous
-mixture of host individuals (i.e. there is no intra-polygon structuration). A field may be composed
-of a single or several polygons..
-\item Host individuals are in one of these four categories: H (healthy),
-E (latent, i.e. infected but not infectious nor symptomatic), I (infectious and symptomatic),
-or R (removed, i.e. epidemiologically inactive).
-\item \strong{A host `individual' is an infection unit and may correspond to a given amount of plant tissue
+mixture of host individuals (i.e. there is no intra-polygon structuration).
+A field may be composed of a single or several polygons.
+\item Host individuals are in one of these four categories: H (healthy), E (exposed and latent,
+i.e. infected but not infectious nor symptomatic), I (infectious and symptomatic), or R
+(removed, i.e. epidemiologically inactive).
+\item \strong{A host ‘individual’ is an infection unit and may correspond to a given amount of plant tissue
 (where a local infection may develop, e.g. fungal lesion) or a whole plant (e.g. systemic viral infection).
-In the first case, plant growth increases the amount of available plant tissue (hence the number of individuals)
-during the cropping season.} Plant growth is deterministic (logistic growth) and
-only healthy hosts (state H) contribute to plant growth (castrating pathogen).
-\item \strong{The decreasing availability of healthy host tissues (as epidemics spread) makes pathogen infection less likely
-(i.e. density-dependence due to plant architecture).}
-\item \strong{Host are cultivated (i.e. sown/planted and harvested), thus there is no host reproduction, dispersal and natural death.}
-\item Environmental and climate conditions are constant, and host individuals of a given genotype are equally
-susceptible to disease from the first to the last day of every cropping season.
-\item Crop yield depends on the average amount of producing host individuals during the cropping season
-and does not depend on the time of epidemic peak. \strong{Only healthy individuals (state H) contribute to crop yield.}
-\item Components of a mixture are independent each other (i.e. there is neither plant-plant interaction
-nor competition for space, and harvests are segregated).
-\item 9.	Crops may be treated with chemicals which reduce the pathogen infection rate (contact treatment).
+In the first case, plant growth increases the amount of available plant tissue
+(hence the number of individuals) during the cropping season.} Plant growth is deterministic (logistic growth)
+and only healthy individuals (state H) contribute to plant growth (castrating pathogen).
+\item \strong{The decreasing availability of healthy host tissues (as epidemics spread) makes pathogen
+infection less likely (i.e. density-dependence due to plant architecture).}
+\item \strong{Host are cultivated (i.e. sown/planted and harvested), thus there is no host reproduction,
+dispersal and natural death.}
+\item Environmental and climate conditions are constant, and host individuals of a given genotype
+are equally susceptible to disease from the first to the last day of every cropping season.
+\item Crop yield depends on the average amount of producing host individuals during the cropping
+season and does not depend on the time of epidemic peak. \strong{Only healthy individuals (state H)
+contribute to crop yield.}
+\item Cultivars may be treated with chemicals which reduce the pathogen infection rate (contact treatment).
 Treatment efficiency decreases with host growth (i.e. new biomass is not protected by treatments)
-\strong{and time (i.e. pesticide degradation)}. Crops to be treated and dates of chemical applications are
-fixed prior to simulations (thus they are independent from the epidemic dynamics) and are the same
-for all polygons cultivated with the crops to be treated.
+\strong{and time (i.e. pesticide degradation)}. Cultivars to be treated and dates of chemical applications
+are fixed prior to simulations (thus they are independent from the epidemic dynamics) and are the
+same for all polygons cultivated with the cultivars to be treated.
+\item Components of a mixture are independent each other (i.e. there is neither plant-plant
+interaction nor competition for space, and harvests are segregated). If one component is treated
+with a chemical, it does not affect other components.
 \item The pathogen is haploid.
 \item Initially, the pathogen is not adapted to any source of resistance, and is only present on
 susceptible hosts (at state I).
 \item \strong{Pathogen dispersal is isotropic (i.e. equally probable in every direction).}
-\item Pathogen reproduction can be purely clonal, purely sexual, or mixed (alternation of clonal and sexual reproduction).
-\item If there is sexual reproduction (or gene recombination), it occurs only between parental infections located
-in the same polygon and the same host genotype. The host population is panmictic (i.e. all pairs of parents have
-the same probability to occur). The propagule production rate of a parental pair is the sum of
-the propagule production rates of the parents. For a given parental pair, the genotype of each
-propagule is issued from random loci segregation of parental qualitative resistance genes.
-For each quantitative resistance gene, the value of each propagule trait is issued from a
-normal distribution around the average of the parental traits, following the infinitesimal model (Fisher 1919).
-\item Each type of propagule (i.e. either clonal or sexual) has its own dispersal ability.
-\item At the end of each cropping season, pathogens experience a bottleneck representing
-the off-season and then propagules are produced (either via clonal or sexual reproduction).
-Clonal propagules are released during the following season only, either altogether at the
-first day of the season, or progressively (in that case the day of release of each propagule
-is sampled from a uniform distribution). Sexual propagules are gradually released during several
-of the following seasons (between-season release). The season of release of each propagule is
-sampled from an exponential distribution, truncated by a maximum viability limit. Then,
-the day of release in a given season is sampled from a uniform distribution (within-season release).
+\item Pathogen reproduction can be purely clonal, purely sexual, or mixed (alternation of clonal
+and sexual reproduction).
+\item If there is sexual reproduction (or gene recombination), it occurs only between parental
+infections located in the same polygon and the same host genotype. At that scale, the pathogen
+population is panmictic (i.e. all pairs of parents have the same probability to occur).
+The propagule production rate of a parental pair is the sum of the propagule production rates of
+the parents. For a given parental pair, the genotype of each propagule is issued from random loci
+segregation of parental qualitative resistance genes. For each quantitative resistance gene, the
+value of each propagule trait is issued from a normal distribution around the average of the
+parental traits, following the infinitesimal model (Fisher 1919).
+\item Both types of propagules (i.e. clonal and sexual) share the same pathogenicity parameters
+(e.g. infection rate, latent period duration, etc.) but each of them has its own dispersal ability
+and survival ability (see after).
+\item At the end of each cropping season, pathogens experience a bottleneck representing the
+off-season and then propagules are produced (either via clonal or sexual reproduction). Clonal
+propagules are released during the following season only, either altogether at the first day of
+the season, or progressively (in that case the day of release of each propagule is sampled from
+a uniform distribution). Sexual propagules are gradually released during several of the following
+seasons (between-season release). The season of release of each propagule is sampled from an
+exponential distribution, truncated by a maximum viability limit. Then, the day of release in a
+given season is sampled from a uniform distribution (within-season release).
 \item Pathogenicity genes mutate independently from each other.
-\item \strong{Pathogen adaptation to a given resistance gene consists in restoring the same aggressiveness component
-as the one targeted by the resistance gene.}
-\item If a fitness cost penalises pathogen adaptation to a given resistance gene, this cost is paid on
-hosts that do not carry this gene, and consists in a reduction in the same aggressiveness component as
-the one targeted by the resistance gene.
-\item When there is a delay for activation of a given resistance gene (APR), the time to activation is the same for
-all hosts carrying this gene and located in the same polygon.
-\item Variances of the durations of the latent and the infectious periods of the pathogen are not affected by plant resistance.
+\item \strong{Pathogen adaptation to a given resistance gene consists in restoring the same aggressiveness
+component as the one targeted by the resistance gene.}
+\item If a fitness cost penalises pathogen adaptation to a given resistance gene, this cost is paid
+on hosts that do not carry this gene, and consists in a reduction in the same aggressiveness
+component as the one targeted by the resistance gene.
+\item When there is a delay for activation of a given resistance gene (APR), the time to activation
+is the same for all hosts carrying this gene and located in the same polygon.
+\item Variances of the durations of the latent and the infectious periods of the pathogen are
+not affected by plant resistance.
 }
 }
 \item{\strong{Epidemiological outputs}}{
@@ -169,8 +176,9 @@ The economic outcome of a simulation can be evaluated using: \enumerate{
 per hectare (depends on the number of productive hosts and associated theoretical yield),
 \item the crop products: yearly products generated from sales, in monetary units per hectare
 (depends on crop yield and market value),
-\item the crop operational costs: yearly costs associated with crop planting,
-in monetary units per hectare (depends on initial host density and planting cost),
+\item the crop operational costs: yearly costs associated with crop planting (depends on initial
+host density and planting cost) and pesticide treatments (depends on the number of applications and
+the cost of a single application) in monetary units per hectare.
 \item the margin, i.e. products - operational costs, in monetary units per hectare.
 }
 }
@@ -248,8 +256,6 @@ Jean-Francois Rey \email{jean-francois.rey@inrae.fr}
 Marta Zaffaroni \email{marta.zaffaroni@inrae.fr}
 
 Jean-Loup Gaussen \email{jean-loup-thomas.gaussen@inrae.fr}
-
-Marta Zaffaroni \email{marta.zaffaroni@inrae.fr}
 
 Maintainer: Jean-Francois Rey \email{jean-francois.rey@inrae.fr}
 }

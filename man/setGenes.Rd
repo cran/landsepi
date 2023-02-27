@@ -24,7 +24,7 @@ dfGenes is a data.frame of parameters associated with each resistance gene and
 with the evolution of each corresponding pathogenicity gene. Columns of the dataframe are:
 \itemize{
 \item geneName: names of resistance genes,
-\item target_trait: aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes,
+\item target_trait: aggressiveness components ("IR", "LAT", "IP", or "PR") targeted by resistance genes,
 \item efficiency: resistance gene efficiencies, i.e. the percentage of reduction of the targeted
 aggressiveness component (IR, 1/LAT, IP and PR),
 \item time_to_activ_mean: expected delays to resistance activation (for APRs),

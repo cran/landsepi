@@ -49,8 +49,8 @@ Otherwise, you can use your own allocation (see below).
 
 You must define for each year of simulation the index of the croptype ("croptypeID") cultivated in each feature 
 (polygons). Each feature has a field identified by "year_XX" (XX <- seq(1:Nyears+1)) and containing the croptype ID. 
-Note that the allocation must contain one more year than the real number of simulated years (for simulation purpose, 
-the content of the allocation in year Nyears+1 does not affect the result).
+Note that the allocation must contain one more year than the real number of simulated years (this is only for 
+simulation purpose, the content of the allocation in year Nyears+1 does not affect the result).
   
 
 | Features/fields | year_1 | year_2 | ... year_Nyears+1 |
@@ -99,23 +99,16 @@ The *RCALI* package has a limited number of built-in dispersal kernels.
 However, users can code for their own dispersal kernel. 
 See section "Details" in the documentation of the function `califlopp` to learn how to implement 
 your own kernel.   
-Then, (let say the name of your kernel is `f`) use `dispf=f` in the function `califlopp`.  
-
+ 
 ***
 
 #### An example
 
-Here is an example of how to compute a dispersal matrix using the dispersal kernel of oilseed 
-rape pollen (available in *RCALI*: use `dispf=1` in the arguments of function `califlopp`).
+Here is an example illustrating the computation of the dispersal matrix on the first landscape supplied in *landsepi*.
 ```{r, eval=FALSE}
 install.packages("RCALI")
 library(RCALI)
-```
-In this example, the dispersal matrix will be computed for the first landscape supplied in *landsepi*.
-```{r, eval=FALSE}
 library(landsepi)
-```
-```{r, eval=FALSE}
 landscape <- landscapeTEST1
 Npoly <- length(landscape)
 Npoly
@@ -143,23 +136,32 @@ for (k in 1:Npoly) {
 }
 cat(NULL, file=file_land, append=T, sep="\n")
 ```
+
 Then the function `califlopp` calculates the flow of particles between polygons 
-using an integration method. See `?califlopp` for details.
+using an integration method. Here we use the dispersal kernel of oilseed rape pollen 
+(available in *RCALI*: use `dispf=1` in the arguments of function `califlopp`, 
+see `?califlopp` for details).
 ```{r, eval=FALSE}
 param <- list(input=2, output=0, method="cub", dp=6000, dz=6000
               , warn.poly=FALSE, warn.conv=FALSE, verbose=FALSE)
 califlopp(file=file_land, dispf=1, param=param, resfile=file_disp)
 ```
-The *RCALI* package has a limited number of built-in dispersal kernels (dispf = 1 in our example). 
-However, users can code for their own dispersal kernel as follows. 
 
+The *RCALI* package has a limited number of built-in dispersal kernels (dispf = 1 in our example). 
+However, users can code for their own dispersal kernel (let say the name of your kernel is `f`) 
+using `dispf=f` in the function `califlopp`:
 ```{r, eval=FALSE}
-my_df <-function(x)((b-2)*(b-1)/(2*a^2*pi)*(1+(abs(x)/a))^(-b))
+my_df <-function(x, a=40, b=7) ((b-2)*(b-1)/(2*a^2*pi)*(1+(abs(x)/a))^(-b))
 
 param <- list(input=2, output=0, method="cub", dp=6000, dz=6000, warn.poly=FALSE,
               warn.conv=FALSE, verbose=FALSE)
 califlopp(file=file_land, dispf=my_df, param=param, resfile=file_disp)
 ```
+However, if there are many polygons in the landscape, computations may be long. 
+In this situation, we recommend to replace one of the built-in functions of RCALI by your own function 
+in the source code, and to recompile RCALI. 
+See paragraph "The individual dispersion functions" in the details of the documentation of the 
+califlopp function (`?califlopp`). 
 
 The output of califlopp must then be reformatted to generate the dispersal matrix that will 
 be further used in *landsepi*. 
@@ -233,7 +235,7 @@ To check the dispersal matrix and represent in a graphic the flow emitted by a s
 ## convert dispersal in matrix
 mat <- matrix(disp_patho, nrow=sqrt(length(disp_patho)))
 poly <- 1
-dispToPlot <- log10(mat[poly,])
+dispToPlot <- log10(mat[poly,] +1E-20)  ## 1E-20 to avoid log(0)
 
 ## Colour palette
 nCol <- 11

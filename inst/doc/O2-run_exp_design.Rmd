@@ -25,7 +25,7 @@ library(landsepi)
 ## Write the experimental design
 
 First create a dataframe containing, for each line, the value of target parameters (i.e. those destined to vary from 
-one simulation to anoter). The dataframe must also contain columns to store simulation outputs.  
+one simulation to another). The dataframe must also contain columns to store simulation outputs.  
 
 >For the sake of simplicity, the following numerical design contains only 5 simulations for which 7 target 
 parameters have been arbitrarily chosen to vary and 3 output variable are to be computed. 
@@ -89,8 +89,8 @@ for (i in 1:n){
     simul_params <- setLandscape(simul_params, landscape)
     
     ## Dispersal parameters
-    disp_patho <- loadDispersalPathogen(myDesign$id_landscape[i])[[1]]  ## update dispersal
-    simul_params <- setDispersalPathogen(simul_params, disp_patho)
+    disp_patho_clonal <- loadDispersalPathogen(myDesign$id_landscape[i])[[1]]  ## update dispersal
+    simul_params <- setDispersalPathogen(simul_params, disp_patho_clonal)
     
     ## Genes
     gene1 <- loadGene(name = "MG 1", type = "majorGene")
@@ -170,7 +170,7 @@ end of the simulation.
 
 >This set of binary files is composed of one file per simulated year and per compartment:  
 - H: healthy hosts,  
-- Hjuv: juvenile healthy hosts,  
+- Hjuv: juvenile healthy hosts (for host reproduction),  
 - L: latently infected hosts,  
 - I: infectious hosts,  
 - R: removed hosts,  
@@ -202,7 +202,7 @@ nTS <- Nyears * nTSpY     ## Total number of time-steps
 
 Npoly <- nrow(simul_params@Landscape)
 Nhost <- nrow(simul_params@Cultivars)
-Npatho <- Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
+Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
 
 ## Initialise lists
 H <- as.list(1:nTS)

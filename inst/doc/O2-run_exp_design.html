@@ -349,7 +349,7 @@ design</h1>
 <h2>Write the experimental design</h2>
 <p>First create a dataframe containing, for each line, the value of
 target parameters (i.e. those destined to vary from one simulation to
-anoter). The dataframe must also contain columns to store simulation
+another). The dataframe must also contain columns to store simulation
 outputs.</p>
 <blockquote>
 <p>For the sake of simplicity, the following numerical design contains
@@ -422,8 +422,8 @@ for details on the different functions.</em></p>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setLandscape</span>(simul_params, landscape)</span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Dispersal parameters</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    disp_patho <span class="ot">&lt;-</span> <span class="fu">loadDispersalPathogen</span>(myDesign<span class="sc">$</span>id_landscape[i])[[<span class="dv">1</span>]]  <span class="do">## update dispersal</span></span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setDispersalPathogen</span>(simul_params, disp_patho)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    disp_patho_clonal <span class="ot">&lt;-</span> <span class="fu">loadDispersalPathogen</span>(myDesign<span class="sc">$</span>id_landscape[i])[[<span class="dv">1</span>]]  <span class="do">## update dispersal</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setDispersalPathogen</span>(simul_params, disp_patho_clonal)</span>
 <span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Genes</span></span>
 <span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    gene1 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;MG 1&quot;</span>, <span class="at">type =</span> <span class="st">&quot;majorGene&quot;</span>)</span>
@@ -504,7 +504,7 @@ simulation.</p>
 <p>This set of binary files is composed of one file per simulated year
 and per compartment:<br />
 - H: healthy hosts,<br />
-- Hjuv: juvenile healthy hosts,<br />
+- Hjuv: juvenile healthy hosts (for host reproduction),<br />
 - L: latently infected hosts,<br />
 - I: infectious hosts,<br />
 - R: removed hosts,<br />
@@ -534,7 +534,7 @@ these lists.</p>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Npoly <span class="ot">&lt;-</span> <span class="fu">nrow</span>(simul_params<span class="sc">@</span>Landscape)</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>Nhost <span class="ot">&lt;-</span> <span class="fu">nrow</span>(simul_params<span class="sc">@</span>Cultivars)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>Npatho <span class="ot">&lt;-</span> Npatho <span class="ot">&lt;-</span> <span class="fu">prod</span>(simul_params<span class="sc">@</span>Genes<span class="sc">$</span>Nlevels_aggressiveness)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>Npatho <span class="ot">&lt;-</span> <span class="fu">prod</span>(simul_params<span class="sc">@</span>Genes<span class="sc">$</span>Nlevels_aggressiveness)</span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Initialise lists</span></span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>H <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>

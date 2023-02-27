@@ -567,7 +567,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # oospore dormancy limit
+  # sexual propagules viability limit
   shiny::observeEvent(input$patho_repro_sex_active, {
     if (input$patho_repro_sex_active == TRUE) {
       # force check
@@ -582,14 +582,14 @@ server <- function(input, output, session) {
     }
   })
 
-  # oospore dormancy limit
+  # sexual propagules viability limit
   shiny::observeEvent(input$patho_sex_propagule_viability_limit, {
     shiny::removeUI(selector = "#pathoDorLimError")
     if (input$patho_repro_sex_active == TRUE) {
       if (input$patho_sex_propagule_viability_limit < 0 || input$patho_sex_propagule_viability_limit > simul_params@TimeParam$nTSpY) {
         showErrorMessage(
           id = "pathoDorLimError", selectorafter = "#generateLandscape",
-          message = "Wrong value for pathogen oospore dormancy limit"
+          message = "Wrong value for pathogen sexual propagules viability limit"
         )
         can_run_simul$path_sex_propagule_viability_limit <<- FALSE
       }
@@ -600,14 +600,14 @@ server <- function(input, output, session) {
     }
   })
 
-  # oospore mu exp average germination
+  # sexual propagules mu exp average release
   shiny::observeEvent(input$patho_sex_propagule_release_mean, {
     shiny::removeUI(selector = "#pathoMuExpError")
     if (input$patho_repro_sex_active == TRUE) {
       if (input$patho_sex_propagule_release_mean < 1) {
         showErrorMessage(
           id = "pathoMuExpError", selectorafter = "#generateLandscape",
-          message = "Pathogen oospore average number of cropping seasons value have to be > 0"
+          message = "Pathogen sexual propagules average number of cropping seasons value have to be > 0"
         )
         can_run_simul$patho_sex_propagule_release_mean <<- FALSE
       }
@@ -629,7 +629,7 @@ server <- function(input, output, session) {
     if (treatment_is_active()) {
       if (length(input$treatment_cultivars_select) < 1 || input$treatment_day_start < 1 ||
         input$treatment_days_interval > input$nTSpY || input$treatment_day_start > input$nTSpY ||
-        input$treatment_reduction_rate <= 0 || input$treatment_efficiency < 0 || input$treatment_efficiency > 1
+        input$treatment_degradation_rate <= 0 || input$treatment_efficiency < 0 || input$treatment_efficiency > 1
         #|| input$treatment_cost < 0
         ) {
         showErrorMessage(
@@ -645,7 +645,7 @@ server <- function(input, output, session) {
         simul_params <<- setTreatment(
           simul_params,
           list(
-            treatment_reduction_rate = input$treatment_reduction_rate,
+            treatment_degradation_rate = input$treatment_degradation_rate,
             treatment_efficiency = input$treatment_efficiency,
             treatment_timesteps = days_list,
             treatment_cultivars = cults,
@@ -669,7 +669,7 @@ server <- function(input, output, session) {
       shinyjs::enable(id = "treatment_day_start")
       shinyjs::enable(id = "treatment_cultivars_select")
       shinyjs::enable(id = "treatment_efficiency")
-      shinyjs::enable(id = "treatment_reduction_rate")
+      shinyjs::enable(id = "treatment_degradation_rate")
       #shinyjs::enable(id = "treatment_cost")
       updateSelectInput(session, "treatment_cultivars_select", choices = c(Choose='',simul_params_cultivars()[, 1]), selected=NULL)
     }
@@ -678,7 +678,7 @@ server <- function(input, output, session) {
       shinyjs::disable(id = "treatment_day_start")
       shinyjs::disable(id = "treatment_cultivars_select")
       shinyjs::disable(id = "treatment_efficiency")
-      shinyjs::disable(id = "treatment_reduction_rate")
+      shinyjs::disable(id = "treatment_degradation_rate")
       #shinyjs::disable(id = "treatment_cost")
     }
     updateTreatment()
@@ -700,7 +700,7 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
   # beta Treatment
-  shiny::observeEvent(input$treatment_reduction_rate, {
+  shiny::observeEvent(input$treatment_degradation_rate, {
     updateTreatment()
   })
 
@@ -1123,7 +1123,7 @@ server <- function(input, output, session) {
     DTdata = shiny::reactive(simul_params_cultivars()),
     disableCol = shiny::reactive({
       if (isTRUE(advanced_mode())) {
-        c("reproduction_rate", "death_rate")
+        c("reproduction_rate")
       } else {
         names(simul_params_cultivars())
       }
@@ -1133,7 +1133,7 @@ server <- function(input, output, session) {
     tooltips = CULTIVARS_TOOLTIP,
     row.default = default_cultivar,
     row.inc = c(1),
-    col.hidden = which(names(simul_params_cultivars()) %in% c("reproduction_rate", "death_rate")) - 1
+    col.hidden = which(names(simul_params_cultivars()) %in% c("reproduction_rate")) - 1
   )
 
   ##### cultivars table modification #####
@@ -1327,7 +1327,7 @@ server <- function(input, output, session) {
   shinyjs::disable(id = "treatment_day_start")
   shinyjs::disable(id = "treatment_cultivars_select")
   shinyjs::disable(id = "treatment_efficiency")
-  shinyjs::disable(id = "treatment_reduction_rate")
+  shinyjs::disable(id = "treatment_degradation_rate")
   #shinyjs::disable(id = "treatment_cost")
 
   # Remove image

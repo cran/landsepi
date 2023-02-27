@@ -30,7 +30,11 @@ struct Cultivar {
     const double max_density;        // Maximum host density per surface unit at the end of the cropping season (in pure crop)
     const double growth_rate;        // Growth rate
     const double reproduction_rate;  // Reproduction rate
-    const double death_rate;         // Death rate
+//    const double death_rate;         // Death rate
+    const double relative_yield_H;   // Yield of H individuals relative to H individuals (100%)
+    const double relative_yield_L;   // Yield of L individuals relative to H individuals
+    const double relative_yield_I;   // Yield of I individuals relative to H individuals
+    const double relative_yield_R;   // Yield of R individuals relative to H individuals
     const std::vector<int> genes_id; // Indices of carried resistance genes
 
     Cultivar();
@@ -38,7 +42,11 @@ struct Cultivar {
                  , const double& max_density
                  , const double& growth_rate
                  , const double& reproduction_rate
-                 , const double& death_rate
+             //    , const double& death_rate
+                 , const double& relative_yield_H
+                 , const double& relative_yield_L
+                 , const double& relative_yield_I
+                 , const double& relative_yield_R
                  , const std::vector<int>& genes_id);
     std::string to_string() const;
 };

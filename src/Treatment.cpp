@@ -23,16 +23,16 @@
 
 // Default constructor
 Treatment::Treatment()
-  : treatment_reduction_rate(0),
+  : treatment_degradation_rate(0),
     treatment_efficiency(0),
     treatment_timesteps({}),
     treatment_cultivars({}),
     treatment_cost(0){}
 
 // Constructor
-Treatment::Treatment(const double& treatment_reduction_rate, const double& treatment_efficiency, const std::vector<int>& treatment_timesteps,
+Treatment::Treatment(const double& treatment_degradation_rate, const double& treatment_efficiency, const std::vector<int>& treatment_timesteps,
           const std::vector<int>& treatment_cultivars, const double& treatment_cost)
-  : treatment_reduction_rate(treatment_reduction_rate),
+  : treatment_degradation_rate(treatment_degradation_rate),
     treatment_efficiency(treatment_efficiency),
     treatment_timesteps(treatment_timesteps),
     treatment_cultivars(treatment_cultivars),
@@ -45,7 +45,7 @@ std::string Treatment::to_string() const {
   std::copy(this->treatment_cultivars.begin(), this->treatment_cultivars.end(), std::ostream_iterator<int>(oss2, ", "));
    
   std::string str("");
-  str += "  treatment reduction rate:        " + std::to_string(this->treatment_reduction_rate) + "\n";
+  str += "  treatment degradation rate:        " + std::to_string(this->treatment_degradation_rate) + "\n";
   str += "  treatment efficiency:         " + std::to_string(this->treatment_efficiency) + "\n";
   str += "  treatment timesteps:         " + oss.str() + "\n";
   str += "  treatment cultivars:         " + oss2.str() + "\n";

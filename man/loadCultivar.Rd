@@ -9,7 +9,7 @@ loadCultivar(name, type = "growingHost")
 \arguments{
 \item{name}{a character string (without space) specifying the cultivar name.}
 
-\item{type}{the cultivar type, among: "growingHost" (default), "nongrowingHost" or "nonCrop".}
+\item{type}{the cultivar type, among: "growingHost" (default), "nongrowingHost", "grapevine", or "nonCrop".}
 }
 \value{
 a dataframe of parameters associated with each host genotype

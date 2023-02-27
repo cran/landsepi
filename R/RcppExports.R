@@ -17,7 +17,7 @@
 #' @param croptypes_cultivars_prop a matrix with three columns named 'croptypeID' for croptype index, 
 #' 'cultivarID' for cultivar index and 'proportion' for the proportion of the cultivar within the croptype. 
 #' @param dispersal list of dispersal parameters:\itemize{ 
-#' \item disp_patho = vectorised dispersal matrix of the pathogen (asexual propagules), 
+#' \item disp_patho_clonal = vectorised dispersal matrix of the pathogen (clonal propagules), 
 #' \item disp_patho_sex = vectorised dispersal matrix of the pathogen (sexual propagules), 
 #' \item disp_host = vectorised dispersal matrix of the host.
 #' }
@@ -31,14 +31,17 @@
 #' \item max_density = vector of maximum host densities (per surface unit) at the end of the cropping season, 
 #' \item growth rate = vector of host growth rates, 
 #' \item reproduction rate = vector of host reproduction rates, 
-#' \item death rate = vector of host death rates, 
+#' \item relative_yield_H = Yield of H individuals relative to H individuals (100%)
+#' \item relative_yield_L = Yield of L individuals relative to H individuals
+#' \item relative_yield_I = Yield of I individuals relative to H individuals
+#' \item relative_yield_R = Yield of R individuals relative to H individuals
 #' \item sigmoid_kappa_host = kappa parameter for the sigmoid invasion function (for host dispersal),
 #' \item sigmoid_sigma_host = sigma parameter for the sigmoid invasion function (for host dispersal),
 #' \item sigmoid_plateau_host = plateau parameter for the sigmoid invasion function (for host dispersal),
-#' \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes.
+#' \item cultivars_genes_list = a list containing, for each host genotype, the indices of carried resistance genes,
 #' } 
 #' @param basic_patho_param list of i. pathogen aggressiveness parameters on a susceptible host 
-#' for a pathogen genotype not adapted to resistance and ii. germination of sexual spores parameters: \itemize{
+#' for a pathogen genotype not adapted to resistance and ii. sexual reproduction parameters: \itemize{
 #' \item infection_rate = maximal expected infection rate of a propagule on a healthy host, 
 #' \item propagule_prod_rate = maximal expected reproduction_rate of an infectious host per timestep, 
 #' \item latent_period_mean = minimal expected duration of the latent period, 
@@ -70,13 +73,13 @@
 #' on hosts that do and do not carry the resistance genes.
 #' }
 #' @param treatment_param list of parameters related to pesticide treatments: \itemize{ 
-#'  \item treatment_reduction_rate = reduction per time step of treatment concentration,
-#'  \item treatment_efficiency =  Maximal efficiency of chemical treatments (i.e. fractional reduction of pathogen infection at the application date),
-#'  \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
-#'  \item treatment_cultivars  = vector of cultivar indices that receive treatments, 
-#'  \item treatment_cost = cost of a single treatments (monetary units/ha)
-#'  
-#'  }
+#' \item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
+#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction 
+#' of pathogen infection rate at the time of application),
+#' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
+#' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
+#' \item treatment_cost = cost of a single treatment application (monetary units/ha)
+#' }
 #' 
 #' @details See ?landsepi for details on the model and assumptions. 
 #' Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
@@ -90,7 +93,7 @@
 #' @return A set of binary files is generated for every year of simulation and every compartment: 
 #' \itemize{
 #'  \item H: healthy hosts,
-#'  \item Hjuv: juvenile healthy hosts,
+#'  \item Hjuv: juvenile healthy hosts (for host reproduction),
 #'  \item L: latently infected hosts,
 #'  \item I: infectious hosts,
 #'  \item R: removed hosts,
@@ -121,7 +124,7 @@
 #'                time_param = time_param,
 #'                basic_patho_param = loadPathogen(disease = "rust"),
 #'                inits = list(pI0=0.01), area_vector = area,
-#'                dispersal = list(disp_patho=c(0.99,0.01,0.01,0.99),
+#'                dispersal = list(disp_patho_clonal=c(0.99,0.01,0.01,0.99),
 #'                disp_patho_sex=c(1,0,0,1),
 #'                disp_host=c(1,0,0,1)),
 #'                rotation_matrix = as.matrix(rotation),
@@ -141,34 +144,47 @@
 #' , croptypes_cultivars_prop, cultivars, eco_param)
 #' 
 #' 
-#' #### 1-year simulation of a rust epidemic in pure susceptible crop in a single 1 ha patch ####
-#' time_param <- list(Nyears=1, nTSpY=120)
-#' Npoly=1
-#' Npatho=1
-#' area <- c(100000)
-#' cultivars <- as.list(rbind(loadCultivar(name="Susceptible", type="growingHost")))
-#' names(cultivars)[names(cultivars)=="cultivarName"] <- "name"
-#' cultivars <- c(cultivars, list(sigmoid_kappa_host=0.002, sigmoid_sigma_host=1.001,
-#'                                sigmoid_plateau_host=1, cultivars_genes_list=list(numeric(0))))
-#' rotation <- data.frame(year_1=c(0), year_2=c(0))
-#' croptypes_cultivars_prop <- data.frame(croptypeID=c(0), cultivarID=c(0), proportion=c(1))
-#' genes <-   list(geneName = character(0) , fitness_cost = numeric(0)
-#' , mutation_prob = numeric(0)
-#' , efficiency = numeric(0) , tradeoff_strength = numeric(0)
-#' , Nlevels_aggressiveness = numeric(0)
-#' , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
-#' , target_trait = character(0))
-#'     
-#' ## run simulation
-#' model_landsepi(seed=1, time_param = time_param
-#' , basic_patho_param = loadPathogen(disease = "rust"),
-#' inits = list(pI0=0.01), area_vector = area,
-#'              dispersal = list(disp_patho=c(1),
-#'              disp_patho_sex=c(1),
-#'              disp_host=c(1)),
-#' rotation_matrix = as.matrix(rotation),
-#' croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop),
-#' cultivars_param = cultivars,  genes_param = genes) 
+#' 
+#' 
+#' #### 1-year simulation of a rust epidemic in pure susceptible crop in a single 1-km2 patch ####
+#'## Simulation and pathogen parameters
+#'time_param <- list(Nyears=1, nTSpY=120)
+#'area <- c(1E6)
+#'basic_patho_param = loadPathogen(disease = "rust")
+#'## croptypes, cultivars and genes
+#'rotation <- data.frame(year_1=c(0), year_2=c(0))
+#'croptypes_cultivars_prop <- data.frame(croptypeID=c(0), cultivarID=c(0), proportion=c(1))
+#'cultivars <- as.list(rbind(loadCultivar(name="Susceptible", type="growingHost")))
+#'names(cultivars)[names(cultivars)=="cultivarName"] <- "name"
+#'yield0 <- cultivars$yield_H + as.numeric(cultivars$yield_H==0)
+#'cultivars <- c(cultivars, list(relative_yield_H = as.numeric(cultivars$yield_H / yield0)
+#'     , relative_yield_L = as.numeric(cultivars$yield_L / yield0)
+#'     , relative_yield_I = as.numeric(cultivars$yield_I / yield0)
+#'     , relative_yield_R = as.numeric(cultivars$yield_R / yield0)
+#'     , sigmoid_kappa_host=0.002, sigmoid_sigma_host=1.001, sigmoid_plateau_host=1
+#'     , cultivars_genes_list=list(numeric(0))))
+#'genes <-   list(geneName = character(0) , fitness_cost = numeric(0)
+#'     , mutation_prob = numeric(0)
+#'     , efficiency = numeric(0) , tradeoff_strength = numeric(0)
+#'     , Nlevels_aggressiveness = numeric(0)
+#'     , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
+#'     , target_trait = character(0)
+#'     , recombination_sd = numeric(0))
+#'treatment=list(treatment_degradation_rate=0.1
+#'     , treatment_efficiency=0
+#'     , treatment_timesteps=logical(0)
+#'     , treatment_cultivars=logical(0)
+#'     , treatment_cost=0)
+#'
+#'## run simulation
+#'model_landsepi(seed=1, time_param = time_param
+#'     , basic_patho_param = basic_patho_param
+#'     , inits = list(pI0=5E-4), area_vector = area
+#'     , dispersal = list(disp_patho_clonal=c(1), disp_patho_sex=c(1), disp_host=c(1))
+#'     , rotation_matrix = as.matrix(rotation)
+#'     , treatment_param = treatment
+#'     , croptypes_cultivars_prop = as.matrix(croptypes_cultivars_prop)
+#'     , cultivars_param = cultivars,  genes_param = genes)
 #' }
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018).
 #' Assessing the durability andefficiency of landscape-based strategies to deploy plant 

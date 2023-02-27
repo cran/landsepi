@@ -28,7 +28,6 @@ as if cultivated in pure crop,
 as if cultivated in pure crop,
 \item growth rate: host growth rates,
 \item reproduction rate: host reproduction rates,
-\item death rate: host death rates,
 \item yield_H: theoretical yield (in weight or volume units / ha / cropping season)
 associated with hosts in sanitary status H as if cultivated in pure crop,
 \item yield_L: theoretical yield (in weight or volume units / ha / cropping season)
@@ -41,11 +40,11 @@ associated with hosts in sanitary status R as if cultivated in pure crop,
 \item market_value = market values of the production (in monetary units / weight or volume unit).
 }
 
-The data.frame must be defined as follow (example):\tabular{llllllllllll}{
-   cultivarName \tab initial_density \tab max_density \tab growth_rate \tab reproduction_rate \tab death_rate \tab yield_H \tab yield_L \tab yield_I \tab yield_R \tab planting_cost \tab market_value \cr
-   Susceptible \tab 0.1 \tab 2.0 \tab 0.1 \tab 0.0 \tab 0.0 \tab 2.5 \tab 0.0 \tab 0.0 \tab 0.0 \tab 225 \tab 200 \cr
-   Resistant1 \tab 0.1 \tab 2.0 \tab 0.1 \tab 0.0 \tab 0.0 \tab 2.5 \tab 0.0 \tab 0.0 \tab 0.0 \tab 225 \tab 200 \cr
-   Resistant2 \tab 0.1 \tab 2.0 \tab 0.1 \tab 0.0 \tab 0.0 \tab 2.5 \tab 0.0 \tab 0.0 \tab 0.0 \tab 225 \tab 200 \cr
+The data.frame must be defined as follow (example):\tabular{lllllllllll}{
+   cultivarName \tab initial_density \tab max_density \tab growth_rate \tab reproduction_rate \tab yield_H \tab yield_L \tab yield_I \tab yield_R \tab planting_cost \tab market_value \cr
+   Susceptible \tab 0.1 \tab 2.0 \tab 0.1 \tab 0.0 \tab 2.5 \tab 0.0 \tab 0.0 \tab 0.0 \tab 225 \tab 200 \cr
+   Resistant1 \tab 0.1 \tab 2.0 \tab 0.1 \tab 0.0 \tab 2.5 \tab 0.0 \tab 0.0 \tab 0.0 \tab 225 \tab 200 \cr
+   Resistant2 \tab 0.1 \tab 2.0 \tab 0.1 \tab 0.0 \tab 2.5 \tab 0.0 \tab 0.0 \tab 0.0 \tab 225 \tab 200 \cr
 }
 }
 \examples{
