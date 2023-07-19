@@ -38,8 +38,8 @@
 #' @details \tabular{ll}{
 #'          Package: \tab landsepi\cr
 #'          Type: \tab Package\cr
-#'          Version: \tab 1.2.5\cr
-#'          Date: \tab 2023-02-24\cr
+#'          Version: \tab 1.3.0\cr
+#'          Date: \tab 2023-07-11\cr
 #'          License: \tab GPL (>=2)\cr
 #'          }
 #'
@@ -92,7 +92,8 @@
 #' The package includes five examples of landscape structures and a default parameterisation to represent
 #' plant pathogens as typified by rusts of cereal crops (genus \emph{Puccinia},
 #' e.g. stripe rust, stem rust and leaf rust of wheat and barley). A parameterisation to
-#' downy mildew of grapevine (\emph{Plasmopara viticola}) is also available.
+#' downy mildew of grapevine (\emph{Plasmopara viticola}) and black sigatoka of banana 
+#' (\emph{Pseudocercospora fijiensis}) are also available.
 #' The main function of the package is \code{runSimul()}.
 #' It can be parameterised to simulate various resistance deployment strategies using either the provided 
 #' landscapes and parameters for cereal rusts, or landscapes and parameters set by the user. 
@@ -115,7 +116,7 @@
 #'  (where a local infection may develop, e.g. fungal lesion) or a whole plant (e.g. systemic viral infection). 
 #'  In the first case, plant growth increases the amount of available plant tissue 
 #'  (hence the number of individuals) during the cropping season.** Plant growth is deterministic (logistic growth) 
-#'  and only healthy individuals (state H) contribute to plant growth (castrating pathogen).
+#'  and **only healthy individuals (state H) contribute to plant growth (castrating pathogen)**.
 #'  \item **The decreasing availability of healthy host tissues (as epidemics spread) makes pathogen 
 #'  infection less likely (i.e. density-dependence due to plant architecture).**
 #'  \item **Host are cultivated (i.e. sown/planted and harvested), thus there is no host reproduction, 
@@ -128,8 +129,7 @@
 #'  \item Cultivars may be treated with chemicals which reduce the pathogen infection rate (contact treatment). 
 #'  Treatment efficiency decreases with host growth (i.e. new biomass is not protected by treatments) 
 #'  **and time (i.e. pesticide degradation)**. Cultivars to be treated and dates of chemical applications 
-#'  are fixed prior to simulations (thus they are independent from the epidemic dynamics) and are the 
-#'  same for all polygons cultivated with the cultivars to be treated.
+#'  are fixed prior to simulations but only polygons where disease severity exceeds a given threshold (possibly 0) are treated. 
 #'  \item Components of a mixture are independent each other (i.e. there is neither plant-plant 
 #'  interaction nor competition for space, and harvests are segregated). If one component is treated 
 #'  with a chemical, it does not affect other components. 
@@ -137,6 +137,7 @@
 #'  \item Initially, the pathogen is not adapted to any source of resistance, and is only present on 
 #'  susceptible hosts (at state I).
 #'  \item **Pathogen dispersal is isotropic (i.e. equally probable in every direction).**
+#'  \item **Boundaries of the landscape are reflective: propagules stay in the system as if it was closed.** 
 #'  \item Pathogen reproduction can be purely clonal, purely sexual, or mixed (alternation of clonal 
 #'  and sexual reproduction).
 #'  \item If there is sexual reproduction (or gene recombination), it occurs only between parental 
@@ -147,9 +148,9 @@
 #'  segregation of parental qualitative resistance genes. For each quantitative resistance gene, the 
 #'  value of each propagule trait is issued from a normal distribution around the average of the 
 #'  parental traits, following the infinitesimal model (Fisher 1919).
-#'  \item Both types of propagules (i.e. clonal and sexual) share the same pathogenicity parameters 
-#'  (e.g. infection rate, latent period duration, etc.) but each of them has its own dispersal ability 
-#'  and survival ability (see after). 
+#'  \item All types of propagules (i.e. clonal and sexual) share the same pathogenicity parameters 
+#'  (e.g. infection rate, latent period duration, etc.) but each of them has their own dispersal and survival 
+#'  abilities (see after). 
 #'  \item At the end of each cropping season, pathogens experience a bottleneck representing the 
 #'  off-season and then propagules are produced (either via clonal or sexual reproduction). Clonal 
 #'  propagules are released during the following season only, either altogether at the first day of 
@@ -164,7 +165,7 @@
 #'  \item If a fitness cost penalises pathogen adaptation to a given resistance gene, this cost is paid 
 #'  on hosts that do not carry this gene, and consists in a reduction in the same aggressiveness 
 #'  component as the one targeted by the resistance gene.
-#'  \item When there is a delay for activation of a given resistance gene (APR), the time to activation 
+#'  \item When there is a delay for activation of a given resistance gene (APR), the age of activation 
 #'  is the same for all hosts carrying this gene and located in the same polygon.
 #'  \item Variances of the durations of the latent and the infectious periods of the pathogen are 
 #'  not affected by plant resistance. 
@@ -214,7 +215,7 @@
 #' \strong{Future versions:}
 #'
 #' Future versions of the package will include in particular:\itemize{
-#' \item Sets of pathogen parameters to simulate other pathosystems (e.g. black sigatoka of banana, potato virus Y on pepper).
+#' \item Sets of pathogen parameters to simulate other pathosystems (e.g. Cucumber mosaic virus on pepper, potato virus Y on pepper).
 #' \item More flexible initial conditions (e.g. size, location and composition of pathogen inoculum at the beginning of the simulation).
 #' }
 #' \strong{Dependencies:}

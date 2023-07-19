@@ -23,7 +23,7 @@ Give the antiderivative of the logistic function from the Verhulst model.
 }
 \details{
 The Verhulst model (used to simulate host growth) is defined by
-\eqn{ f(x) = max\_density / (1 + (max\_density/initial\_density)*exp(-growth\_rate*x)) }.
+\eqn{ f(x) = max\_{density} / (1 + (max\_{density}/initial\_{density})*exp(-growth\_{rate}*x)) }.
 See https://en.wikipedia.org/wiki/Logistic_function for details.
 }
 \examples{

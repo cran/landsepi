@@ -64,7 +64,7 @@ Vector2D<double> Gene::init_mutkernel(const double& mutation_prob) {
 
 
 /* Initialisation of aggressiveness matrix (only called by Gene constructor) */
-Vector2D<double> Gene::init_aggressiveness_matrix(const double& efficiency, const double& fitness_cost,
+Vector2D<double> Gene::init_aggressiveness_matrix(const double& efficiency, const double& adaptation_cost,
                                                   const double& tradeoff_strength) {
     /* Aggressiveness matrix */
     Vector2D<double> aggressiveness_matrix(Nlevels_aggressiveness, std::vector<double>(2));
@@ -81,15 +81,15 @@ Vector2D<double> Gene::init_aggressiveness_matrix(const double& efficiency, cons
     const std::vector<double> cost = tradeoff(gain, tradeoff_strength);
     for(int i = 0; i < Nlevels_aggressiveness; i++) {
         aggressiveness_matrix[i][1] = aggressiveness_0 + gain[i] * efficiency;
-        aggressiveness_matrix[i][0] = 1 - cost[i] * fitness_cost;
+        aggressiveness_matrix[i][0] = 1 - cost[i] * adaptation_cost;
     }
     return aggressiveness_matrix;
 }
 
 // Default constructor
 Gene::Gene()
-    : time_to_activ_mean(0.0),
-      time_to_activ_var(0.0),
+    : age_of_activ_mean(0.0),
+      age_of_activ_var(0.0),
       Nlevels_aggressiveness(0),
       target_trait(""),
       mutkernel(Vector2D<double>()),
@@ -97,22 +97,22 @@ Gene::Gene()
       recombination_sd(0.0){}
 
 // Constructor
-Gene::Gene(const double& time_to_activ_mean, const double& time_to_activ_var, const int& Nlevels_aggressiveness,
+Gene::Gene(const double& age_of_activ_mean, const double& age_of_activ_var, const int& Nlevels_aggressiveness,
            const std::string& target_trait, const double& mutation_prob, const double& efficiency,
-           const double& fitness_cost, const double& tradeoff_strength, const double& recombination_sd)
-    : time_to_activ_mean(time_to_activ_mean),
-      time_to_activ_var(time_to_activ_var),
+           const double& adaptation_cost, const double& tradeoff_strength, const double& recombination_sd)
+    : age_of_activ_mean(age_of_activ_mean),
+      age_of_activ_var(age_of_activ_var),
       Nlevels_aggressiveness(Nlevels_aggressiveness),
       target_trait(target_trait),
       mutkernel(init_mutkernel(mutation_prob)),
-      aggressiveness_matrix(init_aggressiveness_matrix(efficiency, fitness_cost, tradeoff_strength)),
+      aggressiveness_matrix(init_aggressiveness_matrix(efficiency, adaptation_cost, tradeoff_strength)),
       recombination_sd(recombination_sd){}
 
 // Transform Gene attributs to string
 std::string Gene::to_string() const {
     std::string str("");
-    str += "  time_to_activ_mean:      " + std::to_string(this->time_to_activ_mean) + "\n";
-    str += "  time_to_activ_var:      " + std::to_string(this->time_to_activ_var) + "\n";
+    str += "  age_of_activ_mean:      " + std::to_string(this->age_of_activ_mean) + "\n";
+    str += "  age_of_activ_var:      " + std::to_string(this->age_of_activ_var) + "\n";
     str += "  Nlevels_aggressiveness: " + std::to_string(this->Nlevels_aggressiveness) + "\n";
     str += "  target_trait:           " + this->target_trait + "\n";
     str += "  recombination_sd:           " + std::to_string(this->recombination_sd) + "\n";

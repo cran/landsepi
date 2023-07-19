@@ -34,10 +34,11 @@ struct Treatment {
   const std::vector<int> treatment_timesteps; // Vector of time-steps corresponding to treatment application dates
   const std::vector<int> treatment_cultivars; // Vector of cultivar indices that receive treatments
   const double treatment_cost; // cost a single treatment application (monetary units/ha)
+  const std::vector<double> treatment_application_threshold; // Vector of thresholds (i.e. disease severity, one for each treated cultivar) above which the treatment is applied in a polygon
 
   Treatment();
   Treatment(const double& treatment_degradation_rate, const double& treatment_efficiency, const std::vector<int>& treatment_timesteps,
-              const std::vector<int>& cultivars, const double& treatment_cost);
+              const std::vector<int>& cultivars, const double& treatment_cost, const std::vector<double>& treatment_application_threshold);
   std::string to_string() const;
 };
 

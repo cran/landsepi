@@ -25,7 +25,8 @@
   DispPathoClonal = vector(),
   DispPathoSex = vector(),
   Treatment = list(treatment_degradation_rate = 0.1, treatment_efficiency = 0,
-    treatment_timesteps = vector(), treatment_cultivars = vector(), treatment_cost = 0),
+    treatment_timesteps = vector(), treatment_cultivars = vector(), treatment_cost = 0,
+    treatment_application_threshold = vector()),
   OutputDir = normalizePath(character(getwd())),
   OutputGPKG = "landsepi_landscape.gpkg",
   Outputs = list(epid_outputs = "", evol_outputs = "", thres_breakdown = NA, audpc100S =

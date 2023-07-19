@@ -80,6 +80,8 @@ of pathogen infection rate at the time of application),
 \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
 \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 \item treatment_cost = cost of a single treatment application (monetary units/ha)
+\item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar)
+above which the treatment is applied in a polygon
 }}
 
 \item{pathogen_param}{a list of i. pathogen aggressiveness parameters on a susceptible host

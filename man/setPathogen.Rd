@@ -37,7 +37,7 @@ a LandsepiParams object
 Updates a LandsepiParams object with pathogen parameters
 }
 \details{
-a set of parameters representative of rust fungi and downy mildew can be loaded via
+a set of parameters representative of rust fungi, downy mildew or black sigatoka can be loaded via
 \code{\link{loadPathogen}}.
 }
 \examples{

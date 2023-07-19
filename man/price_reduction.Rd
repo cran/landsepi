@@ -4,18 +4,30 @@
 \alias{price_reduction}
 \title{Price reduction function}
 \usage{
-price_reduction(I_host, N_host, Nhost, Nyears, nTSpY)
+price_reduction(
+  I_host,
+  N_host,
+  Nhost,
+  Nyears,
+  nTSpY,
+  severity_thresh = 0.075,
+  price_penalty = 0.3
+)
 }
 \arguments{
-\item{I_host}{number of infected host for cultivars and for timestep}
+\item{I_host}{number of infected individuals for each cultivar and timestep}
 
-\item{N_host}{total number of hosts for cultivars and for timestep}
+\item{N_host}{total number of individuals for each cultivar and timestep}
 
 \item{Nhost}{total number of cultivars considered in the simulation}
 
 \item{Nyears}{number of simulated cropping seasons}
 
-\item{nTSpY}{number of timestep (e.g. days) per cropping season}
+\item{nTSpY}{number of timesteps (e.g. days) per cropping season}
+
+\item{severity_thresh}{disease severity threshold above which the price reduction is applied}
+
+\item{price_penalty}{percentage of price reduction}
 }
 \value{
 A matrix with the price reduction rate per cultivar and per year of simulation

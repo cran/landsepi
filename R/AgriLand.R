@@ -157,7 +157,10 @@ AgriLand <- function(landscape, Nyears, rotation_period = 0, rotation_sequence =
          there is no re-allocation")
   }
   sumProp <- prod(sapply(prop, function(x) {
-    sum(x) == 1
+    # sum(x) == 1
+    ## Pb with rounding
+    ## https://www.developpez.net/forums/d1396081/general-developpement/algorithme-mathematiques/statistiques-data-mining-data-science/r/probleme-gestion-arrondis-r/
+    sum(x) - 1 <= .Machine$double.eps
   }))
   if (sumProp == FALSE) {
     stop("Error: proportions of the croptypes (i.e. elements of list prop) must have a sum at 1")

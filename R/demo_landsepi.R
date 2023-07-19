@@ -93,15 +93,17 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   
   ## Genes
   gene1 <- loadGene(name = "MG 1", type = "majorGene")
+  gene1$mutation_prob <- 1e-4
   gene2 <- loadGene(name = "MG 2", type = "majorGene")
+  gene2$mutation_prob <- 1e-4
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   # genes <- data.frame(geneName =               c("MG1", "MG2"),
   #                     efficiency =             c(1.0  , 1.0  ),
-  #                     time_to_activ_mean =      c(0.0  , 0.0  ),
-  #                     time_to_activ_var =      c(0.0  , 0.0  ),
+  #                     age_of_activ_mean =      c(0.0  , 0.0  ),
+  #                     age_of_activ_var =      c(0.0  , 0.0  ),
   #                     mutation_prob =          c(1E-7 , 1E-7 ),
   #                     Nlevels_aggressiveness = c(2    , 2    ),
-  #                     fitness_cost =           c(0.5  , 0.5  ),
+  #                     adaptation_cost =           c(0.5  , 0.5  ),
   #                     tradeoff_strength =      c(1.0  , 1.0  ),
   #                     target_trait =           c("IR" , "IR"  ),
   #                     var_sex_recombination =  c(0.0  , 0.0),
@@ -122,6 +124,7 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
     cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
     cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   }
+  
   # cultivars <- data.frame(cultivarName = c("Susceptible", "Resistant1", "Resistant2"),
   #                         initial_density =   rep(0.1, 3),
   #                         max_density =       rep(2.0, 3),
@@ -221,7 +224,7 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
     prop = prop,
     aggreg = aggreg
   )
-
+  
   
   ## list of outputs to be generated
   outputlist <- loadOutputs()

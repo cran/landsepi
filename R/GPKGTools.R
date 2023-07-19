@@ -27,6 +27,7 @@
 #' @param landscape a sf object
 #' @param outputfile GPKG output file name
 #' @return the outputfile name (full path)
+#' @noRd
 createLandscapeGPKG <- function(landscape, outputfile) {
   # create and save landscape in layer croptypeID (year_XX croptype ID)
   st_write(
@@ -57,7 +58,7 @@ createLandscapeGPKG <- function(landscape, outputfile) {
 #' @description Gets "area" layer as a vector of a GPKG file
 #' @param gpkgfile a GPKG file
 #' @return a vector of the area of each polygons
-#' @export
+#' @noRd
 getGPKGArea <- function(gpkgfile) {
   area <- st_read(
     gpkgfile,
@@ -74,7 +75,7 @@ getGPKGArea <- function(gpkgfile) {
 #' @description Gets Croptypes ID rotation years as a matrix
 #' @param gpkgfile a GPKG file
 #' @return a matrix as rows for polygons and cols for years
-#' @export
+#' @noRd
 getGPKGRotation <- function(gpkgfile) {
   croptypeID <- st_read(
     gpkgfile,
@@ -98,6 +99,7 @@ getGPKGRotation <- function(gpkgfile) {
 #' @param gpkgfile a GPKF file
 #' @return the GPKG file name
 #' @import DBI
+#' @noRd
 GPKGAddTables <- function(gpkgfile) {
   outputDB <-
     DBI::dbConnect(RSQLite::SQLite(), gpkgfile)
@@ -149,11 +151,11 @@ GPKGAddTables <- function(gpkgfile) {
     "CREATE TABLE Gene(geneID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                                   geneName TEXT NOT NULL,
                                                   efficiency REAL NOT NULL CHECK(efficiency BETWEEN 0 AND 1),
-                                                  time_to_activ_mean REAL NOT NULL CHECK(time_to_activ_mean >= 0),
-                                                  time_to_activ_var REAL NOT NULL CHECK(time_to_activ_var >= 0),
+                                                  age_of_activ_mean REAL NOT NULL CHECK(age_of_activ_mean >= 0),
+                                                  age_of_activ_var REAL NOT NULL CHECK(age_of_activ_var >= 0),
                                                   mutation_prob REAL NOT NULL CHECK(mutation_prob BETWEEN 0 AND 1),
                                                   Nlevels_aggressiveness INTEGER NOT NULL CHECK(Nlevels_aggressiveness >= 1),
-                                                  fitness_cost REAL NOT NULL CHECK(fitness_cost BETWEEN 0 AND 1),
+                                                  adaptation_cost REAL NOT NULL CHECK(adaptation_cost BETWEEN 0 AND 1),
                                                   tradeoff_strength REAL NOT NULL CHECK(tradeoff_strength > 0),
                                                   target_trait TEXT NOT NULL,
                                                   recombination_sd REAL CHECK(recombination_sd > 0));"
@@ -181,6 +183,7 @@ GPKGAddTables <- function(gpkgfile) {
 #' @param table table name
 #' @param data a data to write in BDD, should be the return of a function param2XXXXXBDD
 #' @param deleteExistingData if TRUE overwrite data if already present in gpkg file, default FALSE
+#' @noRd
 GPKGAddInputData <- function(gpkgfile, table = "", data = data.frame(), deleteExistingData = FALSE) {
   outputDB <- DBI::dbConnect(RSQLite::SQLite(), gpkgfile)
 
@@ -220,6 +223,7 @@ GPKGAddInputData <- function(gpkgfile, table = "", data = data.frame(), deleteEx
 #' @description Gets Croptypes and Cultivars proportions from a GPKG file
 #' @param inputGPKG a GPKG filename
 #' @return a data.frame with croptypeID, CultivarNames, and proportions
+#' @noRd
 getGPKGCroptypes <- function(inputGPKG) {
   inputDB <- DBI::dbConnect(RSQLite::SQLite(), inputGPKG)
 
@@ -247,6 +251,7 @@ getGPKGCroptypes <- function(inputGPKG) {
 #' @description Gets Croptypes and Cultivars proportions from a GPKG file without refactoring
 #' @param inputGPKG a GPKG filename
 #' @return a data.frame with croptypeID, CultivarID, and proportions
+#' @noRd
 getGPKGCroptypesRaw <- function(inputGPKG) {
   inputDB <- DBI::dbConnect(RSQLite::SQLite(), inputGPKG)
 
@@ -263,6 +268,7 @@ getGPKGCroptypesRaw <- function(inputGPKG) {
 #' @description Gets Cultivars from a GPKG file
 #' @param inputGPKG a GPKG filename
 #' @return a data.frame
+#' @noRd
 getGPKGCultivars <- function(inputGPKG) {
   inputDB <- DBI::dbConnect(RSQLite::SQLite(), inputGPKG)
 
@@ -280,6 +286,7 @@ getGPKGCultivars <- function(inputGPKG) {
 #' @description Gets Genes from a GPKG file
 #' @param inputGPKG a GPKG filename
 #' @return a data.frame
+#' @noRd
 getGPKGGenes <- function(inputGPKG) {
   inputDB <- DBI::dbConnect(RSQLite::SQLite(), inputGPKG)
 
@@ -299,6 +306,7 @@ getGPKGGenes <- function(inputGPKG) {
 #' @description Gets Cultivars Genes from a GPKG file
 #' @param inputGPKG a GPKG filename
 #' @return a data.frame
+#' @noRd
 getGPKGCultivarsGenes <- function(inputGPKG) {
   inputDB <- DBI::dbConnect(RSQLite::SQLite(), inputGPKG)
 
@@ -326,6 +334,7 @@ getGPKGCultivarsGenes <- function(inputGPKG) {
 #' @param inputGPKG a GPKG filename
 #' @param cultivarID a cultivarID
 #' @return a data.frame of GeneID
+#' @noRd
 getGPKGGeneIDForCultivar <- function(inputGPKG, cultivarID) {
   inputDB <- DBI::dbConnect(RSQLite::SQLite(), inputGPKG)
 

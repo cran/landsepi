@@ -369,7 +369,7 @@ and may be loaded via <code>load*()</code> functions.</p>
 <code>createSimulParams()</code>. If a specific seed is required, it can
 be set using the function <code>setSeed()</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1677261740</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1689750719</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setSeed</span>(simul_params, <span class="at">seed =</span> <span class="dv">1</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div>
@@ -390,8 +390,8 @@ using <code>setTime()</code>:</p>
 components defined on a susceptible host for a pathogen genotype not
 adapted to resistance.</p>
 <p>Buit-in parameterisation for different pathogens (e.g. rusts of
-cereal crops) is available using function
-<code>loadPathogen()</code>:</p>
+cereal crops, mildew of grapevine, black sigatoka of banana) are
+available using function <code>loadPathogen()</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="at">disease =</span> <span class="st">&quot;rust&quot;</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>basic_patho_param</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $name</span></span>
@@ -437,7 +437,99 @@ cereal crops) is available using function
 <span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
 <span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $clonal_propagule_gradual_release</span></span>
-<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="at">disease =</span> <span class="st">&quot;mildew&quot;</span>)</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>basic_patho_param</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $name</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;mildew&quot;</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $survival_prob</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1e-04</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $repro_sex_prob</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $infection_rate</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.9</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $propagule_prod_rate</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $latent_period_mean</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 7</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $latent_period_var</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 8</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $infectious_period_mean</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 14</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $infectious_period_var</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 22</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sigmoid_kappa</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5.333</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sigmoid_sigma</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sigmoid_plateau</span></span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_viability_limit</span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_release_mean</span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $clonal_propagule_gradual_release</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="at">disease =</span> <span class="st">&quot;sigatoka&quot;</span>)</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>basic_patho_param</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $name</span></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sigatoka&quot;</span></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $survival_prob</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.5</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $repro_sex_prob</span></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $infection_rate</span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.02</span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $propagule_prod_rate</span></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 90.9</span></span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $latent_period_mean</span></span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 25.5</span></span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $latent_period_var</span></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1.5</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $infectious_period_mean</span></span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 22</span></span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $infectious_period_var</span></span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 14</span></span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sigmoid_kappa</span></span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5.333</span></span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sigmoid_sigma</span></span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sigmoid_plateau</span></span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_viability_limit</span></span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_release_mean</span></span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $clonal_propagule_gradual_release</span></span>
+<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div>
 <p>This list may be updated to change a specific parameter. For
 instance, to change the infection rate to 50%:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="st">&quot;rust&quot;</span>)</span>
@@ -672,6 +764,12 @@ entirely from scratch:</p>
 <span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   yield_H yield_L yield_I yield_R planting_cost market_value</span></span>
 <span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     2.5       0       0       0           225          200</span></span>
 <span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     2.0       0       0       0           300          150</span></span></code></pre></div>
+<p>Note, assuming that only healthy hosts (state H) contribute to host
+growth, the production of healthy biomass between <span class="math inline">\(t\)</span> and <span class="math inline">\(t+1\)</span> is computed using the following
+logistic equation: <span class="math display">\[H_{t+1} = H_{t}
+\times  \left[1 + growth\_rate \times
+(1-\frac{N_{t}}{K})\right]\]</span> with <span class="math inline">\(N_t\)</span> the total number of individual hosts
+at time-step <span class="math inline">\(t\)</span> and <span class="math inline">\(K\)</span> the carrying capacity.</p>
 </div>
 <div id="resistance-genes" class="section level3">
 <h3>Resistance genes</h3>
@@ -694,16 +792,16 @@ parameterise non-host cultivars.</p>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>gene4 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;nonhost resistance&quot;</span>, <span class="at">type =</span> <span class="st">&quot;immunity&quot;</span>)</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">rbind</span>(gene1, gene2, gene3, gene4), <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>genes</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             geneName efficiency time_to_activ_mean time_to_activ_var</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               MG 1        1.0                  0                 0</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               Lr34        1.0                 30                30</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3             gene 3        0.5                  0                 0</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 nonhost resistance        1.0                  0                 0</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   mutation_prob Nlevels_aggressiveness fitness_cost tradeoff_strength</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         1e-07                      2          0.5                 1</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         1e-07                      2          0.5                 1</span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         1e-04                      6          0.5                 1</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         0e+00                      1          0.0                 1</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             geneName efficiency age_of_activ_mean age_of_activ_var</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               MG 1        1.0                 0                0</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               Lr34        1.0                30               30</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3             gene 3        0.5                 0                0</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 nonhost resistance        1.0                 0                0</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   mutation_prob Nlevels_aggressiveness adaptation_cost tradeoff_strength</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         1e-07                      2             0.5                 1</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         1e-07                      2             0.5                 1</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         1e-04                      6             0.5                 1</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         0e+00                      1             0.0                 1</span></span>
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   target_trait recombination_sd</span></span>
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           IR             1.00</span></span>
 <span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2           IR             1.00</span></span>
@@ -714,16 +812,16 @@ updated as required. For example, to change the mutation probability of
 the pathogen with regard to its adaptation to “MG 1”:</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>genes[genes<span class="sc">$</span>geneName <span class="sc">==</span> <span class="st">&quot;MG 1&quot;</span>, <span class="st">&quot;mutation_prob&quot;</span>] <span class="ot">&lt;-</span> <span class="fl">1e-3</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>genes</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             geneName efficiency time_to_activ_mean time_to_activ_var</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               MG 1        1.0                  0                 0</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               Lr34        1.0                 30                30</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3             gene 3        0.5                  0                 0</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 nonhost resistance        1.0                  0                 0</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   mutation_prob Nlevels_aggressiveness fitness_cost tradeoff_strength</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         1e-03                      2          0.5                 1</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         1e-07                      2          0.5                 1</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         1e-04                      6          0.5                 1</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         0e+00                      1          0.0                 1</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             geneName efficiency age_of_activ_mean age_of_activ_var</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               MG 1        1.0                 0                0</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               Lr34        1.0                30               30</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3             gene 3        0.5                 0                0</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 nonhost resistance        1.0                 0                0</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   mutation_prob Nlevels_aggressiveness adaptation_cost tradeoff_strength</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         1e-03                      2             0.5                 1</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         1e-07                      2             0.5                 1</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         1e-04                      6             0.5                 1</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         0e+00                      1             0.0                 1</span></span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   target_trait recombination_sd</span></span>
 <span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           IR             1.00</span></span>
 <span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2           IR             1.00</span></span>
@@ -733,22 +831,22 @@ the pathogen with regard to its adaptation to “MG 1”:</p>
 entirely from scratch:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>genes_new <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">geneName =</span>               <span class="fu">c</span>(<span class="st">&quot;MG1&quot;</span>, <span class="st">&quot;MG2&quot;</span>),</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">efficiency =</span>             <span class="fu">c</span>(<span class="fl">1.0</span>  , <span class="fl">0.8</span>  ),</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">time_to_activ_mean =</span>      <span class="fu">c</span>(<span class="fl">0.0</span>  , <span class="fl">0.0</span>  ),</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">time_to_activ_var =</span>      <span class="fu">c</span>(<span class="fl">0.0</span>  , <span class="fl">0.0</span>  ),</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">age_of_activ_mean =</span>      <span class="fu">c</span>(<span class="fl">0.0</span>  , <span class="fl">0.0</span>  ),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">age_of_activ_var =</span>      <span class="fu">c</span>(<span class="fl">0.0</span>  , <span class="fl">0.0</span>  ),</span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">mutation_prob =</span>          <span class="fu">c</span>(<span class="fl">1E-7</span> , <span class="fl">1E-4</span>),</span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">Nlevels_aggressiveness =</span> <span class="fu">c</span>(<span class="dv">2</span>    , <span class="dv">2</span>    ),</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">fitness_cost =</span>           <span class="fu">c</span>(<span class="fl">0.50</span> , <span class="fl">0.75</span> ),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">adaptation_cost =</span>           <span class="fu">c</span>(<span class="fl">0.50</span> , <span class="fl">0.75</span> ),</span>
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>                        <span class="at">tradeoff_strength =</span>      <span class="fu">c</span>(<span class="fl">1.0</span>  , <span class="fl">1.0</span>  ),</span>
 <span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">target_trait =</span>           <span class="fu">c</span>(<span class="st">&quot;IR&quot;</span> , <span class="st">&quot;LAT&quot;</span>),</span>
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>                        <span class="at">recombination_sd =</span>       <span class="fu">c</span>(<span class="fl">1.0</span>,<span class="fl">1.0</span>),</span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>genes_new</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geneName efficiency time_to_activ_mean time_to_activ_var mutation_prob</span></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1      MG1        1.0                  0                 0         1e-07</span></span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2      MG2        0.8                  0                 0         1e-04</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Nlevels_aggressiveness fitness_cost tradeoff_strength target_trait</span></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                      2         0.50                 1           IR</span></span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                      2         0.75                 1          LAT</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geneName efficiency age_of_activ_mean age_of_activ_var mutation_prob</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1      MG1        1.0                 0                0         1e-07</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2      MG2        0.8                 0                0         1e-04</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Nlevels_aggressiveness adaptation_cost tradeoff_strength target_trait</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                      2            0.50                 1           IR</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                      2            0.75                 1          LAT</span></span>
 <span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   recombination_sd</span></span>
 <span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                1</span></span>
 <span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                1</span></span></code></pre></div>
@@ -769,40 +867,45 @@ susceptible hosts.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setGenes</span>(simul_params, <span class="at">dfGenes =</span> genes)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setCultivars</span>(simul_params, <span class="at">dfCultivars =</span> cultivars)</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Genes</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                              geneName efficiency time_to_activ_mean</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; MG 1                             MG 1        1.0                  0</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lr34                             Lr34        1.0                 30</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gene 3                         gene 3        0.5                  0</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; nonhost resistance nonhost resistance        1.0                  0</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    time_to_activ_var mutation_prob Nlevels_aggressiveness</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; MG 1                               0         1e-03                      2</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lr34                              30         1e-07                      2</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gene 3                             0         1e-04                      6</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; nonhost resistance                 0         0e+00                      1</span></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    fitness_cost tradeoff_strength target_trait recombination_sd</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; MG 1                        0.5                 1           IR             1.00</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lr34                        0.5                 1           IR             1.00</span></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gene 3                      0.5                 1           IR             0.27</span></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; nonhost resistance          0.0                 1           IR             1.00</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Cultivars</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             cultivarName initial_density max_density growth_rate</span></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible  Susceptible             0.1           2         0.2</span></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1    Resistant1             0.1           2         0.1</span></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2    Resistant2             0.1           2         0.1</span></span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3    Resistant3             2.0           2         0.0</span></span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest            Forest             0.0           2         0.0</span></span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             reproduction_rate yield_H yield_L yield_I yield_R planting_cost</span></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible                 0     2.5       0       0       0           225</span></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1                  0     2.5       0       0       0           225</span></span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2                  0     2.5       0       0       0           225</span></span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3                  0     2.5       0       0       0           225</span></span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                      0     0.0       0       0       0             0</span></span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             market_value</span></span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible          200</span></span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1           200</span></span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2           200</span></span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3           200</span></span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                 0</span></span></code></pre></div>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                              geneName efficiency age_of_activ_mean</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; MG 1                             MG 1        1.0                 0</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lr34                             Lr34        1.0                30</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gene 3                         gene 3        0.5                 0</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; nonhost resistance nonhost resistance        1.0                 0</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    age_of_activ_var mutation_prob Nlevels_aggressiveness</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; MG 1                              0         1e-03                      2</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lr34                             30         1e-07                      2</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gene 3                            0         1e-04                      6</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; nonhost resistance                0         0e+00                      1</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    adaptation_cost tradeoff_strength target_trait</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; MG 1                           0.5                 1           IR</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lr34                           0.5                 1           IR</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gene 3                         0.5                 1           IR</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; nonhost resistance             0.0                 1           IR</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    recombination_sd</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; MG 1                           1.00</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lr34                           1.00</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; gene 3                         0.27</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; nonhost resistance             1.00</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>simul_params<span class="sc">@</span>Cultivars</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             cultivarName initial_density max_density growth_rate</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible  Susceptible             0.1           2         0.2</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1    Resistant1             0.1           2         0.1</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2    Resistant2             0.1           2         0.1</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3    Resistant3             2.0           2         0.0</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest            Forest             0.0           2         0.0</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             reproduction_rate yield_H yield_L yield_I yield_R planting_cost</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible                 0     2.5       0       0       0           225</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1                  0     2.5       0       0       0           225</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2                  0     2.5       0       0       0           225</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3                  0     2.5       0       0       0           225</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                      0     0.0       0       0       0             0</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             market_value</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Susceptible          200</span></span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant1           200</span></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant2           200</span></span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resistant3           200</span></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Forest                 0</span></span></code></pre></div>
 <p>Then the function <code>allocateCultivarGenes()</code> allows the
 attribution of resistance genes to cultivars:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params</span>
@@ -967,7 +1070,7 @@ application (noted <span class="math inline">\(t^*\)</span>); then it
 decreases with time (i.e. natural pesticide degradation) and host growth
 (i.e. new biomass is not protected by treatments):</p>
 <p><span class="math display">\[IR(t) = IR_{max} \times  \left(1 -
-\frac{treatment\_efficiency}{1+e^{3.5- 9.0 \times C(t)}}\right)\]</span>
+\frac{treatment\_efficiency}{1+e^{4.0- 8.5 \times C(t)}}\right)\]</span>
 <span class="math inline">\(C(t) = C_1 \times C_2\)</span> is the
 treatment concentration at <span class="math inline">\(t\)</span>, which
 depends on:</p>
@@ -983,12 +1086,16 @@ via the parameter <code>treatment_degradation_rate</code>)</li>
 treatments (<span class="math inline">\(N(t^*)\)</span> and <span class="math inline">\(N(t)\)</span> are host biomass at the time of
 treatment application and at time <span class="math inline">\(t\)</span>, respectively)</li>
 </ul>
-<p><span class="math display">\[C_2 = min(1.0, N(t^*)/N(t))\]</span></p>
-<p>Cultivars to be treated with chemicals and dates of applications are
-defined with parameters <code>treatment_cultivars</code> and
-<code>treatment_timesteps</code>, and are the same for all polygons
-cultivated with the cultivars to be treated. The cost of a single
-treatment application (monetary units/ha) is defiend by
+<p><span class="math display">\[C_2 = min(1.0, N(t^*)/N(t))\]</span>
+Cultivars to be treated with chemicals and dates of (possible)
+applications are defined with parameters
+<code>treatment_cultivars</code> and <code>treatment_timesteps</code>,
+and are the same for all polygons cultivated with the cultivars to be
+treated. However, the chemicals are applied in a polygon only if the
+disease severity (i.e. <span class="math inline">\(I(t^*) /
+N(t^*)\)</span>) at the application date is higher than a given
+threshold, defined by <code>treatment_application_threshold</code>. The
+cost of a single treatment application (monetary units/ha) is defined by
 <code>treatment_cost</code> and will impact the economic outputs.
 Treatment parameters can be set via the function
 <code>setTreatment</code>:</p>
@@ -996,10 +1103,11 @@ Treatment parameters can be set via the function
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_efficiency =</span> <span class="fl">0.8</span>,</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_timesteps =</span>  <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">120</span>,<span class="dv">14</span>) ,</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_cultivars  =</span> <span class="fu">c</span>(<span class="dv">0</span>),</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_cost =</span> <span class="dv">0</span>)</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setTreatment</span>(simul_params, treatment)</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in checkTreatment(params): Simulation with chemical treatment</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; applications</span></span></code></pre></div>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_cost =</span> <span class="dv">0</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">treatment_application_threshold =</span> <span class="fu">c</span>(<span class="fl">0.0</span>))</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setTreatment</span>(simul_params, treatment)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in checkTreatment(params): Simulation with chemical treatment</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; applications</span></span></code></pre></div>
 </div>
 <div id="choosing-output-variables" class="section level2">
 <h2>Choosing output variables</h2>
@@ -1007,31 +1115,32 @@ Treatment parameters can be set via the function
 generated by landsepi and represented in text files
 (<code>writeTXT=TRUE</code>), graphics (<code>graphic=TRUE</code>) and a
 video (<code>videoMP4=TRUE</code>).<br />
-See <code>?epid_output</code> and <code>?evol_output</code> for details
-on the different output variables.</p>
+See equation below, as well as <code>?epid_output</code> and
+<code>?evol_output</code> for details on the different output
+variables.</p>
 <blockquote>
 <p>Possible epidemiological outputs include:<br />
 - <strong>“audpc”</strong> : Area Under Disease Progress Curve (average
-number of diseased hosts per square meter)<br />
+number of diseased hosts per square meter, <span class="math inline">\(AUDPC_{v,y}\)</span>)<br />
 - <strong>“audpc_rel”</strong> : relative Area Under Disease Progress
 Curve (average proportion of diseased hosts relative to the total number
-of existing hosts)<br />
+of existing hosts, <span class="math inline">\(AUDPC_{v,y}^r\)</span>)<br />
 - <strong>“gla”</strong> : Green Leaf Area (average number of healthy
-hosts per square meter)<br />
+hosts per square meter, <span class="math inline">\(GLA_{v,y}\)</span>)<br />
 - <strong>“gla_rel”</strong> : relative Green Leaf Area (average
 proportion of healthy hosts relative to the total number of existing
-hosts)<br />
+hosts, <span class="math inline">\(GLA_{v,y}^r\)</span>)<br />
 - <strong>“eco_yield”</strong> : total crop yield (in weight or volume
-units per ha)<br />
+units per ha, <span class="math inline">\(Yield_{v,y}\)</span>)<br />
 - <strong>“eco_cost”</strong> : operational crop costs (in monetary
-units per ha)<br />
+units per ha, <span class="math inline">\(Operational\_cost_{v,y}\)</span>)<br />
 - <strong>“eco_product”</strong> : total crop products (in monetary
-units per ha)<br />
+units per ha, <span class="math inline">\(Product_{v,y}\)</span>)<br />
 - <strong>“eco_margin”</strong> : margin (products - operational costs,
-in monetary units per ha)<br />
+in monetary units per ha, <span class="math inline">\(Margin_{v,y}\)</span>)<br />
 - <strong>“contrib”</strong>: contribution of pathogen genotypes to LIR
-dynamics<br />
-- <strong>“HLIR_dynamics”, “H_dynamics”, “L_dynamics”, “IR_dynamics”,
+dynamics (<span class="math inline">\(Contrib_{p,v,y}\)</span>) -
+<strong>“HLIR_dynamics”, “H_dynamics”, “L_dynamics”, “IR_dynamics”,
 “HLI_dynamics”</strong>, etc.: Epidemic dynamics related to the
 specified sanitary status (H, L, I or R and all their combinations).
 Graphics only, works only if graphic=TRUE.<br />
@@ -1039,15 +1148,87 @@ Graphics only, works only if graphic=TRUE.<br />
 - <strong>““</strong> : none of these outputs will be generated.</p>
 </blockquote>
 <blockquote>
-<p>Possible evolutionary outputs include:<br />
-- <strong>“evol_patho”</strong>: dynamics of pathogen genotype
-frequencies<br />
-- <strong>“evol_aggr”</strong>: evolution of pathogen
-aggressiveness<br />
+<p>Possible evolutionary outputs, based on the computation of genotype
+frequencies (<span class="math inline">\(freq(I)_{p,t}\)</span>)
+include:<br />
+- <strong>“evol_patho”</strong>: evolution of pathogen genotypes<br />
+- <strong>“evol_aggr”</strong>: evolution of pathogen aggressiveness
+(i.e. phenotype)<br />
 - <strong>“durability”</strong>: durability of resistance genes<br />
 - <strong>“all”</strong>: compute all these outputs (default)<br />
 - <strong>““</strong>: none of these outputs will be generated.</p>
 </blockquote>
+<div id="equations" class="section level3">
+<h3>Equations</h3>
+<p>In the following equations, <span class="math inline">\(H_{i,v,t}\)</span>, <span class="math inline">\(L_{i,v,p,t}\)</span>, <span class="math inline">\(I_{i,v,p,t}\)</span> and <span class="math inline">\(R_{i,v,p,t}\)</span> respectively denote the
+number of healthy, latent, infectious and removed host individuals,
+respectively, in field <span class="math inline">\(i\)</span> (<span class="math inline">\(i=1,…,J\)</span>), for cultivar <span class="math inline">\(v\)</span> (<span class="math inline">\(v=1,…,V\)</span>) at time step <span class="math inline">\(t\)</span> (<span class="math inline">\(t=1,…,T
+\times Y\)</span> with <span class="math inline">\(Y\)</span> the total
+number of cropping seasons and <span class="math inline">\(T\)</span>
+the number of time-steps per season).</p>
+<p><span class="math inline">\(AUDPC_{v,y} =
+\frac{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J} \sum_{p=1}^{P}
+\{I_{i,v,p,t}+R_{i,v,p,t}\}}{T \times \sum_{i=1}^{J} A_i}\)</span></p>
+<p><span class="math inline">\(AUDPC^r_{v,y} =
+\frac{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J} \sum_{p=1}^{P}
+\{I_{i,v,p,t}+R_{i,v,p,t}\}}{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J}
+\left(H_{i,v,t}+\sum_{p=1}^{P}
+\{L_{i,v,p,t}+I_{i,v,p,t}+R_{i,v,p,t}\}\right)}\)</span></p>
+<p><span class="math inline">\(GLA_{v,y} =
+\frac{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J} H_{i,v,t}}{T \times
+\sum_{i=1}^{J} A_i}\)</span></p>
+<p><span class="math inline">\(GLA^r_{v,y} =
+\frac{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J}
+H_{i,v,t}}{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J}
+\left(H_{i,v,t}+\sum_{p=1}^{P}
+\{L_{i,v,p,t}+I_{i,v,p,t}+R_{i,v,p,t}\}\right)}\)</span></p>
+<p><span class="math inline">\(Yield_{v,y} =
+\frac{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J} \left( y_{H,v} \times
+H_{i,v,t} + \sum_{p=1}^{P} \{y_{L,v} \times L_{i,v,p,t} + y_{I,v} \times
+I_{i,v,p,t} + y_{R,v} \times R_{i,v,p,t}\} \right)}
+{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J} H^*_{i,v,t}}\)</span> with
+<span class="math inline">\(y_{H,v}\)</span>, <span class="math inline">\(y_{L,v}\)</span>, <span class="math inline">\(y_{I,v}\)</span> and <span class="math inline">\(y_{R,v}\)</span> the theoretical yield of cultivar
+v in pure crop (in weight or volume unit/ha/season) associated with the
+sanitary statuses ‘H’, ‘L’, ‘I’ and ‘R’, respectively. <span class="math inline">\(H^*_{i,v,t}\)</span> is the number of healthy
+hosts in a pure crop and in absence of disease.</p>
+<p><span class="math inline">\(Operational\_cost_{v,y}=planting\_cost_v
+\times \frac{\sum_{i \in \Omega_{v,y}}(area_i \times prop_{v,i})}
+{\sum_{i \in \Omega_{v,y}}area_i} + treatment\_cost \times \frac{\sum_{i
+\in \Omega_{v,y}}(TFI_{i,v,y} \times area_i \times prop_{v,i})} {\sum_{i
+\in \Omega_{v,y}}area_i}\)</span> with <span class="math inline">\(\Omega_{v,y}\)</span> the set of polygon indices
+where cultivar <span class="math inline">\(v\)</span> is cultivated at
+year <span class="math inline">\(y\)</span>, and <span class="math inline">\(prop_{v,i}\)</span> the proportion of cultivar
+<span class="math inline">\(v\)</span> in polygon <span class="math inline">\(i\)</span> (for mixtures). <span class="math inline">\(TFI\)</span> stands for the Treatment Frequency
+Indicator (number of treatment applications per ha).</p>
+<p><span class="math inline">\(Product_{v,y}=yield_{v,y} \times
+market\_value\)</span></p>
+<p><span class="math inline">\(Margin_{v,y} = Product_{v,y} -
+Operational\_Cost_{v,y}\)</span></p>
+<p><span class="math inline">\(Contrib_{p,v,y} =
+\frac{\sum_{t=t^0(y)}^{t^f(y)} \sum_{i=1}^{J}
+\{L_{i,v,p,t}+I_{i,v,p,t}+R_{i,v,p,t}\}} {\sum_{t=t^0(y)}^{t^f(y)}
+\sum_{i=1}^{J} \sum_{p=1}^{P}
+\{L_{i,v,p,t}+I_{i,v,p,t}+R_{i,v,p,t}\}}\)</span></p>
+<p><span class="math inline">\(freq(I)_{p,t} = \frac{\sum_{i=1}^{J}
+\sum_{v=1}^{V} I_{i,v,p,t}} {\sum_{p=1}^{P} \sum_{i=1}^{J}
+\sum_{v=1}^{V} I_{i,v,p,t}}\)</span></p>
+<p>With respect to evolutionary outputs, for each pathogen genotype
+(<code>evol_patho</code>) or phenotype (<code>evol_aggr</code>, note
+that different pathogen genotypes may lead to the same phenotype on a
+resistant host, i.e. level of aggressiveness), several computations are
+performed:<br />
+- appearance: time to first appearance (as propagule);<br />
+- R_infection: time to first true infection of a resistant host;<br />
+- R_invasion: time to invasion, when the number of infections of
+resistant hosts reaches , above which the genotype or phenotype is
+unlikely to go extinct.<br />
+The value <code>Nyears + 1 time step</code> is used if the genotype or
+phenotype never appeared/infected/invaded.<br />
+Durability is defined as the time to invasion of completely adapted
+pathogen individuals.</p>
+</div>
+<div id="parameterisation" class="section level3">
+<h3>Parameterisation</h3>
 <p>A list of outputs can be generated using
 <code>loadOutputs()</code>:</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;all&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;all&quot;</span>)</span>
@@ -1068,7 +1249,7 @@ audpc in a fully susceptible landscape (used as reference value for
 graphics). If necessary, the function <code>compute_audpc100S</code>
 helps compute this value in a single 1-km^2 field:</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>audpc100S <span class="ot">&lt;-</span> <span class="fu">compute_audpc100S</span>(<span class="st">&quot;rust&quot;</span>, <span class="st">&quot;growingHost&quot;</span>, <span class="at">area=</span><span class="fl">1E6</span>)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for rust in a single susceptible field of 1e+06 m^2</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for rust in a single susceptible field of 1e+06 m^2 during 120 time steps</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Run the C++ model&quot;</span></span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; *** SPATIOTEMPORAL MODEL SIMULATING THE SPREAD AND EVOLUTION OF A PATHOGEN IN A LANDSCAPE ***</span></span>
@@ -1081,9 +1262,9 @@ helps compute this value in a single 1-km^2 field:</p>
 <span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; total computational time 1 seconds. </span></span>
 <span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
 <span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpRQ4RvF/Rbuild2a7261da0d7/landsepi/vignettes&quot;</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/Rtmp4xwBYY/Rbuild369562f5e41/landsepi/vignettes&quot;</span></span>
 <span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>audpc100S <span class="ot">&lt;-</span> <span class="fu">compute_audpc100S</span>(<span class="st">&quot;mildew&quot;</span>, <span class="st">&quot;grapevine&quot;</span>, <span class="at">area=</span><span class="fl">1E6</span>)</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for mildew in a single susceptible field of 1e+06 m^2</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for mildew in a single susceptible field of 1e+06 m^2 during 120 time steps</span></span>
 <span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Run the C++ model&quot;</span></span>
 <span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; *** SPATIOTEMPORAL MODEL SIMULATING THE SPREAD AND EVOLUTION OF A PATHOGEN IN A LANDSCAPE ***</span></span>
@@ -1093,16 +1274,32 @@ helps compute this value in a single 1-km^2 field:</p>
 <span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 3 -----------------------------</span></span>
 <span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 4 -----------------------------</span></span>
 <span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 5 -----------------------------</span></span>
-<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; total computational time 12 seconds. </span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; total computational time 14 seconds. </span></span>
 <span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
 <span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
-<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpRQ4RvF/Rbuild2a7261da0d7/landsepi/vignettes&quot;</span></span></code></pre></div>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/Rtmp4xwBYY/Rbuild369562f5e41/landsepi/vignettes&quot;</span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>audpc100S <span class="ot">&lt;-</span> <span class="fu">compute_audpc100S</span>(<span class="st">&quot;sigatoka&quot;</span>, <span class="st">&quot;banana&quot;</span>, <span class="at">area=</span><span class="fl">1E6</span>, <span class="at">nTSpY=</span><span class="dv">182</span>)</span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for sigatoka in a single susceptible field of 1e+06 m^2 during 182 time steps</span></span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Run the C++ model&quot;</span></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; *** SPATIOTEMPORAL MODEL SIMULATING THE SPREAD AND EVOLUTION OF A PATHOGEN IN A LANDSCAPE ***</span></span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 1 -----------------------------</span></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 2 -----------------------------</span></span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 3 -----------------------------</span></span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 4 -----------------------------</span></span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ----------------------------- YEAR 5 -----------------------------</span></span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; total computational time 1 seconds. </span></span>
+<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
+<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
+<span id="cb28-45"><a href="#cb28-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/Rtmp4xwBYY/Rbuild369562f5e41/landsepi/vignettes&quot;</span></span></code></pre></div>
 <p>Then <code>simul_params</code> can be updated via
 <code>setOutputs()</code>:</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span></code></pre></div>
 <p><em>See also tutorial on how to <a href="O2-run_exp_design.html">run
 a numerical experimental design</a> to compute your own output variables
 and to run several simulations within an experimental design</em></p>
+</div>
 </div>
 <div id="running-the-simulation" class="section level2">
 <h2>Running the simulation</h2>

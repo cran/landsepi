@@ -85,17 +85,19 @@ class Model {
           const Vector2D<double>& disp_patho_clonal, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed);
 
     void dynepi();
+    
     void infection(const int& t, std::vector<int>& H, const Vector2D<int>& Hcontaminated, Vector2D<int>& L,
                    Vector2D<int>& I, Vector2D<int>& R, Vector3D<int>& L2I, Vector3D<int>& I2R,
-                   const std::vector<int>& activeR, const std::vector<int>& N,  const std::vector<int>& Nspray);
+                   const std::vector<int>& activeR, const std::vector<int>& N,  const std::vector<int>& Nspray,
+                   const std::vector<int>& t_lastspray);
     Vector2D<int> contamination(const std::vector<int>& H, const std::vector<int>& P, const std::vector<int>& N);
     void host_dynamic(const int& poly, const int& year, const int& t, std::vector<int>& H, std::vector<int>& Hjuv,
                              Vector2D<int>& L, Vector2D<int>& I, Vector2D<int>& R, Vector3D<int>& L2I, Vector3D<int>& I2R, 
-                             std::vector<int>& N, std::vector<int>& Nspray);
+                             std::vector<int>& N, std::vector<int>& Nspray, std::vector<int>& t_lastspray, std::vector<int>& TFI);
     Vector3D<int> bottleneck(const int& t, const Vector3D<int>& L, const Vector3D<int>& I,
                              const Vector2D<int>& activeQR);
     //void dormancy(std::vector<int>& P, const int& year, const int& poly, Vector2D<int>& P_rest, std::vector<int>& P_germ);
-    void dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix);
+//    void dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix);
     void dispersal(Vector2D<int>& Propagules, const Vector2D<double>& disp_matrix, const int& Ngeno);
     void mutation(std::vector<int>& P);
     void mutation_locus(const int& patho, const int& trait_mut, Vector2D<int>& PpathoMut);
@@ -106,7 +108,7 @@ class Model {
     void reproClonal(const int& t, std::vector<int>& P, const Vector2D<int>& I, const std::vector<int>& activeR);
     std::array<Vector2D<int>, 2> split_IclonalIsex(const int& t, const Vector2D<int>& I);
     bool get_resistance(const int& index_gene, const int& host, const int& t, const int& activeR);
-    double get_treat_effect(const int& Nt, const int& Nspray, const int& t);
+    double get_treat_effect(const int& Nt, const int& Nspray, const int& t, const int& t_lastspray);
     std::vector<int> get_P_stock_release(Vector2D<int>& P_stock_poly, const int& year);
     void get_P_daily(Vector2D<int>& P_daily, Vector3D<int>& P_primary, const int& t);
     Vector2D<int> get_sum_Vector2D(Vector2D<int>& M1, Vector2D<int>& M2);
@@ -123,7 +125,8 @@ class Model {
                  Vector3D<int>& P_sex_primary, Vector2D<int>& P_sex_primary_tmp, Vector3D<int>& P_clonal_primary, 
                  Vector2D<int>& P_clonal_primary_tmp, Vector2D<int>& P_sex_daily, Vector2D<int>& P_clonal_daily,
                  Vector3D<int>& P_stock);
-    void init_Nspray(Vector2D<int>& Nspray);
+    void init_Nspray_t_lastspray(Vector2D<int>& Nspray, Vector2D<int>& t_lastspray);
+    void init_TFI(Vector3D<int>& TFI);
     void init_Nlevels_aggressiveness(std::vector<int>& Nlevels_aggressiveness);
     void init_L2I2R(Vector4D<int>& L2I, Vector4D<int>& I2R);
     Vector2D<int> intro_H(const int& year);
@@ -143,7 +146,7 @@ class Model {
 
     /* Print parameters in an output .txt file */
     void print_param(const int& seed, const std::vector<double>& mutation_prob, const std::vector<double>& efficiency,
-                     const std::vector<double>& fitness_cost, const std::vector<double>& tradeoff_strength);
+                     const std::vector<double>& adaptation_cost, const std::vector<double>& tradeoff_strength);
 
     /* Write model output in .txt files and print output on screen */
     void write_HHjuvPLIR(const Vector2D<int>& H, const Vector2D<int>& Hjuv, const Vector2D<int>& P,
@@ -152,6 +155,9 @@ class Model {
 
     /* Write model output in .txt files and print output on screen (Pbefinter ONLY) */
     void write_Pbefinter(const Vector3D<int>& eqIsurv, FILE* feqIsurv, const Vector2D<int>& Pbefinter, FILE* fPbefinter);
+    
+    /* Write model output in .txt files and print output on screen */
+    void write_TFI(const Vector2D<int>& TFI, FILE* fTFI);
 
 };
 
@@ -333,12 +339,12 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //' \item target_trait = vector of aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes, 
 //' \item efficiency = vector of resistance gene efficiencies (percentage of reduction of the targeted 
 //' aggressiveness component: IR, 1/LAT, IP and PR), 
-//' \item time_to_activ_mean = vector of expected delays to resistance activation (for APRs), 
-//' \item time_to_activ_var = vector of variances of the delay to resistance activation (for APRs),  
+//' \item age_of_activ_mean = vector of expected delays to resistance activation (for APRs), 
+//' \item age_of_activ_var = vector of variances of the delay to resistance activation (for APRs),  
 //' \item mutation_prob = vector of mutation probabilities for pathogenicity genes (each of them corresponding to a resistance gene), 
 //' \item Nlevels_aggressiveness = vector of number of adaptation levels related to each resistance gene (i.e. 1 + number 
 //' of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene), 
-//' \item fitness_cost = vector of fitness penalties paid by pathogen genotypes fully adapted 
+//' \item adaptation_cost = vector of adaptation penalties paid by pathogen genotypes fully adapted 
 //' to the considered resistance genes on hosts that do not carry this gene, 
 //' \item tradeoff_strength = vector of strengths of the trade-off relationships between the level of aggressiveness 
 //' on hosts that do and do not carry the resistance genes.
@@ -349,7 +355,8 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //' of pathogen infection rate at the time of application),
 //' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
 //' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
-//' \item treatment_cost = cost of a single treatment application (monetary units/ha)
+//' \item treatment_cost = cost of a single treatment application (monetary units/ha),
+//' \item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar) above which the treatment is applied
 //' }
 //' 
 //' @details See ?landsepi for details on the model and assumptions. 
@@ -370,7 +377,9 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //'  \item R: removed hosts,
 //'  \item P: propagules.}
 //' Each file indicates for every time-step the number of individuals in each field, and when 
-//' appropriate for each host and pathogen genotypes).
+//' appropriate for each host and pathogen genotypes). Additionally, a binary file called TFI is 
+//' generated and gives the Treatment Frequency Indicator (expressed as the number of treatment applications 
+//'  per polygon).
 //' 
 //' @examples
 //' \dontrun{
@@ -434,18 +443,19 @@ inline std::vector<std::vector<double>> Model::ran_multisample_multivariate_gaus
 //'     , relative_yield_R = as.numeric(cultivars$yield_R / yield0)
 //'     , sigmoid_kappa_host=0.002, sigmoid_sigma_host=1.001, sigmoid_plateau_host=1
 //'     , cultivars_genes_list=list(numeric(0))))
-//'genes <-   list(geneName = character(0) , fitness_cost = numeric(0)
+//'genes <-   list(geneName = character(0) , adaptation_cost = numeric(0)
 //'     , mutation_prob = numeric(0)
 //'     , efficiency = numeric(0) , tradeoff_strength = numeric(0)
 //'     , Nlevels_aggressiveness = numeric(0)
-//'     , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
+//'     , age_of_activ_mean = numeric(0) , age_of_activ_var = numeric(0)
 //'     , target_trait = character(0)
 //'     , recombination_sd = numeric(0))
 //'treatment=list(treatment_degradation_rate=0.1
 //'     , treatment_efficiency=0
 //'     , treatment_timesteps=logical(0)
 //'     , treatment_cultivars=logical(0)
-//'     , treatment_cost=0)
+//'     , treatment_cost=0
+//'     , treatment_application_threshold = logical(0))
 //'
 //'## run simulation
 //'model_landsepi(seed=1, time_param = time_param

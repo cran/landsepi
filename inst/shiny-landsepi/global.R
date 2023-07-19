@@ -252,7 +252,7 @@ checkGenesTable <- function(data){
   }
   
   shiny::removeUI(selector = "#GenesValueMaxError")
-  if( sum(data[, c("time_to_activ_mean", "time_to_activ_var", "Nlevels_aggressiveness", "tradeoff_strength")] > VALUEMAX) != 0 ) {
+  if( sum(data[, c("age_of_activ_mean", "age_of_activ_var", "Nlevels_aggressiveness", "tradeoff_strength")] > VALUEMAX) != 0 ) {
 
     showErrorMessage(id = "GenesValueMaxError", selectorafter= "#generateLandscape",
                      message = paste0("Values in the 'Genes' table should be lower than ",VALUEMAX))
@@ -268,9 +268,9 @@ checkGenesTable <- function(data){
   }
   
   shiny::removeUI(selector = "#GenesUpper1Error")
-  if( sum(data[, c("efficiency", "mutation_prob", "fitness_cost", "recombination_sd")] > 1) != 0) {
+  if( sum(data[, c("efficiency", "mutation_prob", "adaptation_cost", "recombination_sd")] > 1) != 0) {
     showErrorMessage(id = "GenesUpper1Error", selectorafter= "#generateLandscape",
-                     message = paste0("Gene 'efficiency' / 'mutation_prob' / 'fitness_cost' / 'recombination_sd' values should lower than 1"))
+                     message = paste0("Gene 'efficiency' / 'mutation_prob' / 'adaptation_cost' / 'recombination_sd' values should lower than 1"))
     isok <- FALSE
   }
   
@@ -338,6 +338,15 @@ cultivarTypeDisease2type <- function(disease="no pathogen", type="growingHost"){
         )
         return(type)
     }
+  
+  if(disease == "sigatoka"){
+    type <- switch( type,
+                    "growingHost" = "banana",
+                    "nongrowingHost" = "nongrowingHost",
+                    "nonCrop" = "nonCrop"
+    )
+    return(type)
+  }
     
     return("")
 }

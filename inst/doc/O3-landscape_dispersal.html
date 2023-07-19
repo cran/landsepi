@@ -464,25 +464,31 @@ matrix on the first landscape supplied in <em>landsepi</em>.</p>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>Npoly <span class="ot">&lt;-</span> <span class="fu">length</span>(landscape)</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>Npoly</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(landscape)</span></code></pre></div>
+<p>For compatibility with the function <code>califlopp</code>, the
+landscape can be modified with specific functions of package <em>sf</em>
+relative to geographic projection (<code>st_transform</code>), polygon
+simplification (<code>st_simplify</code>).</p>
 <p>The function <code>califlopp</code> needs a specific format for the
 coordinates of each polygon (i.e. fields) composing the landscape.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>file_land <span class="ot">&lt;-</span> <span class="st">&quot;land_rcali.txt&quot;</span>  <span class="do">## input for califlopp</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>file_disp <span class="ot">&lt;-</span> <span class="st">&quot;disp_rcali.txt&quot;</span>  <span class="do">## output for califlopp</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>file_disp <span class="ot">&lt;-</span> <span class="st">&quot;disp_rcali.txt&quot;</span>  <span class="do">## output for califlopp (DO NOT WRITE A PATH)</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Formatting the polygons-file for califlopp</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(Npoly, <span class="at">file=</span>file_land)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>Npoly) {</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## extract coordinates of polygon vertices</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  coords <span class="ot">&lt;-</span> landscape<span class="sc">@</span>polygons[[k]]<span class="sc">@</span>Polygons[[<span class="dv">1</span>]]<span class="sc">@</span>coords  </span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(coords)</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="cn">NULL</span>, <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">c</span>(k,k,n), <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  coords <span class="ot">&lt;-</span> landscape<span class="sc">@</span>polygons[[k]]<span class="sc">@</span>Polygons[[<span class="dv">1</span>]]<span class="sc">@</span>coords </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="do">## alternatively:</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># coords &lt;- as.data.frame(landscape$geometry[[k]][[1]])</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(coords)</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="cn">NULL</span>, <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(coords[<span class="dv">1</span><span class="sc">:</span>n,<span class="dv">1</span>], <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="cn">NULL</span>,<span class="at">file=</span>file_land,<span class="at">append=</span>T,<span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(coords[<span class="dv">1</span><span class="sc">:</span>n,<span class="dv">2</span>], <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="cn">NULL</span>, <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">c</span>(k,k,n), <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="cn">NULL</span>, <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(coords[<span class="dv">1</span><span class="sc">:</span>n,<span class="dv">1</span>], <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="cn">NULL</span>,<span class="at">file=</span>file_land,<span class="at">append=</span>T,<span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(coords[<span class="dv">1</span><span class="sc">:</span>n,<span class="dv">2</span>], <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="cn">NULL</span>, <span class="at">file=</span>file_land, <span class="at">append=</span>T, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <p>Then the function <code>califlopp</code> calculates the flow of
 particles between polygons using an integration method. Here we use the
 dispersal kernel of oilseed rape pollen (available in <em>RCALI</em>:
@@ -511,42 +517,44 @@ dispersal matrix that will be further used in <em>landsepi</em>. The
 vector of field areas can also be generated.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Import califlopp results</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>disp_df <span class="ot">&lt;-</span> <span class="fu">getRes</span>(file_disp)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>emitter <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>poly1, disp_df<span class="sc">$</span>poly2)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>receiver <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>poly2, disp_df<span class="sc">$</span>poly1)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Write a text file containing a vector of areas of all polygons</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>area_e <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>area1, disp_df<span class="sc">$</span>area2)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>area_r <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>area2, disp_df<span class="sc">$</span>area1)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>area <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">by</span>(area_e, emitter, mean))</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(area, <span class="at">file=</span><span class="st">&quot;area.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;,&quot;</span>)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="do">## Generation of the dispersal matrix</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>name_f <span class="ot">&lt;-</span> <span class="st">&quot;mean.flow&quot;</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>flow_mean <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df[,name_f], disp_df[,name_f])</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> <span class="fu">cbind</span>(emitter, receiver, flow_mean, area_e, area_r)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Remove the doublons (i.e. half the lines where emitter == receiver)</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>flow_f[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(disp_df),][(disp_df<span class="sc">$</span>poly2 <span class="sc">-</span> disp_df<span class="sc">$</span>poly1) <span class="sc">==</span> <span class="dv">0</span>,] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> flow_f[<span class="fu">is.na</span>(<span class="fu">apply</span>(flow_f, <span class="dv">1</span>, sum)) <span class="sc">==</span> F,]</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(flow_f)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(flow_f) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;emitter&quot;</span>, <span class="st">&quot;receiver&quot;</span>, <span class="st">&quot;flow&quot;</span>, <span class="st">&quot;area_e&quot;</span>, <span class="st">&quot;area_r&quot;</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> flow_f[<span class="fu">order</span>(flow_f<span class="sc">$</span>emitter),]</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="do">## lines: emitter</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="do">## columns: receiver</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>matrix_f <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>Npoly){</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="do">## flow divided by the emitter area</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  matrix_f <span class="ot">&lt;-</span> <span class="fu">cbind</span>(matrix_f, flow_f<span class="sc">$</span>flow[flow_f<span class="sc">$</span>receiver<span class="sc">==</span>k] <span class="sc">/</span> area)</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="do">## In order to have sum == 1</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>flowtot_f <span class="ot">&lt;-</span> <span class="fu">apply</span>(matrix_f,<span class="dv">1</span>,sum)</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>Npoly){</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  matrix_f[k,] <span class="ot">&lt;-</span> (matrix_f[k,] <span class="sc">/</span> flowtot_f[k])</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(<span class="fu">as.vector</span>(matrix_f), <span class="at">file=</span><span class="st">&quot;dispersal.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;,&quot;</span>)</span></code></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Double the table because only half of the flows have been calculated</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>emitter <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>poly1, disp_df<span class="sc">$</span>poly2)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>receiver <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>poly2, disp_df<span class="sc">$</span>poly1)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Write a text file containing a vector of areas of all polygons</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>area_e <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>area1, disp_df<span class="sc">$</span>area2)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>area_r <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df<span class="sc">$</span>area2, disp_df<span class="sc">$</span>area1)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>area <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(<span class="fu">by</span>(area_e, emitter, mean))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(area, <span class="at">file=</span><span class="st">&quot;area.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;,&quot;</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Generation of the dispersal matrix</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>name_f <span class="ot">&lt;-</span> <span class="st">&quot;mean.flow&quot;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>flow_mean <span class="ot">&lt;-</span> <span class="fu">c</span>(disp_df[,name_f], disp_df[,name_f])</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> <span class="fu">cbind</span>(emitter, receiver, flow_mean, area_e, area_r)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="do">## Remove the doublons (i.e. half the lines where emitter == receiver)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>flow_f[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(disp_df),][(disp_df<span class="sc">$</span>poly2 <span class="sc">-</span> disp_df<span class="sc">$</span>poly1) <span class="sc">==</span> <span class="dv">0</span>,] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> flow_f[<span class="fu">is.na</span>(<span class="fu">apply</span>(flow_f, <span class="dv">1</span>, sum)) <span class="sc">==</span> F,]</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(flow_f)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(flow_f) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;emitter&quot;</span>, <span class="st">&quot;receiver&quot;</span>, <span class="st">&quot;flow&quot;</span>, <span class="st">&quot;area_e&quot;</span>, <span class="st">&quot;area_r&quot;</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>flow_f <span class="ot">&lt;-</span> flow_f[<span class="fu">order</span>(flow_f<span class="sc">$</span>emitter),]</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="do">## lines: emitter</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="do">## columns: receiver</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>matrix_f <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>Npoly){</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="do">## flow divided by the emitter area</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  matrix_f <span class="ot">&lt;-</span> <span class="fu">cbind</span>(matrix_f, flow_f<span class="sc">$</span>flow[flow_f<span class="sc">$</span>receiver<span class="sc">==</span>k] <span class="sc">/</span> area)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="do">## Normalisation of the matrix (reflecting boundaries)</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="do">## (do not normalise for absorbing boundaries)</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>flowtot_f <span class="ot">&lt;-</span> <span class="fu">apply</span>(matrix_f,<span class="dv">1</span>,sum)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>Npoly){</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  matrix_f[k,] <span class="ot">&lt;-</span> (matrix_f[k,] <span class="sc">/</span> flowtot_f[k]) <span class="do">## In order to have sum == 1</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(<span class="fu">as.vector</span>(matrix_f), <span class="at">file=</span><span class="st">&quot;dispersal.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;,&quot;</span>)</span></code></pre></div>
 <p>Then, to read the file, use:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>disp_patho <span class="ot">&lt;-</span> <span class="fu">scan</span>(<span class="st">&quot;dispersal.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;,&quot;</span>)</span></code></pre></div>
 </div>
@@ -580,6 +588,18 @@ emitted by a specific polygon, use:</p>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot</span></span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(landscape, <span class="at">col =</span> col_disp[intvls_disp], <span class="at">main=</span><span class="fu">paste</span>(<span class="st">&quot;Dispersal from polygon&quot;</span>, poly))</span></code></pre></div>
+<p>With package <em>ggplot2</em>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(landscape) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="fu">paste</span>(<span class="st">&quot;Dispersal from polygon&quot;</span>, poly)) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="at">colour=</span><span class="st">&quot;black&quot;</span>, <span class="fu">aes</span>(<span class="at">fill =</span> dispToPlot)) <span class="sc">+</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_gradientn</span>(<span class="at">name=</span><span class="st">&quot;Prob. of</span><span class="sc">\n</span><span class="st">dispersal&quot;</span>, <span class="at">colours=</span><span class="fu">rev</span>(<span class="fu">heat.colors</span>(<span class="dv">10</span>)), <span class="at">breaks=</span><span class="sc">-</span><span class="dv">1</span><span class="sc">:-</span><span class="dv">10</span>, <span class="at">labels=</span><span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span><span class="sc">:-</span><span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># theme_classic() +</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.line=</span><span class="fu">element_blank</span>(),<span class="at">axis.text.x=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.y=</span><span class="fu">element_blank</span>(),<span class="at">axis.ticks=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.title.x=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.title.y=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">panel.background=</span><span class="fu">element_blank</span>(),<span class="at">panel.border=</span><span class="fu">element_blank</span>(),<span class="at">panel.grid.major=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">panel.grid.minor=</span><span class="fu">element_blank</span>(),<span class="at">plot.background=</span><span class="fu">element_blank</span>())</span></code></pre></div>
 </div>
 
 

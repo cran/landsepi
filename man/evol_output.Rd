@@ -19,8 +19,8 @@ evol_output(
 \arguments{
 \item{types}{a character string (or a vector of character strings if several outputs are to be computed) specifying the
 type of outputs to generate (see details):\itemize{
-\item "evol_patho": Dynamics of pathogen genotype frequencies
-\item "evol_aggr": Evolution of pathogen aggressiveness
+\item "evol_patho": Evolution of pathogen genotypes
+\item "evol_aggr": Evolution of pathogen aggressiveness (i.e. phenotype)
 \item "durability": Durability of resistance genes
 \item "all": compute all these outputs (default)
 }}
@@ -64,12 +64,15 @@ Each matrix can be written in a txt file (if writeTXT=TRUE), and illustrated in 
 Generates evolutionary outputs from model simulations.
 }
 \details{
-For each pathogen genotype, several computations are performed: \itemize{
+For each pathogen genotype (evol_patho) or phenotype (evol_aggr, note that different pathogen genotypes
+may lead to the same phenotype on a resistant host), several computations are performed based on pathogen genotype
+frequencies: \itemize{
 \item appearance: time to first appearance (as propagule);
 \item R_infection: time to first true infection of a resistant host;
-\item R_invasion: time when the number of infections of resistant hosts reaches a threshold above which
-the genotype is unlikely to go extinct.}
-The value Nyears + 1 time step is used if the genotype never appeared/infected/invaded.
+\item R_invasion: time to invasion, when the number of infections of resistant hosts reaches a threshold above which
+the genotype or phenotype is unlikely to go extinct.}
+The value Nyears + 1 time step is used if the genotype or phenotype never appeared/infected/invaded.
+Durability is defined as the time to invasion of completely adapted pathogen individuals.
 }
 \examples{
 \dontrun{

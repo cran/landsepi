@@ -15,6 +15,8 @@ of pathogen infection rate at the time of application),
 \item treatment_timesteps = vector of time steps corresponding to treatment application dates,
 \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 \item treatment_cost = cost of a single treatment application (monetary units/ha)
+\item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar)
+above which the treatment is applied in a polygon.
 }
 }
 \description{
@@ -22,6 +24,8 @@ Loads the list of treatment parameters required by the model (initialised at 0
 , i.e. absence of treatments)
 }
 \details{
+Chemical treatment is applied in a polygon only if disease severity (i.e. I/N) in this polygon
+exceeds the threshold given by \code{treatment_application_threshold}.
 Treatment efficiency is maximum (i.e. equal to the parameter treatment_efficiency)
 at the time of treatment application (noted \eqn{t*}); then it decreases with time
 (i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:

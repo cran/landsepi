@@ -474,19 +474,19 @@ void Model::mutation(std::vector<int>& P) {
 /* Dispersal of new host and new pathogen propagules in the landscape */
 
 /* Update Hjuv and P */
-void Model::dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix) {
+/*void Model::dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix) {
   /* H, Hjuv, P are the numbers of individuals in a given poly */
-  Vector3D<int> Pdisp(this->Npatho, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
+/*  Vector3D<int> Pdisp(this->Npatho, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
   Vector3D<int> Hjuvtmp(this->Nhost, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
   
   /* Production and dispersal of the host & dispersal of pathogen propagules */
-  for(int poly = 0; poly < this->Npoly; poly++) {
+/*  for(int poly = 0; poly < this->Npoly; poly++) {
     /* Pathogen dispersal */
-    for(int patho = 0; patho < this->Npatho; patho++) {
+/*    for(int patho = 0; patho < this->Npatho; patho++) {
       Pdisp[patho][poly] = ran_multinomial(P[poly][patho], disp_matrix[poly]);
     }
     /* Host reproduction: production and dispersal of Hjuv */
-    for(int host = 0; host < this->Nhost; host++) {
+/*    for(int host = 0; host < this->Nhost; host++) {
       Hjuvtmp[host][poly] = ran_multinomial(
         static_cast<int>(this->cultivars[host].reproduction_rate * H[poly][host]), this->disp_host[poly]);
     }
@@ -494,7 +494,7 @@ void Model::dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<
   
   for(int poly = 0; poly < this->Npoly; poly++) {
     /* Update the number of propagules (P) and Hjuv landing in each field */
-    for(int patho = 0; patho < this->Npatho; patho++) {
+/*    for(int patho = 0; patho < this->Npatho; patho++) {
       P[poly][patho] = 0;
       for(int polyE = 0; polyE < this->Npoly; polyE++) {
         P[poly][patho] += Pdisp[patho][polyE][poly];
@@ -508,22 +508,43 @@ void Model::dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<
       }
     }
   }
-}
+}*/
 
 
 /* Update Hjuv and P after dispersal */
 void Model::dispersal(Vector2D<int>& Propagules, const Vector2D<double>& disp_matrix, const int& Ngeno) {
   /* Propagules (either Hjuv or P) are the numbers of individuals in a given poly */
   /* "geno" is the genotype (="host" for Hjuv ; ="patho" for P) and Ngeno is the total number of genotypes */
+
+  int lost_propagules;  // propagules that fall outside a polygon
+  double sum_matrix_poly, lost_prob; // probablity to land/fall outside a polygon
   
   /* Dispersal of propagules */
   Vector3D<int> Pdisp(Ngeno, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
   for(int poly = 0; poly < this->Npoly; poly++) {
+
+    /* Sum of dispersal matrix line */
+    sum_matrix_poly = 0;
+    for (int polyReceiver = 0; polyReceiver < this->Npoly; polyReceiver++){
+      sum_matrix_poly += disp_matrix[poly][polyReceiver];
+    }
+    lost_prob = 1 - sum_matrix_poly;
+    
     for(int geno = 0; geno < Ngeno; geno++) {
-      Pdisp[geno][poly] = ran_multinomial(Propagules[poly][geno], disp_matrix[poly]);
+      
+      if (lost_prob < 1E-6){
+        /* Reflecting boundaries */
+        lost_propagules = 0; 
+      }else{
+        /* Absorbing boundaries */
+        lost_propagules = ran_binomial(lost_prob, Propagules[poly][geno]);
+      }
+
+      Pdisp[geno][poly] = ran_multinomial(Propagules[poly][geno] - lost_propagules, disp_matrix[poly]);
     }
   }
   
+
   /* Update the number of propagules landing in each field */
   for(int poly = 0; poly < this->Npoly; poly++) {
     for(int geno = 0; geno < Ngeno; geno++) {
@@ -575,7 +596,7 @@ Vector3D<int> Model::bottleneck(const int& t, const Vector3D<int>& L, const Vect
 /* Compute host reproduction, death and growth and update the number of H, Hjuv, L, I and R in the concerned poly */
 void Model::host_dynamic(const int& poly, const int& year, const int& t, std::vector<int>& H, std::vector<int>& Hjuv,
                          Vector2D<int>& L, Vector2D<int>& I, Vector2D<int>& R, Vector3D<int>& L2I, Vector3D<int>& I2R, 
-                         std::vector<int>& N, std::vector<int>& Nspray) {
+                         std::vector<int>& N, std::vector<int>& Nspray, std::vector<int>& t_lastspray,  std::vector<int>& TFI) {
   /* H, Hjuv, L, I and R are the number of host in a given poly */
   
   // If there is no rotation (same croptype each year), only take the first year rotation
@@ -585,7 +606,6 @@ void Model::host_dynamic(const int& poly, const int& year, const int& t, std::ve
     const int id_host = cultivar_prop.first;
     const double prop = cultivar_prop.second;
     int L_host = 0, I_host = 0, R_host = 0; 
-    
     
     /* HOST MORTALITY: H2M, L2M, I2M, R2M */
     /*  DO NOT WORK FOR L AND I HOSTS  */
@@ -651,11 +671,30 @@ void Model::host_dynamic(const int& poly, const int& year, const int& t, std::ve
         (R_host * this->cultivars[id_host].relative_yield_R))));
     
     
-    /* SAVE Nspray (i.e. the number of host individuals at treatment dates) */
-    /* This information is needed to compute the effect of pesticide treatments */
+    double disease_severity =  (static_cast<double>(I_host)/static_cast<double>(N[id_host]));
+    
+    /* Get the position of the id_host in the treatment_cultivars array*/
+    /* TO DO: Get the index_treated_cultivar by using std::find and std::distance*/
+    
+    int index_treated_cultivar = 0;
+    for(unsigned int i = 0; i < this->treatment.treatment_cultivars.size(); i++){
+      if(this->treatment.treatment_cultivars[i] == id_host){
+        index_treated_cultivar = i;
+        break;
+      }
+    }
+    
+    /* If the treatment is applied, save Nspray (i.e. the number of host individuals at treatment dates) */
+    /* date of spray and update the TFI */
+    /* That information is needed to compute the effect of pesticide treatments */
     /* ------------------------------------------------------------------------- */ 
-    if (std::find(this->treatment.treatment_timesteps.begin(), this->treatment.treatment_timesteps.end(), t) != this->treatment.treatment_timesteps.end()) {
+    
+    if (std::find(this->treatment.treatment_timesteps.begin(), this->treatment.treatment_timesteps.end(), t) != this->treatment.treatment_timesteps.end() &&
+    std::find(this->treatment.treatment_cultivars.begin(), this->treatment.treatment_cultivars.end(), id_host) != this->treatment.treatment_cultivars.end() &&
+    disease_severity>=this->treatment.treatment_application_threshold[index_treated_cultivar]){ 
       Nspray[id_host] = N[id_host];
+      t_lastspray[id_host] = t;
+      TFI[id_host] +=1;
     }
   }
 }
@@ -723,7 +762,8 @@ Vector2D<int> Model::contamination(const std::vector<int>& H, const std::vector<
 /* Calculate the number of contaminated sites that become infected, infectious or removed and update H, L, I, R */
 void Model::infection(const int& t, std::vector<int>& H, const Vector2D<int>& Hcontaminated, Vector2D<int>& L,
                       Vector2D<int>& I, Vector2D<int>& R, Vector3D<int>& L2I, Vector3D<int>& I2R,
-                      const std::vector<int>& activeR, const std::vector<int>& N,  const std::vector<int>& Nspray) {
+                      const std::vector<int>& activeR, const std::vector<int>& N,  const std::vector<int>& Nspray,
+                      const std::vector<int>& t_lastspray) {
   /* H, Hcontaminated, L, I, R, L2I and I2R are the number of individuals in a given poly */
   for(int patho = 0; patho < this->Npatho; patho++) {
     const std::vector<int> aggr = this->switch_patho_to_aggr(patho);
@@ -743,7 +783,7 @@ void Model::infection(const int& t, std::vector<int>& H, const Vector2D<int>& Hc
       /* Interaction with pesticide treatment*/
       
       if (std::find(this->treatment.treatment_cultivars.begin(), this->treatment.treatment_cultivars.end(), host) != this->treatment.treatment_cultivars.end()) {
-        infection_rate_exp *= this->get_treat_effect(N[host], Nspray[host], t);
+        infection_rate_exp *= this->get_treat_effect(N[host], Nspray[host], t, t_lastspray[host]);
       }
       const int H2L = ran_binomial(infection_rate_exp, Hcontaminated[patho][host]);
       
@@ -815,14 +855,16 @@ void Model:: dynepi() {
   using namespace std::chrono;
   auto start_tot = high_resolution_clock::now();  
   char name_fH[20], name_fHjuv[20], name_fP[20], name_fL[20], name_fI[20], name_fR[20],
-       name_feqIsurv[20], name_fPbefinter[20];
+       name_feqIsurv[20], name_fPbefinter[20], name_fTFI[20];
   Vector2D<int> Hcontaminated; // Contaminated sites (where a propagule is deposited)
   Vector2D<int> Hjuv, P;
   Vector3D<int> L(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->Nhost)));
   Vector3D<int> I(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->Nhost)));
   Vector3D<int> R(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->Nhost)));
   std::vector<int> N(this->Nhost);
-  Vector2D<int> Nspray(this->Npoly, std::vector<int>(this->Nhost));
+  Vector2D<int> Nspray(this->Npoly, std::vector<int>(this->Nhost)); // Nspray is updated with the number of infected host at time of treatment application
+  Vector2D<int> t_lastspray(this->Npoly, std::vector<int>(this->Nhost)); // t_lastspray is updated with the date of the last treatment application
+  Vector3D<int> TFI(this->Nyears, Vector2D<int>(this->Npoly, std::vector<int>(this->Nhost))); // TFI contains the number of treatments applied in each parcel and on each host
   std::vector<int> Nlevels_aggressiveness(this->Ngene);
   Vector4D<int> L2I;
   Vector4D<int> I2R;
@@ -851,7 +893,8 @@ void Model:: dynepi() {
   this->init_HjuvLIR(Hjuv, L, I, R);
   this->init_P(P, P_sex_secondary, P_clonal_secondary, P_sex_primary, P_sex_primary_tmp, 
                P_clonal_primary, P_clonal_primary_tmp, P_sex_daily, P_clonal_daily, P_stock); // initialised a 0
-  this->init_Nspray(Nspray); // initialised a 0
+  this->init_Nspray_t_lastspray(Nspray, t_lastspray); // initialised a 0
+  this->init_TFI(TFI); // initialised a 0
   this->init_Nlevels_aggressiveness(Nlevels_aggressiveness);
   this->init_L2I2R(L2I, I2R);
   Vector2D<int> H = this->intro_H(0);
@@ -889,6 +932,7 @@ void Model:: dynepi() {
     snprintf(name_fR, 20, "R-%02d.bin", year);
     snprintf(name_feqIsurv, 20, "eqIsurv-%02d.bin", year);
     snprintf(name_fPbefinter,20, "Pbefinter-%02d.bin", year);
+    snprintf(name_fTFI,20, "TFI-%02d.bin", year);
     
     FILE* fH = fopen(name_fH, "wb");
     FILE* fHjuv = fopen(name_fHjuv, "wb");
@@ -898,12 +942,13 @@ void Model:: dynepi() {
     FILE* fR = fopen(name_fR, "wb");
     FILE* feqIsurv = fopen(name_feqIsurv, "wb");
     FILE* fPbefinter = fopen(name_fPbefinter, "wb");
+    FILE* fTFI = fopen(name_fTFI, "wb");
     
     /* Loop for all the timesteps of the cropping season */
     for(int t = 1; t < this->time_steps_per_year; t++) {
 
 #ifdef DEBUG
-      Rcpp::Rcout <<"----------------------------- T "<< t << " -----------------------------" << std::endl;
+      Rcpp::Rcout <<"----------------------------- T "<< t << " ----------------------------- \n" << std::endl;
 #endif
       
       // Writing model output for timestep t
@@ -981,12 +1026,21 @@ void Model:: dynepi() {
       
       for(int poly = 0; poly < this->Npoly; poly++) {
         //Rprintf("----------------------------- Poly %d -----------------------------\n",poly);
-        this->host_dynamic(poly, year - 1, t, H[poly], Hjuv[poly], L[poly], I[poly], R[poly], L2I[poly], I2R[poly], N, Nspray[poly]);
+        this->host_dynamic(poly, year - 1, t, H[poly], Hjuv[poly], L[poly], I[poly], R[poly], L2I[poly], I2R[poly], N, Nspray[poly],
+                           t_lastspray[poly], TFI[year-1][poly]);
         Hcontaminated = this->contamination(H[poly], P[poly], N);
         this->infection(t, H[poly], Hcontaminated, L[poly], I[poly], R[poly], L2I[poly], I2R[poly],
-                        activeR[poly], N,  Nspray[poly]);
+                        activeR[poly], N,  Nspray[poly], t_lastspray[poly]);
       }
     }
+    
+    
+    // for(int poly = 0; poly < this->Npoly; poly++) {
+    //   for(unsigned int h = 0; h < t_lastspray[poly].size(); h++){
+    //     Rcpp::Rcout <<t_lastspray[poly][h]<< " ";
+    //   }
+    //   Rcpp::Rcout << "\n ";
+    // }
     
     /* Last time-step of the season: bottleneck before starting a new season */
     
@@ -1234,15 +1288,17 @@ void Model:: dynepi() {
     H = this->intro_H(year);
     activeR = this->init_activeR();
     // Nspray is re-initializated at 0, i.e. there is no fungicide left on plant tissue
-    this->init_Nspray(Nspray);
+    this->init_Nspray_t_lastspray(Nspray,t_lastspray);
     
     /* Infection of newly planted hosts to generate the primary inoculum of the next season */
     for(int poly = 0; poly < this->Npoly; poly++) {
       /* N = H[poly] in beginning of next season */ 
       Hcontaminated = this->contamination(H[poly], P[poly], H[poly]);
       this->infection(0, H[poly], Hcontaminated, L[poly], I[poly], R[poly], L2I[poly], I2R[poly], activeR[poly],
-                      H[poly],  Nspray[poly]);
+                      H[poly],  Nspray[poly], t_lastspray[poly]);
     }
+    
+    this->write_TFI(TFI[year-1], fTFI);
     
     fclose(fH);
     fclose(fHjuv);
@@ -1252,6 +1308,7 @@ void Model:: dynepi() {
     fclose(fR);
     fclose(fPbefinter);
     fclose(feqIsurv);
+    fclose(fTFI);
     
     auto stop = high_resolution_clock::now(); 
     auto duration = duration_cast<seconds>(stop - start); 
@@ -1259,6 +1316,7 @@ void Model:: dynepi() {
     Rcpp::Rcout << "computational time" << " " << duration.count()<< " " << "seconds. \n"; 
 #endif
   }
+
   auto stop_tot = high_resolution_clock::now(); 
   auto duration_tot = duration_cast<seconds>(stop_tot - start_tot); 
   Rcpp::Rcout << "total computational time" << " " << duration_tot.count()<< " " << "seconds. \n"; 
@@ -1417,7 +1475,8 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
                       Rcpp::as<double>(treatment_param["treatment_efficiency"]),
                       Rcpp::as< std::vector<int> >(treatment_param["treatment_timesteps"]),
                       Rcpp::as< std::vector<int> >(treatment_param["treatment_cultivars"]),
-                      Rcpp::as<double>(treatment_param["treatment_cost"])
+                      Rcpp::as<double>(treatment_param["treatment_cost"]),
+                      Rcpp::as< std::vector<double> >(treatment_param["treatment_application_threshold"])
                       );
 #ifdef DEBUG
   Rcpp::Rcerr << treatment.to_string() << std::endl;
@@ -1426,13 +1485,13 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   /*------------------------*/
   /*  Evolution parameters  */
   /*------------------------*/
-  const std::vector<double> time_to_activ_mean = Rcpp::as<std::vector<double>>(genes_param["time_to_activ_mean"]);
-  const std::vector<double> time_to_activ_var = Rcpp::as<std::vector<double>>(genes_param["time_to_activ_var"]);
+  const std::vector<double> age_of_activ_mean = Rcpp::as<std::vector<double>>(genes_param["age_of_activ_mean"]);
+  const std::vector<double> age_of_activ_var = Rcpp::as<std::vector<double>>(genes_param["age_of_activ_var"]);
   const std::vector<int> Nlevels_aggressiveness = Rcpp::as<std::vector<int>>(genes_param["Nlevels_aggressiveness"]);
   const std::vector<std::string> target_trait = Rcpp::as<std::vector<std::string>>(genes_param["target_trait"]);
   const std::vector<double> mutation_prob = Rcpp::as<std::vector<double>>(genes_param["mutation_prob"]);
   const std::vector<double> efficiency = Rcpp::as<std::vector<double>>(genes_param["efficiency"]);
-  const std::vector<double> fitness_cost = Rcpp::as<std::vector<double>>(genes_param["fitness_cost"]);
+  const std::vector<double> adaptation_cost = Rcpp::as<std::vector<double>>(genes_param["adaptation_cost"]);
   const std::vector<double> tradeoff_strength = Rcpp::as<std::vector<double>>(genes_param["tradeoff_strength"]);
   const std::vector<double> recombination_sd = Rcpp::as<std::vector<double>>(genes_param["recombination_sd"]);
 
@@ -1443,8 +1502,8 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   std::vector<Gene> genes(0);
   //for( int g=0; g < total_genes_id.size(); g++) {
   for(int g : total_genes_id) { // Only keep the gene used by the cultivars (Reduce Npatho)
-    genes.push_back(Gene(time_to_activ_mean[g], time_to_activ_var[g], Nlevels_aggressiveness[g], target_trait[g],
-                         mutation_prob[g], efficiency[g], fitness_cost[g], tradeoff_strength[g], recombination_sd[g]));
+    genes.push_back(Gene(age_of_activ_mean[g], age_of_activ_var[g], Nlevels_aggressiveness[g], target_trait[g],
+                         mutation_prob[g], efficiency[g], adaptation_cost[g], tradeoff_strength[g], recombination_sd[g]));
   }
   const int Ngene = genes.size();
   
@@ -1461,7 +1520,7 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   /*--------------------------------------*/
   /* Write and Print the model parameters */
   /*--------------------------------------*/
-    model.print_param(seed, mutation_prob, efficiency, fitness_cost, tradeoff_strength);
+    model.print_param(seed, mutation_prob, efficiency, adaptation_cost, tradeoff_strength);
 
   /* -------------- */
   /* Epidemic model */

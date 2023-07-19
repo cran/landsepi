@@ -22,6 +22,10 @@ simul_params@TimeParam
 ## -----------------------------------------------------------------------------
 basic_patho_param <- loadPathogen(disease = "rust")
 basic_patho_param
+basic_patho_param <- loadPathogen(disease = "mildew")
+basic_patho_param
+basic_patho_param <- loadPathogen(disease = "sigatoka")
+basic_patho_param
 
 ## -----------------------------------------------------------------------------
 basic_patho_param <- loadPathogen("rust")
@@ -110,11 +114,11 @@ genes
 ## -----------------------------------------------------------------------------
 genes_new <- data.frame(geneName =               c("MG1", "MG2"),
                         efficiency =             c(1.0  , 0.8  ),
-                        time_to_activ_mean =      c(0.0  , 0.0  ),
-                        time_to_activ_var =      c(0.0  , 0.0  ),
+                        age_of_activ_mean =      c(0.0  , 0.0  ),
+                        age_of_activ_var =      c(0.0  , 0.0  ),
                         mutation_prob =          c(1E-7 , 1E-4),
                         Nlevels_aggressiveness = c(2    , 2    ),
-                        fitness_cost =           c(0.50 , 0.75 ),
+                        adaptation_cost =           c(0.50 , 0.75 ),
                         tradeoff_strength =      c(1.0  , 1.0  ),
                         target_trait =           c("IR" , "LAT"),
                         recombination_sd =       c(1.0,1.0),
@@ -199,7 +203,8 @@ treatment <- list(treatment_degradation_rate = 0.1,
                   treatment_efficiency = 0.8,
                   treatment_timesteps =  seq(1,120,14) ,
                   treatment_cultivars  = c(0),
-                  treatment_cost = 0)
+                  treatment_cost = 0,
+                  treatment_application_threshold = c(0.0))
 simul_params <- setTreatment(simul_params, treatment)
 
 ## -----------------------------------------------------------------------------
@@ -209,6 +214,7 @@ outputlist
 ## -----------------------------------------------------------------------------
 audpc100S <- compute_audpc100S("rust", "growingHost", area=1E6)
 audpc100S <- compute_audpc100S("mildew", "grapevine", area=1E6)
+audpc100S <- compute_audpc100S("sigatoka", "banana", area=1E6, nTSpY=182)
 
 ## -----------------------------------------------------------------------------
 simul_params <- setOutputs(simul_params, outputlist)

@@ -15,7 +15,7 @@ simul_landsepi(
   cultivars_genes_list = list(numeric(0)),
   genes = data.frame(geneName = character(0), mutation_prob = numeric(0), efficiency =
     numeric(0), tradeoff_strength = numeric(0), Nlevels_aggressiveness = numeric(0),
-    fitness_cost = numeric(0), time_to_activ_mean = numeric(0), time_to_activ_var =
+    adaptation_cost = numeric(0), age_of_activ_mean = numeric(0), age_of_activ_var =
     numeric(0), target_trait = character(0), recombination_sd = numeric(0)),
   landscape = NULL,
   area = 1e+06,
@@ -33,7 +33,7 @@ simul_landsepi(
   disp_host = c(1),
   treatment = list(treatment_degradation_rate = 0.1, treatment_efficiency = 0,
     treatment_timesteps = logical(0), treatment_cultivars = logical(0), treatment_cost =
-    0),
+    0, treatment_application_threshold = logical(0)),
   pI0 = 5e-04,
   epid_outputs = "all",
   evol_outputs = "all",
@@ -87,12 +87,12 @@ each corresponding pathogenicity gene. Columns of the dataframe are:\itemize{
 \item target_trait: aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes,
 \item efficiency: resistance gene efficiencies (percentage of reduction of targeted aggressiveness components:
 IR, 1/LAT, IP and PR),
-\item time_to_activ_mean: expected delays to resistance activation (for APRs),
-\item time_to_activ_var: variances of the delay to resistance activation (for APRs),
+\item age_of_activ_mean: expected delays to resistance activation (for APRs),
+\item age_of_activ_var: variances of the delay to resistance activation (for APRs),
 \item mutation_prob: mutation probabilities for pathogenicity genes (each of them corresponding to a resistance gene),
 \item Nlevels_aggressiveness: number of adaptation levels related to each resistance gene (i.e. 1 + number
 of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene),
-\item fitness_cost: fitness penalties paid by pathogen genotypes fully adapted
+\item adaptation_cost: fitness penalties paid by pathogen genotypes fully adapted
 to the considered resistance genes on host that do not carry the resistance genes,
 \item tradeoff_strength: strengths of the trade-off relationships between the level of aggressiveness
 on hosts that do and do not carry the resistance genes.
@@ -144,6 +144,8 @@ of pathogen infection rate at the time of application),
 \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
 \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 \item treatment_cost = cost of a single treatment application (monetary units/ha)
+\item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar)
+above which the treatment is applied in a polygon
 }}
 
 \item{pI0}{initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
@@ -208,7 +210,9 @@ every compartment: \itemize{
 \item R: removed hosts,
 \item P: propagules.}
 Each file indicates for every time-step the number of individuals in each field, and when appropriate for
-each host and pathogen genotype.
+each host and pathogen genotype. Additionally, a binary file called TFI is
+generated and gives the Treatment Frequency Indicator (expressed as the number of treatment applications
+per polygon).
 }
 \description{
 Stochastic, spatially-explicit, demo-genetic model simulating the spread and evolution

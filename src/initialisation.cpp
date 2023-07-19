@@ -119,8 +119,8 @@ Vector2D<int> Model::init_activeR() {
     // note: if Ngene==0, activeR is of size 0 and will never be used
     for(int poly = 0; poly < this->Npoly; poly++) {
         for(int gene = 0; gene < this->Ngene; gene++) {
-            const double exp = this->genes[gene].time_to_activ_mean;
-            const double var = this->genes[gene].time_to_activ_var;
+            const double exp = this->genes[gene].age_of_activ_mean;
+            const double var = this->genes[gene].age_of_activ_var;
             if(exp > 0 && var > 0) {
                 const std::array<double, 2> alpha = find_paramGamma(exp, var);
                 activeR[poly][gene] = static_cast<int>(ran_gamma(alpha[0], alpha[1]));
@@ -150,7 +150,7 @@ bool Model::get_resistance(const int& index_gene, const int& host, const int& t,
 /*  of fungicide residue after application is influenced by fungicide  */ 
 /*  characteristics and plant growth.                                  */
 
-double Model::get_treat_effect(const int& Nt, const int& Nspray, const int& t) {
+double Model::get_treat_effect(const int& Nt, const int& Nspray, const int& t, const int& t_lastspray) {
   
   /* Evaluating fungicide CONCENTRATION at time t after fungicide application Ct */
   /* C1 is the degradation of fungicide concentration due to time */
@@ -163,18 +163,10 @@ double Model::get_treat_effect(const int& Nt, const int& Nspray, const int& t) {
   double treat_effect = 1; 
   
   /* Evaluating the variable "time after spray" */
-  if(t < treatment.treatment_timesteps[0]){
-    treat_effect = 1; // No treatment effect before the first spray 
+  if(t_lastspray == 0){
+    treat_effect = 1; // No treatment effect before the first spray application 
   }else{
-    if(t >= treatment.treatment_timesteps[this->treatment.treatment_timesteps.size()-1]){
-      t_after_spray = t - treatment.treatment_timesteps[this->treatment.treatment_timesteps.size()-1];
-    }else{
-      for(unsigned int i = 0; i< this->treatment.treatment_timesteps.size()-1; i++){
-        if(t > treatment.treatment_timesteps[i] && t < treatment.treatment_timesteps[i+1]){
-          t_after_spray = t - treatment.treatment_timesteps[i];
-        }
-      }
-    }
+    t_after_spray = t - t_lastspray;
     double C1 = 1*exp(- this->treatment.treatment_degradation_rate*t_after_spray);
     double C2 = 1;
     if (Nt > 0){
@@ -187,8 +179,8 @@ double Model::get_treat_effect(const int& Nt, const int& Nspray, const int& t) {
     /* of the fungicide concentration C. logistic_a and logistic_b are shape parameters, the range */
     /* of their values is between parentheses */ 
     
-    double logistic_a = 3.5; // [3.5 - 4.5]
-    double logistic_b = 9.0; // [8.9 - 9.0]
+    double logistic_a = 4.0; // 3.5; [3.5 - 4.5]
+    double logistic_b = 8.5; // 9.0; [8.0 - 9.0]
     treat_effect = 1 - this->treatment.treatment_efficiency/(1+exp(logistic_a-logistic_b*C));
   }
   return treat_effect;
@@ -254,9 +246,15 @@ void Model::init_P( Vector2D<int>& P, Vector2D<int>& P_sex_secondary, Vector2D<i
   P_stock = Vector3D<int>(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->basic_patho.sex_propagule_viability_limit, 0)));
 }
 
-/* Initialisation of Nspray at 0 */
-void Model::init_Nspray(Vector2D<int>& Nspray) {
+/* Initialisation of Nspray and t_lastspray at 0 */
+void Model::init_Nspray_t_lastspray(Vector2D<int>& Nspray, Vector2D<int>& t_lastspray) {
   Nspray = Vector2D<int>(this->Npoly, std::vector<int>(this->Nhost, 0));
+  t_lastspray = Vector2D<int>(this->Npoly, std::vector<int>(this->Nhost, 0));
+}
+
+/* Initialisation of TFI at 0 */
+void Model::init_TFI(Vector3D<int>& TFI) {
+  TFI = Vector3D<int>(this->Nyears, Vector2D<int>(this->Npoly, std::vector<int>(this->Nhost, 0)));
 }
 
 /* Initialisation of Nlevels_aggressiveness at 0 */

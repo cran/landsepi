@@ -75,12 +75,25 @@ Cultivars_list <- list(
     "max_density" = 20.0,
     "growth_rate" = 0.1,
     "reproduction_rate" = 0.0,
-    "yield_H" = 2.5,
-    "yield_L" = 0.0,
+    "yield_H" = 6.7,
+    "yield_L" = 6.7,
+    "yield_I" = 6.7,
+    "yield_R" = 0.0,
+    "planting_cost" = 5481,
+    "market_value" = 600
+  ),
+  "banana" = list(
+    "cultivarName" = "Cavendish",
+    "initial_density" = 0.9,
+    "max_density" = 1.8,
+    "growth_rate" = 0.02,
+    "reproduction_rate" = 0.0,
+    "yield_H" = 28.8,
+    "yield_L" = 28.8,
     "yield_I" = 0.0,
     "yield_R" = 0.0,
-    "planting_cost" = 225,
-    "market_value" = 200
+    "planting_cost" = 0,
+    "market_value" = 0
   ),
   "nonCrop" = list(
     "cultivarName" = "",

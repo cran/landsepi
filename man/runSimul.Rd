@@ -41,7 +41,9 @@ every compartment: \itemize{
 \item R: removed hosts,
 \item P: propagules.}
 Each file indicates for every time step the number of individuals in each field, and when
-appropriate for each host and pathogen genotype.
+appropriate for each host and pathogen genotype. Additionally, a binary file called TFI is
+generated and gives the Treatment Frequency Indicator (expressed as the number of treatment applications
+per polygon).
 }
 \description{
 Runs a simulation with landsepi,

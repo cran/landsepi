@@ -87,6 +87,8 @@
 #' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
 #' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 #' \item treatment_cost = cost of a single treatment application (monetary units/ha)
+#' \item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar) 
+#' above which the treatment is applied in a polygon
 #' }
 #' @param audpc100S the audpc in a fully susceptible landscape (used as reference value for graphics).
 #' @param writeTXT a logical indicating if the output is written in a text file (TRUE) or not (FALSE).
@@ -460,7 +462,7 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
         ## Economic outputs
         
         # Computing the price reduction rate: if the severity of infection on grape is higher than
-        # a threshold value, the market value is reduced by 0%-5% depending on disease severity
+        # a threshold value, the market value is reduced by 5%-10% depending on disease severity
         # (FOR MILDEW ONLY - for other diseases the market value is never reduced):
         
         if(is.null(pathogen_param$name) || pathogen_param$name != "mildew") {
@@ -469,25 +471,50 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
           price_reduction_rate <- price_reduction(I_host, N_host, Nhost, Nyears, nTSpY)  
         }
         
-        # Computing the annual treatment cost (for each host)
-        n_treatments<-length(treatment_param$treatment_timesteps)
-        annual_treatments_cost_perIndiv<-matrix(0,Nyears,Nhost)
-        annual_treatments_cost_perIndiv[,treatment_param$cultivars+1]<- treatment_param$treatment_cost*1E-4 / initial_density[treatment_param$cultivars+1] * n_treatments
+        # Computing the annual treated surface & treatment cost (for each host)
         
+        # Read binary file to compute the nb of treatments per year and host
+        ## Note that the binary file 'TFI' is expressed in nb of treatments per polygon, host and year
+        nb_treatments <- as.list(1:Nyears) #list of nb_treatments per each year, poly and cultivars 
+        for (year in 1:Nyears) {
+          binfileNbTreatments <- file(paste(path, sprintf("/TFI-%02d", year), ".bin", sep = ""), "rb")
+          nb_treatments.tmp <- readBin(con = binfileNbTreatments, what = "int", n = Npoly * Nhost,
+                             size = 4 , signed = T, endian = "little")
+          close(binfileNbTreatments)
+          nb_treatments[[year]] <- t(array(data = nb_treatments.tmp[1:(Npoly*Nhost)]
+                                 , dim = c(Nhost,Npoly)))
+        }
+
+        ## Surface treated per year and host and total cost of treatment
+        surf_treated <- data.frame(matrix(0, ncol = Nhost, nrow = Nyears))
+        rownames(surf_treated) <- paste("year_", 1:Nyears, sep = "")
+        colnames(surf_treated) <- c(cultivar_names)
+        for (y in 1:Nyears){
+          for (poly in 1:Npoly){
+            id_croptype <- rotation[poly, y]  ## index of the croptype cultivated in poly
+            croptypes_sub <- croptypes[croptypes$croptypeID==id_croptype, ]  ## subtable containing only the croptype cultivated
+            id_host_in_croptype <- croptypes_sub$cultivarID+1 ## add 1 because cultivarID starts at 0
+            prop_host_poly <- croptypes_sub$proportion
+            surf_treated[y,id_host_in_croptype] <- surf_treated[y,id_host_in_croptype] + nb_treatments[[y]][poly,id_host_in_croptype] * area[poly] * prop_host_poly
+          } ## for poly
+        } ## for y
+        # TFI <- surf_treated / area_host  ## (here, TFI is expressed in nb of treatments per ha, host and year)
+        treatment_cost_tot <- treatment_param$treatment_cost * 1e-4 * surf_treated
+
         if (substr(type, 1, 3) == "eco") {
           eco <- list(eco_yield = output_matrix)
           eco[["eco_product"]] <- data.frame(rep(market_value, each = Nyears) * eco[["eco_yield"]][, 1:Nhost] * (1-(t(price_reduction_rate))))
           ## data.frame to avoid pb when Nhost=1
           colnames(eco[["eco_product"]]) <- cultivar_names ## useful if Nhost=1
           eco[["eco_product"]]$total <- apply(eco[["eco_product"]], 1, sum, na.rm = TRUE)
-          eco[["eco_cost"]] <- data.frame(rep(planting_cost_perIndiv, each = Nyears) * t(C_host) + 
-                                            annual_treatments_cost_perIndiv * t(C_host))
+          eco[["eco_cost"]] <- data.frame(rep(planting_cost_perIndiv, each = Nyears) * t(C_host) + treatment_cost_tot)
           colnames(eco[["eco_cost"]]) <- cultivar_names ## useful if Nhost=1
           eco[["eco_cost"]]$total <- apply(eco[["eco_cost"]], 1, sum, na.rm = TRUE)
           eco[["eco_margin"]] <- eco[["eco_product"]] - eco[["eco_cost"]]
           
           output_matrix <- eco[[type]] / (area_host * 1E-4) ## normalization by area in Ha
         }
+        
         # product <- t(output_matrix[,1:Nhost])
         # benefit <- market_value %*% product
         # cost <- planting_cost_perIndiv %*% C_host
@@ -547,6 +574,11 @@ epid_output <- function(types = "all", time_param, Npatho, area, rotation, cropt
         
       } ## else type==contrib
 
+    # For AUDPC plot, changing value to audpc100S if the pathogen is mildew:
+      
+      if(pathogen_param$name == "mildew") {
+       audpc100S = 8.48
+      }
       
       if (graphic & Nyears > 1) {
         ## Graphical parameters
@@ -736,8 +768,8 @@ switch_patho_to_aggr <- function(index_patho, Ngenes, Nlevels_aggressiveness) {
 #' @description Generates evolutionary outputs from model simulations.
 #' @param types a character string (or a vector of character strings if several outputs are to be computed) specifying the
 #' type of outputs to generate (see details):\itemize{
-#' \item "evol_patho": Dynamics of pathogen genotype frequencies
-#' \item "evol_aggr": Evolution of pathogen aggressiveness
+#' \item "evol_patho": Evolution of pathogen genotypes
+#' \item "evol_aggr": Evolution of pathogen aggressiveness (i.e. phenotype)
 #' \item "durability": Durability of resistance genes
 #' \item "all": compute all these outputs (default)
 #' }
@@ -765,12 +797,15 @@ switch_patho_to_aggr <- function(index_patho, Ngenes, Nlevels_aggressiveness) {
 #' @param path a character string indicating the path of the repository where simulation output files are located and
 #' where .txt files and graphics will be generated.
 #'
-#' @details For each pathogen genotype, several computations are performed: \itemize{
+#' @details For each pathogen genotype (evol_patho) or phenotype (evol_aggr, note that different pathogen genotypes 
+#' may lead to the same phenotype on a resistant host), several computations are performed based on pathogen genotype 
+#' frequencies: \itemize{
 #' \item appearance: time to first appearance (as propagule);
 #' \item R_infection: time to first true infection of a resistant host;
-#' \item R_invasion: time when the number of infections of resistant hosts reaches a threshold above which
-#' the genotype is unlikely to go extinct.}
-#' The value Nyears + 1 time step is used if the genotype never appeared/infected/invaded.
+#' \item R_invasion: time to invasion, when the number of infections of resistant hosts reaches a threshold above which
+#' the genotype or phenotype is unlikely to go extinct.}
+#' The value Nyears + 1 time step is used if the genotype or phenotype never appeared/infected/invaded.
+#' Durability is defined as the time to invasion of completely adapted pathogen individuals.
 #' @return A list containing, for each required type of output, a matrix summarising the output.
 #' Each matrix can be written in a txt file (if writeTXT=TRUE), and illustrated in a graphic (if graphic=TRUE).
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018). Assessing the durability and efficiency
@@ -1131,7 +1166,7 @@ utils::globalVariables(c("y"))
 #' @export
 video <- function(audpc, time_param, Npatho, landscape, area, rotation, croptypes, croptype_names = c(), cultivars_param
                   # , audpc100S
-                  , keyDates = NULL,nMapPY = 5, path = getwd()) {
+                  , keyDates = NULL,nMapPY = 10, path = getwd()) { #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   if (system("ffmpeg -version", ignore.stdout = TRUE) == 127) {
     stop("You need to install ffmpeg before generating videos. Go to https://ffmpeg.org/download.html")

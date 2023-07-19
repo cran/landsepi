@@ -47,7 +47,7 @@ void print_d3sum1(FILE* f, const int& z, const int& l, const int& c, const Vecto
 
 /* Print the parameters in an output .txt file */
 void Model::print_param(const int& seed, const std::vector<double>& mutation_prob,
-                        const std::vector<double>& efficiency, const std::vector<double>& fitness_cost,
+                        const std::vector<double>& efficiency, const std::vector<double>& adaptation_cost,
                         const std::vector<double>& tradeoff_strength) {
     std::ofstream param_file("parameters.txt");
     std::ofstream landscape_file("param_landscape.txt");
@@ -113,7 +113,7 @@ void Model::print_param(const int& seed, const std::vector<double>& mutation_pro
         param_file << "Gene " << i + 1 << ":\n" << this->genes[i].to_string();
         param_file << "  mutation_prob:          " << mutation_prob[i] << "\n";
         param_file << "  efficiency:             " << efficiency[i] << "\n";
-        param_file << "  fitness_cost:           " << fitness_cost[i] << "\n";
+        param_file << "  adaptation_cost:           " << adaptation_cost[i] << "\n";
         param_file << "  tradeoff_strength:      " << tradeoff_strength[i] << "\n\n";
     }
     
@@ -156,4 +156,13 @@ void Model::write_Pbefinter(const Vector3D<int>& eqIsurv, FILE* feqIsurv,
       }
     }
   }
+}
+
+/* Write model output in .txt files and print output on screen */
+void Model::write_TFI(const Vector2D<int>& TFI, FILE* fTFI){
+    for(int poly = 0; poly < Npoly; poly++) {
+      for(int host = 0; host < Nhost; host++) {
+        fwrite(&TFI[poly][host], sizeof(int), 1, fTFI);
+      }
+    }
 }

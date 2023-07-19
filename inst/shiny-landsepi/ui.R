@@ -125,6 +125,7 @@ pathogenTab <- {
         choices = list(
           "Rust" = "Rust",
           "Mildew" = "Mildew",
+          "Black Sigatoka" = "Sigatoka",
           "No Pathogen" = "No Pathogen"
         ),
         width = "25%"

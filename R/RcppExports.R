@@ -62,12 +62,12 @@
 #' \item target_trait = vector of aggressiveness components (IR, LAT, IP, or PR) targeted by resistance genes, 
 #' \item efficiency = vector of resistance gene efficiencies (percentage of reduction of the targeted 
 #' aggressiveness component: IR, 1/LAT, IP and PR), 
-#' \item time_to_activ_mean = vector of expected delays to resistance activation (for APRs), 
-#' \item time_to_activ_var = vector of variances of the delay to resistance activation (for APRs),  
+#' \item age_of_activ_mean = vector of expected delays to resistance activation (for APRs), 
+#' \item age_of_activ_var = vector of variances of the delay to resistance activation (for APRs),  
 #' \item mutation_prob = vector of mutation probabilities for pathogenicity genes (each of them corresponding to a resistance gene), 
 #' \item Nlevels_aggressiveness = vector of number of adaptation levels related to each resistance gene (i.e. 1 + number 
 #' of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene), 
-#' \item fitness_cost = vector of fitness penalties paid by pathogen genotypes fully adapted 
+#' \item adaptation_cost = vector of adaptation penalties paid by pathogen genotypes fully adapted 
 #' to the considered resistance genes on hosts that do not carry this gene, 
 #' \item tradeoff_strength = vector of strengths of the trade-off relationships between the level of aggressiveness 
 #' on hosts that do and do not carry the resistance genes.
@@ -78,7 +78,8 @@
 #' of pathogen infection rate at the time of application),
 #' \item treatment_timesteps = vector of time-steps corresponding to treatment application dates,
 #' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
-#' \item treatment_cost = cost of a single treatment application (monetary units/ha)
+#' \item treatment_cost = cost of a single treatment application (monetary units/ha),
+#' \item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar) above which the treatment is applied
 #' }
 #' 
 #' @details See ?landsepi for details on the model and assumptions. 
@@ -99,7 +100,9 @@
 #'  \item R: removed hosts,
 #'  \item P: propagules.}
 #' Each file indicates for every time-step the number of individuals in each field, and when 
-#' appropriate for each host and pathogen genotypes).
+#' appropriate for each host and pathogen genotypes). Additionally, a binary file called TFI is 
+#' generated and gives the Treatment Frequency Indicator (expressed as the number of treatment applications 
+#'  per polygon).
 #' 
 #' @examples
 #' \dontrun{
@@ -163,18 +166,19 @@
 #'     , relative_yield_R = as.numeric(cultivars$yield_R / yield0)
 #'     , sigmoid_kappa_host=0.002, sigmoid_sigma_host=1.001, sigmoid_plateau_host=1
 #'     , cultivars_genes_list=list(numeric(0))))
-#'genes <-   list(geneName = character(0) , fitness_cost = numeric(0)
+#'genes <-   list(geneName = character(0) , adaptation_cost = numeric(0)
 #'     , mutation_prob = numeric(0)
 #'     , efficiency = numeric(0) , tradeoff_strength = numeric(0)
 #'     , Nlevels_aggressiveness = numeric(0)
-#'     , time_to_activ_mean = numeric(0) , time_to_activ_var = numeric(0)
+#'     , age_of_activ_mean = numeric(0) , age_of_activ_var = numeric(0)
 #'     , target_trait = character(0)
 #'     , recombination_sd = numeric(0))
 #'treatment=list(treatment_degradation_rate=0.1
 #'     , treatment_efficiency=0
 #'     , treatment_timesteps=logical(0)
 #'     , treatment_cultivars=logical(0)
-#'     , treatment_cost=0)
+#'     , treatment_cost=0
+#'     , treatment_application_threshold = logical(0))
 #'
 #'## run simulation
 #'model_landsepi(seed=1, time_param = time_param

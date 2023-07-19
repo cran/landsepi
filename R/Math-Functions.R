@@ -160,7 +160,7 @@ multiN <- function(d, area, prop, range = 0, algo = "random") {
 #' @param max_density maximal density
 #' @param growth_rate growth rate
 #' @details The Verhulst model (used to simulate host growth) is defined by 
-#' \eqn{ f(x) = max\_density / (1 + (max\_density/initial\_density)*exp(-growth\_rate*x)) }.
+#' \eqn{ f(x) = max\_{density} / (1 + (max\_{density}/initial\_{density})*exp(-growth\_{rate}*x)) }.
 #' See https://en.wikipedia.org/wiki/Logistic_function for details.
 #' @return An object of the same type as x containing the antiderivative of the input values.
 #' @examples
@@ -174,17 +174,19 @@ antideriv_verhulst <- function(x, initial_density, max_density, growth_rate){
 #' @title Price reduction function
 #' @name price_reduction
 #' @description Give the price reduction rate associated with the infection on the (grapevine) fruits
-#' @param I_host number of infected host for cultivars and for timestep
-#' @param N_host total number of hosts for cultivars and for timestep
+#' @param I_host number of infected individuals for each cultivar and timestep
+#' @param N_host total number of individuals for each cultivar and timestep
 #' @param Nhost total number of cultivars considered in the simulation
 #' @param Nyears number of simulated cropping seasons
-#' @param nTSpY number of timestep (e.g. days) per cropping season
+#' @param nTSpY number of timesteps (e.g. days) per cropping season
+#' @param severity_thresh disease severity threshold above which the price reduction is applied
+#' @param price_penalty percentage of price reduction
 #' @return A matrix with the price reduction rate per cultivar and per year of simulation
 #' @references Savary, S., Delbac, L., Rochas, A., Taisant, G., & Willocquet, L. (2009). 
 #' Analysis of nonlinear relationships in dual epidemics, and its application to the management 
 #' of grapevine downy and powdery mildews. Phytopathology, 99(8), 930-942.
 #' @export
-price_reduction <- function(I_host, N_host, Nhost, Nyears, nTSpY){ 
+price_reduction <- function(I_host, N_host, Nhost, Nyears, nTSpY, severity_thresh = 0.075, price_penalty = 0.3){ 
     # computing the disease severity on grape (% of infected grape) from the disease 
     # severity on leaves (Savary et al. 2009)
     
@@ -221,10 +223,6 @@ price_reduction <- function(I_host, N_host, Nhost, Nyears, nTSpY){
     }
     
     # Compute of the price reduction, one value for each year and for each cultivar
-    
-    severity_thresh <- 0.075 #0.075
-    price_penalty <- 0.05 # (0.05-0.10) 
-    
     price_reduction_rate <- matrix(0, nrow = Nhost, ncol=Nyears)
     price_reduction_rate[which(final_severity_grape > severity_thresh)] = price_penalty  
     res = price_reduction_rate

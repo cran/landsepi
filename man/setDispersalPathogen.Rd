@@ -12,14 +12,14 @@ setDispersalPathogen(params, mat_clonal, mat_sex = NULL)
 \item{mat_clonal}{a square matrix giving the probability of pathogen dispersal (clonal propagules)
 from any field of the landscape to any other field.
 It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}.
-The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum
-to 1.}
+The size of the matrix must match the number of fields in the landscape, and lines of the matrix may sum
+to 1 (reflecting boundaries) or be <1 (absorbing boundaries).}
 
 \item{mat_sex}{a square matrix giving the probability of pathogen dispersal (sexual propagules)
 from any field of the landscape to any other field (default identity matrix) .
 It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}.
-The size of the matrix must match the number of fields in the landscape, and lines of the matrix must sum
-to 1 in a continuous landscape.}
+The size of the matrix must match the number of fields in the landscape, and lines of the matrix may sum
+to 1 (reflecting boundaries) or be <1 (absorbing boundaries).}
 }
 \value{
 a LandsepiParam object.
@@ -31,8 +31,9 @@ Updates a LandsepiParams object with a pathogen dispersal matrix.
 See tutorial (vignettes) on how to
 use your own landscape and compute your own pathogen dispersal kernel.
 The disersal matrix a square matrix whose size is the number of fields in the landscape and whose elements are,
-for each line i and each column i' the probability that propagules migrate
-from field i to field i'.
+for each line i and each column i' the probability that propagules migrate from field i to field i'.
+Lines of the matrix can be normalised to sum to 1 (reflective boundaries);
+otherwise propagules dispersing outside the landscape are lost (absorbing boundaries).
 }
 \examples{
 \dontrun{

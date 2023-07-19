@@ -27,14 +27,14 @@ with the evolution of each corresponding pathogenicity gene. Columns of the data
 \item target_trait: aggressiveness components ("IR", "LAT", "IP", or "PR") targeted by resistance genes,
 \item efficiency: resistance gene efficiencies, i.e. the percentage of reduction of the targeted
 aggressiveness component (IR, 1/LAT, IP and PR),
-\item time_to_activ_mean: expected delays to resistance activation (for APRs),
-\item time_to_activ_var: variances of the delay to resistance activation (for APRs),
+\item age_of_activ_mean: expected delays to resistance activation (for APRs),
+\item age_of_activ_var: variances of the delay to resistance activation (for APRs),
 \item mutation_prob: mutation probabilities for pathogenicity genes (each of them
 corresponding to a resistance gene),
 \item Nlevels_aggressiveness: number of adaptation levels related to each resistance gene
 (i.e. 1 + number of required mutations for a pathogenicity gene to fully adapt to the
 corresponding resistance gene),
-\item fitness_cost: fitness penalties paid by pathogen genotypes
+\item adaptation_cost: fitness penalties paid by pathogen genotypes
 fully adapted to the considered resistance genes on host that do not carry these genes,
 \item tradeoff_strength: strengths of the trade-off relationships between the
 level of aggressiveness on hosts that do and do not carry the resistance genes.
@@ -42,7 +42,7 @@ level of aggressiveness on hosts that do and do not carry the resistance genes.
 }
 
 The data.frame must be defined as follow (example):\tabular{llllllllll}{
-   geneName \tab efficiency \tab time_to_activ_mean \tab time_to_activ_var \tab mutation_prob \tab Nlevels_agressiveness \tab fitness_cost \tab tradeoff_strength \tab target_trait \tab recombination_sd \cr
+   geneName \tab efficiency \tab age_of_activ_mean \tab age_of_activ_var \tab mutation_prob \tab Nlevels_agressiveness \tab adaptation_cost \tab tradeoff_strength \tab target_trait \tab recombination_sd \cr
    MG1 \tab 1 \tab 0 \tab 0 \tab 1e-07 \tab 2 \tab 0.5 \tab 1 \tab IR \tab 0.27 \cr
    QTL1 \tab 0.5 \tab 0 \tab 0 \tab 0.0001 \tab 10 \tab 0.74 \tab 1 \tab LAT \tab 0.27 \cr
 }

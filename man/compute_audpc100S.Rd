@@ -2,23 +2,26 @@
 % Please edit documentation in R/Methods-LandsepiParams.R
 \name{compute_audpc100S}
 \alias{compute_audpc100S}
-\title{Compute AUDPC in a 100\% susceptible field}
+\title{Compute AUDPC in a single 100\% susceptible field}
 \usage{
 compute_audpc100S(
   disease = "rust",
   hostType = "growingHost",
-  seed = 12345,
-  area = 1e+06
+  nTSpY = 120,
+  area = 1e+06,
+  seed = 12345
 )
 }
 \arguments{
-\item{disease}{a disease name, among "rust" (default) and "mildew"}
+\item{disease}{a disease name, among "rust" (default), "mildew" and "sigatoka"}
 
 \item{hostType}{cultivar type, among: "growingHost" (default), "nongrowingHost", "grapevine".}
 
-\item{seed}{an integer used as seed value (for random number generator).}
+\item{nTSpY}{number to time steps per cropping season}
 
 \item{area}{area of the field (must be in square meters).}
+
+\item{seed}{an integer used as seed value (for random number generator).}
 }
 \value{
 The AUDPC value (numeric)
@@ -33,6 +36,7 @@ audpc100S is the average AUDPC computed in a non-spatial simulation.
 \dontrun{
 compute_audpc100S("rust", "growingHost", area=1E6)
 compute_audpc100S("mildew", "grapevine", area=1E6)
+compute_audpc100S("sigatoka", "banana", area=1E6, nTSpY=182)
 }
 }
 \seealso{

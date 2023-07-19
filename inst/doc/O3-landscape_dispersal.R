@@ -31,13 +31,15 @@ knitr::opts_chunk$set(
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #  file_land <- "land_rcali.txt"  ## input for califlopp
-#  file_disp <- "disp_rcali.txt"  ## output for califlopp
+#  file_disp <- "disp_rcali.txt"  ## output for califlopp (DO NOT WRITE A PATH)
 #  
 #  ## Formatting the polygons-file for califlopp
 #  cat(Npoly, file=file_land)
 #  for (k in 1:Npoly) {
 #    ## extract coordinates of polygon vertices
 #    coords <- landscape@polygons[[k]]@Polygons[[1]]@coords
+#    ## alternatively:
+#    # coords <- as.data.frame(landscape$geometry[[k]][[1]])
 #    n <- nrow(coords)
 #    cat(NULL, file=file_land, append=T, sep="\n")
 #    cat(c(k,k,n), file=file_land, append=T, sep="\t")
@@ -63,6 +65,7 @@ knitr::opts_chunk$set(
 ## ---- eval=FALSE--------------------------------------------------------------
 #  ## Import califlopp results
 #  disp_df <- getRes(file_disp)
+#  ## Double the table because only half of the flows have been calculated
 #  emitter <- c(disp_df$poly1, disp_df$poly2)
 #  receiver <- c(disp_df$poly2, disp_df$poly1)
 #  
@@ -92,10 +95,11 @@ knitr::opts_chunk$set(
 #    matrix_f <- cbind(matrix_f, flow_f$flow[flow_f$receiver==k] / area)
 #  }
 #  
-#  ## In order to have sum == 1
+#  ## Normalisation of the matrix (reflecting boundaries)
+#  ## (do not normalise for absorbing boundaries)
 #  flowtot_f <- apply(matrix_f,1,sum)
 #  for(k in 1:Npoly){
-#    matrix_f[k,] <- (matrix_f[k,] / flowtot_f[k])
+#    matrix_f[k,] <- (matrix_f[k,] / flowtot_f[k]) ## In order to have sum == 1
 #  }
 #  
 #  write(as.vector(matrix_f), file="dispersal.txt", sep=",")
@@ -129,4 +133,17 @@ knitr::opts_chunk$set(
 #  
 #  ## Plot
 #  plot(landscape, col = col_disp[intvls_disp], main=paste("Dispersal from polygon", poly))
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  library(ggplot2)
+#  ggplot(landscape) + ggtitle(paste("Dispersal from polygon", poly)) +
+#      geom_sf(colour="black", aes(fill = dispToPlot)) +
+#      scale_fill_gradientn(name="Prob. of\ndispersal", colours=rev(heat.colors(10)), breaks=-1:-10, labels=10^(-1:-10)) +
+#      # theme_classic() +
+#      theme(axis.line=element_blank(),axis.text.x=element_blank(),
+#            axis.text.y=element_blank(),axis.ticks=element_blank(),
+#            axis.title.x=element_blank(),
+#            axis.title.y=element_blank(),
+#            panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
+#            panel.grid.minor=element_blank(),plot.background=element_blank())
 

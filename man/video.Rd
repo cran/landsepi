@@ -15,7 +15,7 @@ video(
   croptype_names = c(),
   cultivars_param,
   keyDates = NULL,
-  nMapPY = 5,
+  nMapPY = 10,
   path = getwd()
 )
 }

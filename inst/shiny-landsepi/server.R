@@ -649,7 +649,8 @@ server <- function(input, output, session) {
             treatment_efficiency = input$treatment_efficiency,
             treatment_timesteps = days_list,
             treatment_cultivars = cults,
-            treatment_cost = 0.0 # input$treatment_cost
+            treatment_cost = 0.0, # input$treatment_cost
+            treatment_application_threshold = rep(0.0,cults)
           )
         )
         can_run_simul$treatment <<- TRUE
