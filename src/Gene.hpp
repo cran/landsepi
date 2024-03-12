@@ -28,7 +28,7 @@ class Gene {
     Vector2D<double> init_mutkernel(const double& mutation_prob);
     /* Initialisation of infectivity and aggressiveness matrices (only called by Gene constructor) */
     Vector2D<double> init_aggressiveness_matrix(const double& efficiency, const double& adaptation_cost,
-                                                const double& tradeoff_strength);
+                                                const double& relative_advantage,const double& tradeoff_strength);
 
 public:
     const double age_of_activ_mean;               /* Expected delay to resistance activation (for APRs) */
@@ -42,7 +42,7 @@ public:
     Gene();
     Gene(const double& age_of_activ_mean, const double& age_of_activ_var, const int& Nlevels_aggressiveness,
          const std::string& target_trait, const double& mutation_prob, const double& efficiency,
-         const double& adaptation_cost, const double& tradeoff_strength, const double& recombination_sd);
+         const double& adaptation_cost, const double& relative_advantage, const double& tradeoff_strength, const double& recombination_sd);
     std::string to_string() const;
 };
 

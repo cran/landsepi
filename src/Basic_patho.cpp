@@ -29,7 +29,8 @@ Basic_patho::Basic_patho()
       latent_period_var(0.0),
       infectious_period_mean(0.0),
       infectious_period_var(0.0),
-      survival_prob(0.0),
+      //survival_prob(0.0),
+      survival_prob(Vector2D<double>(0.0)),
       repro_sex_prob(0.0),
       sigmoid_kappa(0.0),
       sigmoid_sigma(0.0),
@@ -42,7 +43,7 @@ Basic_patho::Basic_patho()
 Basic_patho::Basic_patho(const double& infection_rate, const double& propagule_prod_rate,
                          const double& latent_period_mean, const double& latent_period_var,
                          const double& infectious_period_mean, const double& infectious_period_var,
-                         const double& survival_prob, const std::vector<double>& repro_sex_prob, const double& sigmoid_kappa,
+                         const Vector2D<double>& survival_prob, const std::vector<double>& repro_sex_prob, const double& sigmoid_kappa,
                          const double& sigmoid_sigma, const double& sigmoid_plateau,
                          const int& sex_propagule_viability_limit, const double& sex_propagule_release_mean,
                          const bool& clonal_propagule_gradual_release
@@ -65,22 +66,34 @@ Basic_patho::Basic_patho(const double& infection_rate, const double& propagule_p
 // Transform Basic_patho attributs to string
 std::string Basic_patho::to_string() const {
   std::ostringstream oss;
-  std::copy(this->repro_sex_prob.begin(), this->repro_sex_prob.end(), std::ostream_iterator<int>(oss, ", "));
+  std::copy(this->repro_sex_prob.begin(), this->repro_sex_prob.end(), std::ostream_iterator<double>(oss, ", "));
   
     std::string str("");
-    str += "  infection_rate:        " + std::to_string(this->infection_rate) + "\n";
-    str += "  propagule_prod_rate:   " + std::to_string(this->propagule_prod_rate) + "\n";
+    str += "  infection_rate:         " + std::to_string(this->infection_rate) + "\n";
+    str += "  propagule_prod_rate:    " + std::to_string(this->propagule_prod_rate) + "\n";
     str += "  latent_period_mean:     " + std::to_string(this->latent_period_mean) + "\n";
-    str += "  latent_period_var:     " + std::to_string(this->latent_period_var) + "\n";
+    str += "  latent_period_var:      " + std::to_string(this->latent_period_var) + "\n";
     str += "  infectious_period_mean: " + std::to_string(this->infectious_period_mean) + "\n";
-    str += "  infectious_period_var: " + std::to_string(this->infectious_period_var) + "\n";
-    str += "  survival_prob:         " + std::to_string(this->survival_prob) + "\n";
-    str += "  repro_sex_prob:        " + oss.str() + "\n";
-    str += "  sigmoid_kappa:         " + std::to_string(this->sigmoid_kappa) + "\n";
-    str += "  sigmoid_sigma:         " + std::to_string(this->sigmoid_sigma) + "\n";
-    str += "  sigmoid_plateau:       " + std::to_string(this->sigmoid_plateau) + "\n";
-    str += "  sex_propagule_viability_limit:         " + std::to_string(this->sex_propagule_viability_limit) + "\n";
+    str += "  infectious_period_var:  " + std::to_string(this->infectious_period_var) + "\n";
+  //  str += "  survival_prob:         " + std::to_string(this->survival_prob) + "\n";
+  str += "  survival_prob:\n           ";
+  for(unsigned int j = 0; j < this->survival_prob[0].size(); j++) {
+    str += "croptype_" + std::to_string(j) + " ";
+  }
+  str += "\n";
+  for(unsigned int i = 0; i < this->survival_prob.size(); i++) {
+    str += "    year " + std::to_string(i+1) + ": ";
+    for(unsigned int j = 0; j < this->survival_prob[0].size(); j++) {
+      str += std::to_string(this->survival_prob[i][j]) + " ";
+    }
+    str += "\n";
+  }
+    str += "  repro_sex_prob:         " + oss.str() + "\n";
+    str += "  sigmoid_kappa:          " + std::to_string(this->sigmoid_kappa) + "\n";
+    str += "  sigmoid_sigma:          " + std::to_string(this->sigmoid_sigma) + "\n";
+    str += "  sigmoid_plateau:        " + std::to_string(this->sigmoid_plateau) + "\n";
+    str += "  sex_propagule_viability_limit:    " + std::to_string(this->sex_propagule_viability_limit) + "\n";
     str += "  sex_propagule_release_mean:       " + std::to_string(this->sex_propagule_release_mean) + "\n";
-    str += "  clonal_propagule_gradual_release:       " + std::to_string(this->clonal_propagule_gradual_release) + "\n";
+    str += "  clonal_propagule_gradual_release: " + std::to_string(this->clonal_propagule_gradual_release) + "\n";
         return str;
 }

@@ -19,7 +19,6 @@
     sigmoid_kappa = 0, sigmoid_sigma = 0, sigmoid_plateau = 1,
     sex_propagule_viability_limit = 0, sex_propagule_release_mean = 0,
     clonal_propagule_gradual_release = 0),
-  ReproSexProb = vector(),
   PI0 = 0,
   DispHost = vector(),
   DispPathoClonal = vector(),
@@ -57,23 +56,21 @@ the evolution of each corresponding pathogenicity gene.}
 \item{Pathogen}{a list of pathogen aggressiveness parameters on a susceptible host
 for a pathogen genotype not adapted to resistance.}
 
-\item{ReproSexProb}{a vector of size TimeParam$nTSpY +1 (end of season) of the probabilities for an infectious host to reproduce via sex rather
-than via cloning at each time step (days).}
-
-\item{PI0}{initial probability for the first host (whose index is 0) to be infectious
-(i.e. state I) at the beginning of the simulation. Must be between 0 and 1.}
+\item{PI0}{vector of length Npoly.Nhost.Npatho filled with the initial probabilities for hosts
+to be infectious (i.e. state I), for each pathogen genotype,
+at the beginning of the simulation.}
 
 \item{DispHost}{a vectorized matrix giving the probability of host dispersal
-from any field of the landscape to any other field}
+from any polygon of the landscape to any other polygon}
 
 \item{DispPathoClonal}{a vectorized matrix giving the probability of pathogen dispersal
-from any field of the landscape to any other field.}
+from any polygon of the landscape to any other polygon.}
 
 \item{DispPathoSex}{a vectorized matrix giving the probability of pathogen dispersal
-from any field of the landscape to any other field (sexual propagule).}
+from any polygon of the landscape to any other polygon (sexual propagule).}
 
-\item{Treatment}{a list of chemical treatment parameters (indices of treated cultivars, times of application,
-efficiency and degradation rate)}
+\item{Treatment}{a list of chemical treatment parameters (indices of treated cultivars,
+times of application, efficiency and degradation rate)}
 
 \item{OutputDir}{the directory for simulation outputs}
 

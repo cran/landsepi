@@ -74,11 +74,6 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   #                           , sex_propagule_viability_limit = 1, sex_propagule_release_mean = 1, clonal_propagule_gradual_release = 0)
   simul_params <- setPathogen(simul_params, basic_patho_param)
   
-
-  ## Initial conditions
-  simul_params <- setInoculum(simul_params, 5e-4) 
-
-
   ## Landscape and dispersal parameters
   id_landscape <- 1
   landscape <- loadLandscape(id_landscape)
@@ -104,6 +99,7 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
   #                     mutation_prob =          c(1E-7 , 1E-7 ),
   #                     Nlevels_aggressiveness = c(2    , 2    ),
   #                     adaptation_cost =           c(0.5  , 0.5  ),
+  #                     relative_advantage =           c(0.5  , 0.5  ),
   #                     tradeoff_strength =      c(1.0  , 1.0  ),
   #                     target_trait =           c("IR" , "IR"  ),
   #                     var_sex_recombination =  c(0.0  , 0.0),
@@ -224,7 +220,9 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
     prop = prop,
     aggreg = aggreg
   )
-  
+
+  ## Inoculum
+  simul_params <- setInoculum(simul_params, 5E-4)
   
   ## list of outputs to be generated
   outputlist <- loadOutputs()

@@ -65,7 +65,11 @@ Vector2D<double> Gene::init_mutkernel(const double& mutation_prob) {
 
 /* Initialisation of aggressiveness matrix (only called by Gene constructor) */
 Vector2D<double> Gene::init_aggressiveness_matrix(const double& efficiency, const double& adaptation_cost,
+                                                  const double& relative_advantage,
                                                   const double& tradeoff_strength) {
+  // Leonard KJ (1977) Selection Pressures and Plant Pathogens. 
+  // Annals of the New York Academy of Sciences, 287, 207-222. https://doi.org/10.1111/j.1749-6632.1977.tb34240.x
+  
     /* Aggressiveness matrix */
     Vector2D<double> aggressiveness_matrix(Nlevels_aggressiveness, std::vector<double>(2));
     const double aggressiveness_0 = 1 - efficiency;
@@ -80,7 +84,7 @@ Vector2D<double> Gene::init_aggressiveness_matrix(const double& efficiency, cons
 
     const std::vector<double> cost = tradeoff(gain, tradeoff_strength);
     for(int i = 0; i < Nlevels_aggressiveness; i++) {
-        aggressiveness_matrix[i][1] = aggressiveness_0 + gain[i] * efficiency;
+        aggressiveness_matrix[i][1] = aggressiveness_0 + gain[i] * (efficiency - adaptation_cost + relative_advantage);
         aggressiveness_matrix[i][0] = 1 - cost[i] * adaptation_cost;
     }
     return aggressiveness_matrix;
@@ -99,23 +103,24 @@ Gene::Gene()
 // Constructor
 Gene::Gene(const double& age_of_activ_mean, const double& age_of_activ_var, const int& Nlevels_aggressiveness,
            const std::string& target_trait, const double& mutation_prob, const double& efficiency,
-           const double& adaptation_cost, const double& tradeoff_strength, const double& recombination_sd)
+           const double& adaptation_cost, const double& relative_advantage, const double& tradeoff_strength, 
+           const double& recombination_sd)
     : age_of_activ_mean(age_of_activ_mean),
       age_of_activ_var(age_of_activ_var),
       Nlevels_aggressiveness(Nlevels_aggressiveness),
       target_trait(target_trait),
       mutkernel(init_mutkernel(mutation_prob)),
-      aggressiveness_matrix(init_aggressiveness_matrix(efficiency, adaptation_cost, tradeoff_strength)),
+      aggressiveness_matrix(init_aggressiveness_matrix(efficiency, adaptation_cost, relative_advantage, tradeoff_strength)),
       recombination_sd(recombination_sd){}
 
 // Transform Gene attributs to string
 std::string Gene::to_string() const {
     std::string str("");
     str += "  age_of_activ_mean:      " + std::to_string(this->age_of_activ_mean) + "\n";
-    str += "  age_of_activ_var:      " + std::to_string(this->age_of_activ_var) + "\n";
+    str += "  age_of_activ_var:       " + std::to_string(this->age_of_activ_var) + "\n";
     str += "  Nlevels_aggressiveness: " + std::to_string(this->Nlevels_aggressiveness) + "\n";
     str += "  target_trait:           " + this->target_trait + "\n";
-    str += "  recombination_sd:           " + std::to_string(this->recombination_sd) + "\n";
+    str += "  recombination_sd:       " + std::to_string(this->recombination_sd) + "\n";
     str += "  mutkernel:\n";
     for(int i = 0; i < this->Nlevels_aggressiveness; i++) {
         str += "    " + std::to_string(i) + ": ";

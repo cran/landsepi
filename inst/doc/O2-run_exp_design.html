@@ -29,23 +29,23 @@ document.addEventListener('DOMContentLoaded', function(e) {
 </script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
 
 <style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
@@ -63,55 +63,54 @@ pre > code.sourceCode { white-space: pre-wrap; }
 pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
-  { counter-reset: source-line 0; }
+{ counter-reset: source-line 0; }
 pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
+{ position: relative; left: -4em; counter-increment: source-line; }
 pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
 div.sourceCode
-  {   }
+{ }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -344,7 +343,7 @@ design</h1>
 
 <p>This is an example of how to run a numerical experimental design with
 <em>landsepi</em>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(landsepi)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(landsepi)</span></code></pre></div>
 <div id="write-the-experimental-design" class="section level2">
 <h2>Write the experimental design</h2>
 <p>First create a dataframe containing, for each line, the value of
@@ -358,142 +357,144 @@ chosen to vary and 3 output variable are to be computed. Off course,
 real numerical designs will include more simulations, in particular
 those representing factorial experimental plans.</p>
 </blockquote>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>myDesign <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">nTSpY =</span> <span class="fu">c</span>(<span class="dv">120</span>, <span class="dv">110</span>, <span class="dv">100</span>, <span class="dv">90</span>, <span class="dv">80</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">pI0 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1E-4</span>, <span class="fl">5E-4</span>, <span class="fl">1E-3</span>, <span class="fl">1E-2</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">infection_rate =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">id_landscape =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">aggreg =</span> <span class="fu">c</span>(<span class="fl">0.07</span>, <span class="fl">0.07</span>, <span class="fl">0.25</span>, <span class="dv">10</span>, <span class="dv">10</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">R_efficiency =</span> <span class="fu">c</span>(<span class="fl">1.00</span>, <span class="fl">0.90</span>, <span class="fl">0.80</span>, <span class="fl">0.70</span>, <span class="fl">0.60</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">growth_rate =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                       <span class="do">## create columns to store outputs</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">durab_MG1 =</span> <span class="cn">NA</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">durab_MG2 =</span> <span class="cn">NA</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                       , <span class="at">mean_audpc =</span> <span class="cn">NA</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>myDesign <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">nTSpY =</span> <span class="fu">c</span>(<span class="dv">120</span>, <span class="dv">110</span>, <span class="dv">100</span>, <span class="dv">90</span>, <span class="dv">80</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                       , <span class="at">pI0 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1E-4</span>, <span class="fl">5E-4</span>, <span class="fl">1E-3</span>, <span class="fl">1E-2</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                       , <span class="at">infection_rate =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>                       , <span class="at">id_landscape =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>                       , <span class="at">aggreg =</span> <span class="fu">c</span>(<span class="fl">0.07</span>, <span class="fl">0.07</span>, <span class="fl">0.25</span>, <span class="dv">10</span>, <span class="dv">10</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>                       , <span class="at">R_efficiency =</span> <span class="fu">c</span>(<span class="fl">1.00</span>, <span class="fl">0.90</span>, <span class="fl">0.80</span>, <span class="fl">0.70</span>, <span class="fl">0.60</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>                       , <span class="at">growth_rate =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>                       <span class="do">## create columns to store outputs</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>                       , <span class="at">durab_MG1 =</span> <span class="cn">NA</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>                       , <span class="at">durab_MG2 =</span> <span class="cn">NA</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>                       , <span class="at">mean_audpc =</span> <span class="cn">NA</span>)</span></code></pre></div>
 <p>Then add an identifier for each simulation and specify a random seed
 (for stochasticity).</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(myDesign)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>myDesign <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">simul =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">seed =</span> <span class="fu">sample</span>(n<span class="sc">*</span><span class="dv">100</span>, n), myDesign)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>myDesign</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   simul seed nTSpY   pI0 infection_rate id_landscape aggreg R_efficiency</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     1  472   120 0e+00            0.5            1   0.07          1.0</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     2  334   110 1e-04            0.4            2   0.07          0.9</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     3   71   100 5e-04            0.3            3   0.25          0.8</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     4  384    90 1e-03            0.2            4  10.00          0.7</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     5  315    80 1e-02            0.1            5  10.00          0.6</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   growth_rate durab_MG1 durab_MG2 mean_audpc</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         0.1        NA        NA         NA</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         0.2        NA        NA         NA</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         0.3        NA        NA         NA</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         0.1        NA        NA         NA</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5         0.1        NA        NA         NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(myDesign)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>myDesign <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">simul =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">seed =</span> <span class="fu">sample</span>(n<span class="sc">*</span><span class="dv">100</span>, n), myDesign)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>myDesign</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;   simul seed nTSpY   pI0 infection_rate id_landscape aggreg R_efficiency</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1     1  322   120 0e+00            0.5            1   0.07          1.0</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 2     2   41   110 1e-04            0.4            2   0.07          0.9</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 3     3  121   100 5e-04            0.3            3   0.25          0.8</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 4     4  392    90 1e-03            0.2            4  10.00          0.7</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 5     5  248    80 1e-02            0.1            5  10.00          0.6</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;   growth_rate durab_MG1 durab_MG2 mean_audpc</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; 1         0.1        NA        NA         NA</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 2         0.2        NA        NA         NA</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; 3         0.3        NA        NA         NA</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; 4         0.1        NA        NA         NA</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 5         0.1        NA        NA         NA</span></span></code></pre></div>
 </div>
 <div id="run-the-simulations" class="section level2">
 <h2>Run the simulations</h2>
 <p>Create the object <code>simul_params</code> and a repository to store
 inputs and outputs of the simulations.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">createSimulParams</span>(<span class="at">outputDir =</span> <span class="fu">getwd</span>())</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">createSimulParams</span>(<span class="at">outputDir =</span> <span class="fu">getwd</span>())</span></code></pre></div>
 <p>Then run the experimental design by updating target parameters with
 the values stored in <code>myDesign</code>. Note that some parameters
 vary jointly (e.g. landscape and dispersal matrix). <em>See tutorial on
 how to <a href="O1-run_simple_simul.html">run a simple simulation</a>
 for details on the different functions.</em></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){  </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Running simulation&quot;</span>, i, <span class="st">&quot;/&quot;</span>, n))</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Set Nyears and nTSpY</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setTime</span>(simul_params</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                            , <span class="at">Nyears =</span> <span class="dv">6</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                            , <span class="at">nTSpY =</span> myDesign<span class="sc">$</span>nTSpY[i])  <span class="do">## update nTSpY</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="do">## set seed (to run stochastic replicates)</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setSeed</span>(simul_params, myDesign<span class="sc">$</span>seed[i])  <span class="do">## update seed</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Pathogen parameters</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    simul_params<span class="sc">@</span>ReproSexProb <span class="ot">&lt;-</span> <span class="fu">logical</span>(<span class="dv">0</span>) <span class="do">## initialize vector of sexual probability (one for each time step)</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="st">&quot;rust&quot;</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    basic_patho_param<span class="sc">$</span>infection_rate <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>infection_rate[i]  <span class="do">## update inf. rate</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setPathogen</span>(simul_params, basic_patho_param)    </span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Initial conditions </span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setInoculum</span>(simul_params, myDesign<span class="sc">$</span>pI0[i])  <span class="do">## update pI0</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Landscape parameters</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    landscape <span class="ot">&lt;-</span> <span class="fu">loadLandscape</span>(myDesign<span class="sc">$</span>id_landscape[i])   <span class="do">## update landscape</span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setLandscape</span>(simul_params, landscape)</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Dispersal parameters</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    disp_patho_clonal <span class="ot">&lt;-</span> <span class="fu">loadDispersalPathogen</span>(myDesign<span class="sc">$</span>id_landscape[i])[[<span class="dv">1</span>]]  <span class="do">## update dispersal</span></span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setDispersalPathogen</span>(simul_params, disp_patho_clonal)</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Genes</span></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    gene1 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;MG 1&quot;</span>, <span class="at">type =</span> <span class="st">&quot;majorGene&quot;</span>)</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    gene1<span class="sc">$</span>mutation_prob<span class="ot">&lt;-</span><span class="fl">1e-4</span></span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    gene2 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;MG 2&quot;</span>, <span class="at">type =</span> <span class="st">&quot;majorGene&quot;</span>)</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    gene2<span class="sc">$</span>mutation_prob<span class="ot">&lt;-</span><span class="fl">1e-4</span></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    genes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">rbind</span>(gene1, gene2), <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    genes<span class="sc">$</span>efficiency <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>R_efficiency[i]  <span class="do">## update resistance efficiency</span></span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setGenes</span>(simul_params, genes)</span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Cultivars</span></span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    cultivar1 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Susceptible&quot;</span>, <span class="at">type =</span> <span class="st">&quot;growingHost&quot;</span>)</span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    cultivar2 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Resistant1&quot;</span>, <span class="at">type =</span> <span class="st">&quot;growingHost&quot;</span>)</span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    cultivar3 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Resistant2&quot;</span>, <span class="at">type =</span> <span class="st">&quot;growingHost&quot;</span>)</span>
-<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    cultivars <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">rbind</span>(cultivar1, cultivar2, cultivar3)</span>
-<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>                            , <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    cultivars<span class="sc">$</span>growth_rate <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>growth_rate[i]  <span class="do">## update growth rate</span></span>
-<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setCultivars</span>(simul_params, cultivars)</span>
-<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Allocate genes to cultivars</span></span>
-<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params, <span class="st">&quot;Resistant1&quot;</span>, <span class="fu">c</span>(<span class="st">&quot;MG 1&quot;</span>))</span>
-<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params, <span class="st">&quot;Resistant2&quot;</span>, <span class="fu">c</span>(<span class="st">&quot;MG 2&quot;</span>))</span>
-<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Allocate cultivars to croptypes</span></span>
-<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">loadCroptypes</span>(simul_params, <span class="at">names =</span> <span class="fu">c</span>(<span class="st">&quot;Susceptible crop&quot;</span></span>
-<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>                                                       , <span class="st">&quot;Resistant crop 1&quot;</span></span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>                                                       , <span class="st">&quot;Resistant crop 2&quot;</span>))</span>
-<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes, <span class="st">&quot;Susceptible crop&quot;</span>, <span class="st">&quot;Susceptible&quot;</span>)</span>
-<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes, <span class="st">&quot;Resistant crop 1&quot;</span>, <span class="st">&quot;Resistant1&quot;</span>)</span>
-<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes, <span class="st">&quot;Resistant crop 2&quot;</span>, <span class="st">&quot;Resistant2&quot;</span>)</span>
-<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setCroptypes</span>(simul_params, croptypes)</span>
-<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Allocate croptypes to landscape          </span></span>
-<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    rotation_sequence <span class="ot">&lt;-</span> croptypes<span class="sc">$</span>croptypeID <span class="do">## No rotation: 1 rotation_sequence element</span></span>
-<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    rotation_period <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="do">## same croptypes every years</span></span>
-<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    prop <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>) <span class="do">## croptypes proportions</span></span>
-<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    aggreg <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>aggreg[i]</span>
-<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">allocateLandscapeCroptypes</span>(simul_params,</span>
-<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">rotation_period =</span> rotation_period,</span>
-<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">rotation_sequence =</span> rotation_sequence,</span>
-<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">rotation_realloc =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">prop =</span> prop,</span>
-<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">aggreg =</span> aggreg,</span>
-<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">graphic =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    <span class="do">## configure outputs</span></span>
-<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;audpc&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;durability&quot;</span>)</span>
-<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span>
-<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Check, (save) and run simulation</span></span>
-<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>    <span class="fu">checkSimulParams</span>(simul_params)</span>
-<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>    <span class="co"># simul_params &lt;- saveDeploymentStrategy(simul_params, overwrite = TRUE)</span></span>
-<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">runSimul</span>(simul_params, <span class="at">writeTXT=</span><span class="cn">FALSE</span>, <span class="at">graphic =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Extract outputs    </span></span>
-<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>    myDesign<span class="sc">$</span>durab_MG1[i]  <span class="ot">&lt;-</span> res<span class="sc">$</span>evol_outputs<span class="sc">$</span>durability[,<span class="st">&quot;MG 1&quot;</span>]</span>
-<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>    myDesign<span class="sc">$</span>durab_MG2[i]  <span class="ot">&lt;-</span> res<span class="sc">$</span>evol_outputs<span class="sc">$</span>durability[,<span class="st">&quot;MG 2&quot;</span>]</span>
-<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>    myDesign<span class="sc">$</span>mean_audpc[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(res<span class="sc">$</span>epid_outputs<span class="sc">$</span>audpc<span class="sc">$</span>total)</span>
-<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Create myDesign.txt at first simulation and then append</span></span>
-<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i <span class="sc">==</span><span class="dv">1</span>){</span>
-<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>        <span class="fu">write.table</span>(myDesign[i,], <span class="fu">paste</span>(simul_params<span class="sc">@</span>OutputDir, <span class="st">&quot;/myDesign.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span>
-<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>                    , <span class="at">append=</span><span class="cn">FALSE</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">col.names =</span> <span class="cn">TRUE</span>)      </span>
-<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>        <span class="fu">write.table</span>(myDesign[i,], <span class="fu">paste</span>(simul_params<span class="sc">@</span>OutputDir, <span class="st">&quot;/myDesign.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span>
-<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>                    , <span class="at">append=</span><span class="cn">TRUE</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">col.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>myDesign</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){  </span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>    <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Running simulation&quot;</span>, i, <span class="st">&quot;/&quot;</span>, n))</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    </span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="do">## Set Nyears and nTSpY</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setTime</span>(simul_params</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                            , <span class="at">Nyears =</span> <span class="dv">6</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                            , <span class="at">nTSpY =</span> myDesign<span class="sc">$</span>nTSpY[i])  <span class="do">## update nTSpY</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>    </span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>    <span class="do">## set seed (to run stochastic replicates)</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setSeed</span>(simul_params, myDesign<span class="sc">$</span>seed[i])  <span class="do">## update seed</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    </span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    <span class="do">## Pathogen parameters</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>    simul_params<span class="sc">@</span>ReproSexProb <span class="ot">&lt;-</span> <span class="fu">logical</span>(<span class="dv">0</span>) <span class="do">## initialize vector of sexual probability (one for each time step)</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>    basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="st">&quot;rust&quot;</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>    basic_patho_param<span class="sc">$</span>infection_rate <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>infection_rate[i]  <span class="do">## update inf. rate</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setPathogen</span>(simul_params, basic_patho_param)    </span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>    </span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>    </span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>    <span class="do">## Landscape parameters</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>    landscape <span class="ot">&lt;-</span> <span class="fu">loadLandscape</span>(myDesign<span class="sc">$</span>id_landscape[i])   <span class="do">## update landscape</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setLandscape</span>(simul_params, landscape)</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>    </span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>    <span class="do">## Dispersal parameters</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    disp_patho_clonal <span class="ot">&lt;-</span> <span class="fu">loadDispersalPathogen</span>(myDesign<span class="sc">$</span>id_landscape[i])[[<span class="dv">1</span>]]  <span class="do">## update dispersal</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setDispersalPathogen</span>(simul_params, disp_patho_clonal)</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>    </span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>    <span class="do">## Genes</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>    gene1 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;MG 1&quot;</span>, <span class="at">type =</span> <span class="st">&quot;majorGene&quot;</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>    gene1<span class="sc">$</span>mutation_prob<span class="ot">&lt;-</span><span class="fl">1e-4</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>    gene2 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;MG 2&quot;</span>, <span class="at">type =</span> <span class="st">&quot;majorGene&quot;</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>    gene2<span class="sc">$</span>mutation_prob<span class="ot">&lt;-</span><span class="fl">1e-4</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>    genes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">rbind</span>(gene1, gene2), <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>    genes<span class="sc">$</span>efficiency <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>R_efficiency[i]  <span class="do">## update resistance efficiency</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setGenes</span>(simul_params, genes)</span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>    </span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>    <span class="do">## Cultivars</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>    cultivar1 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Susceptible&quot;</span>, <span class="at">type =</span> <span class="st">&quot;growingHost&quot;</span>)</span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>    cultivar2 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Resistant1&quot;</span>, <span class="at">type =</span> <span class="st">&quot;growingHost&quot;</span>)</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>    cultivar3 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Resistant2&quot;</span>, <span class="at">type =</span> <span class="st">&quot;growingHost&quot;</span>)</span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>    cultivars <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">rbind</span>(cultivar1, cultivar2, cultivar3)</span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a>                            , <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a>    cultivars<span class="sc">$</span>growth_rate <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>growth_rate[i]  <span class="do">## update growth rate</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setCultivars</span>(simul_params, cultivars)</span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a>    </span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a>    <span class="do">## Allocate genes to cultivars</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params, <span class="st">&quot;Resistant1&quot;</span>, <span class="fu">c</span>(<span class="st">&quot;MG 1&quot;</span>))</span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params, <span class="st">&quot;Resistant2&quot;</span>, <span class="fu">c</span>(<span class="st">&quot;MG 2&quot;</span>))</span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a>    </span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a>    <span class="do">## Allocate cultivars to croptypes</span></span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">loadCroptypes</span>(simul_params, <span class="at">names =</span> <span class="fu">c</span>(<span class="st">&quot;Susceptible crop&quot;</span></span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a>                                                       , <span class="st">&quot;Resistant crop 1&quot;</span></span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a>                                                       , <span class="st">&quot;Resistant crop 2&quot;</span>))</span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes, <span class="st">&quot;Susceptible crop&quot;</span>, <span class="st">&quot;Susceptible&quot;</span>)</span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes, <span class="st">&quot;Resistant crop 1&quot;</span>, <span class="st">&quot;Resistant1&quot;</span>)</span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a>    croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes, <span class="st">&quot;Resistant crop 2&quot;</span>, <span class="st">&quot;Resistant2&quot;</span>)</span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setCroptypes</span>(simul_params, croptypes)</span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a>    </span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a>    <span class="do">## Allocate croptypes to landscape          </span></span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a>    rotation_sequence <span class="ot">&lt;-</span> croptypes<span class="sc">$</span>croptypeID <span class="do">## No rotation: 1 rotation_sequence element</span></span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a>    rotation_period <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="do">## same croptypes every years</span></span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a>    prop <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>) <span class="do">## croptypes proportions</span></span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a>    aggreg <span class="ot">&lt;-</span> myDesign<span class="sc">$</span>aggreg[i]</span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">allocateLandscapeCroptypes</span>(simul_params,</span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a>                                               <span class="at">rotation_period =</span> rotation_period,</span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a>                                               <span class="at">rotation_sequence =</span> rotation_sequence,</span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a>                                               <span class="at">rotation_realloc =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a>                                               <span class="at">prop =</span> prop,</span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a>                                               <span class="at">aggreg =</span> aggreg,</span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a>                                               <span class="at">graphic =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a>    </span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a>    <span class="do">## Initial conditions </span></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setInoculum</span>(simul_params, myDesign<span class="sc">$</span>pI0[i])  <span class="do">## update pI0</span></span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a>    <span class="co">#Only susceptible hosts are infected, see vignette1 for a more complex inoculum</span></span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a>    </span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a>    <span class="do">## configure outputs</span></span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a>    outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;audpc&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;durability&quot;</span>)</span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a>    simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a>  </span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a>    <span class="do">## Check, (save) and run simulation</span></span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a>    <span class="fu">checkSimulParams</span>(simul_params)</span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a>    <span class="co"># simul_params &lt;- saveDeploymentStrategy(simul_params, overwrite = TRUE)</span></span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">runSimul</span>(simul_params, <span class="at">writeTXT=</span><span class="cn">FALSE</span>, <span class="at">graphic =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a>    </span>
+<span id="cb5-84"><a href="#cb5-84" tabindex="-1"></a>    <span class="do">## Extract outputs    </span></span>
+<span id="cb5-85"><a href="#cb5-85" tabindex="-1"></a>    myDesign<span class="sc">$</span>durab_MG1[i]  <span class="ot">&lt;-</span> res<span class="sc">$</span>evol_outputs<span class="sc">$</span>durability[,<span class="st">&quot;MG 1&quot;</span>]</span>
+<span id="cb5-86"><a href="#cb5-86" tabindex="-1"></a>    myDesign<span class="sc">$</span>durab_MG2[i]  <span class="ot">&lt;-</span> res<span class="sc">$</span>evol_outputs<span class="sc">$</span>durability[,<span class="st">&quot;MG 2&quot;</span>]</span>
+<span id="cb5-87"><a href="#cb5-87" tabindex="-1"></a>    myDesign<span class="sc">$</span>mean_audpc[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(res<span class="sc">$</span>epid_outputs<span class="sc">$</span>audpc<span class="sc">$</span>total)</span>
+<span id="cb5-88"><a href="#cb5-88" tabindex="-1"></a>    </span>
+<span id="cb5-89"><a href="#cb5-89" tabindex="-1"></a>    <span class="do">## Create myDesign.txt at first simulation and then append</span></span>
+<span id="cb5-90"><a href="#cb5-90" tabindex="-1"></a>    <span class="cf">if</span> (i <span class="sc">==</span><span class="dv">1</span>){</span>
+<span id="cb5-91"><a href="#cb5-91" tabindex="-1"></a>        <span class="fu">write.table</span>(myDesign[i,], <span class="fu">paste</span>(simul_params<span class="sc">@</span>OutputDir, <span class="st">&quot;/myDesign.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb5-92"><a href="#cb5-92" tabindex="-1"></a>                    , <span class="at">append=</span><span class="cn">FALSE</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">col.names =</span> <span class="cn">TRUE</span>)      </span>
+<span id="cb5-93"><a href="#cb5-93" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb5-94"><a href="#cb5-94" tabindex="-1"></a>        <span class="fu">write.table</span>(myDesign[i,], <span class="fu">paste</span>(simul_params<span class="sc">@</span>OutputDir, <span class="st">&quot;/myDesign.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb5-95"><a href="#cb5-95" tabindex="-1"></a>                    , <span class="at">append=</span><span class="cn">TRUE</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">col.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-96"><a href="#cb5-96" tabindex="-1"></a>    }</span>
+<span id="cb5-97"><a href="#cb5-97" tabindex="-1"></a>}</span>
+<span id="cb5-98"><a href="#cb5-98" tabindex="-1"></a></span>
+<span id="cb5-99"><a href="#cb5-99" tabindex="-1"></a>myDesign</span></code></pre></div>
 </div>
 <div id="compute-your-own-output-variables" class="section level2">
 <h2>Compute your own output variables</h2>
@@ -513,12 +514,12 @@ Each file indicates for every time-step the number of individuals in
 each field, and when appropriate for each host and pathogen
 genotypes.</p>
 </blockquote>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Disable computation of outputs:</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;&quot;</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Run simulation and keep raw binary files:</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">runSimul</span>(simul_params, <span class="at">writeTXT=</span><span class="cn">FALSE</span>, <span class="at">graphic =</span> <span class="cn">FALSE</span>, <span class="at">keepRawResults =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="do">## Disable computation of outputs:</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="do">## Run simulation and keep raw binary files:</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">runSimul</span>(simul_params, <span class="at">writeTXT=</span><span class="cn">FALSE</span>, <span class="at">graphic =</span> <span class="cn">FALSE</span>, <span class="at">keepRawResults =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>The following code loads the content of the binary files in lists
 (named “H”, “Hjuv”, “P”, “L”, “I”, “R”). Each element of these lists
 contains a matrix or an array of the number of individuals associated
@@ -526,79 +527,79 @@ with each field, host genotype and pathogen genotype for a given time
 step (i.e. the number of elements of each list is the total number of
 time steps). Then, users can compute their own output variables using
 these lists.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">##  retrieve parameters from the object simul_params</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> simul_params<span class="sc">@</span>OutputDir</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>Nyears <span class="ot">&lt;-</span> simul_params<span class="sc">@</span>TimeParam<span class="sc">$</span>Nyears</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>nTSpY <span class="ot">&lt;-</span> simul_params<span class="sc">@</span>TimeParam<span class="sc">$</span>nTSpY</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>nTS <span class="ot">&lt;-</span> Nyears <span class="sc">*</span> nTSpY     <span class="do">## Total number of time-steps</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Npoly <span class="ot">&lt;-</span> <span class="fu">nrow</span>(simul_params<span class="sc">@</span>Landscape)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>Nhost <span class="ot">&lt;-</span> <span class="fu">nrow</span>(simul_params<span class="sc">@</span>Cultivars)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>Npatho <span class="ot">&lt;-</span> <span class="fu">prod</span>(simul_params<span class="sc">@</span>Genes<span class="sc">$</span>Nlevels_aggressiveness)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Initialise lists</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>H <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>Hjuv <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>I <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="do">## Read binary files and store values in the lists as matrices or arrays</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>Nyears) {</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    binfileH <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/H-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    H.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileH, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY, <span class="at">size =</span> <span class="dv">4</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>                     , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">close</span>(binfileH)</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    binfileHjuv <span class="ot">=</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/Hjuv-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    Hjuv.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con=</span>binfileHjuv, <span class="at">what=</span><span class="st">&quot;int&quot;</span>, <span class="at">n=</span>Npoly<span class="sc">*</span>Nhost<span class="sc">*</span>nTSpY, <span class="at">size =</span> <span class="dv">4</span></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>                        , <span class="at">signed=</span>T,<span class="at">endian=</span><span class="st">&quot;little&quot;</span>)</span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">close</span>(binfileHjuv)</span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    binfileP <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/P-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    P.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileP, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> nTSpY, <span class="at">size =</span> <span class="dv">4</span></span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>                     , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">close</span>(binfileP)</span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    binfileL <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/L-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    L.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileL, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY</span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>                     , <span class="at">size =</span> <span class="dv">4</span> , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">close</span>(binfileL)</span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    binfileI <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/I-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    I.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileI, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY</span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>                     , <span class="at">size =</span> <span class="dv">4</span> , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">close</span>(binfileI)</span>
-<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    binfileR <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/R-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
-<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>    R.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileR, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY</span>
-<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>                     , <span class="at">size =</span> <span class="dv">4</span> , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
-<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">close</span>(binfileR)</span>
-<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Convert vectors in matrices or arrays</span></span>
-<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nTSpY) {</span>
-<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>        H[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(H.tmp[((Nhost <span class="sc">*</span> Npoly) <span class="sc">*</span> (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Nhost <span class="sc">*</span> Npoly))]</span>
-<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>                                 , <span class="at">ncol =</span> Nhost, <span class="at">byrow =</span> T)</span>
-<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>        Hjuv[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(Hjuv.tmp[((Nhost<span class="sc">*</span>Npoly)<span class="sc">*</span>(t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t<span class="sc">*</span>(Nhost<span class="sc">*</span>Npoly))]</span>
-<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>                                    , <span class="at">ncol=</span>Nhost,<span class="at">byrow=</span>T)</span>
-<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>        P[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(P.tmp[((Npatho <span class="sc">*</span> Npoly) <span class="sc">*</span> (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly))]</span>
-<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>                                 , <span class="at">ncol =</span> Npatho, <span class="at">byrow =</span> T)</span>
-<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>        L[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="at">data =</span> L.tmp[((Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost) <span class="sc">*</span> </span>
-<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>                                                (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost))]</span>
-<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>                                , <span class="at">dim =</span> <span class="fu">c</span>(Nhost, Npatho, Npoly))</span>
-<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>        I[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="at">data =</span> I.tmp[((Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost) <span class="sc">*</span> </span>
-<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>                                                (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost))]</span>
-<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>                                , <span class="at">dim =</span> <span class="fu">c</span>(Nhost, Npatho, Npoly))</span>
-<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>        R[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="at">data =</span> R.tmp[((Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost) <span class="sc">*</span> </span>
-<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>                                                (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost))]</span>
-<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>                                , <span class="at">dim =</span> <span class="fu">c</span>(Nhost, Npatho, Npoly))</span>
-<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>    index <span class="ot">&lt;-</span> index <span class="sc">+</span> nTSpY</span>
-<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="do">##  retrieve parameters from the object simul_params</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>path <span class="ot">&lt;-</span> simul_params<span class="sc">@</span>OutputDir</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>Nyears <span class="ot">&lt;-</span> simul_params<span class="sc">@</span>TimeParam<span class="sc">$</span>Nyears</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>nTSpY <span class="ot">&lt;-</span> simul_params<span class="sc">@</span>TimeParam<span class="sc">$</span>nTSpY</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>nTS <span class="ot">&lt;-</span> Nyears <span class="sc">*</span> nTSpY     <span class="do">## Total number of time-steps</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>Npoly <span class="ot">&lt;-</span> <span class="fu">nrow</span>(simul_params<span class="sc">@</span>Landscape)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>Nhost <span class="ot">&lt;-</span> <span class="fu">nrow</span>(simul_params<span class="sc">@</span>Cultivars)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>Npatho <span class="ot">&lt;-</span> <span class="fu">prod</span>(simul_params<span class="sc">@</span>Genes<span class="sc">$</span>Nlevels_aggressiveness)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="do">## Initialise lists</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>H <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>Hjuv <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>I <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="dv">1</span><span class="sc">:</span>nTS)</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="do">## Read binary files and store values in the lists as matrices or arrays</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>Nyears) {</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>    </span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>    binfileH <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/H-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>    H.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileH, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY, <span class="at">size =</span> <span class="dv">4</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>                     , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>    <span class="fu">close</span>(binfileH)</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>    </span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>    binfileHjuv <span class="ot">=</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/Hjuv-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>    Hjuv.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con=</span>binfileHjuv, <span class="at">what=</span><span class="st">&quot;int&quot;</span>, <span class="at">n=</span>Npoly<span class="sc">*</span>Nhost<span class="sc">*</span>nTSpY, <span class="at">size =</span> <span class="dv">4</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>                        , <span class="at">signed=</span>T,<span class="at">endian=</span><span class="st">&quot;little&quot;</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>    <span class="fu">close</span>(binfileHjuv)</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>    </span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>    binfileP <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/P-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a>    P.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileP, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> nTSpY, <span class="at">size =</span> <span class="dv">4</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a>                     , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a>    <span class="fu">close</span>(binfileP)</span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a>    </span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a>    binfileL <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/L-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a>    L.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileL, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY</span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a>                     , <span class="at">size =</span> <span class="dv">4</span> , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a>    <span class="fu">close</span>(binfileL)</span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a>    </span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a>    binfileI <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/I-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a>    I.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileI, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY</span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a>                     , <span class="at">size =</span> <span class="dv">4</span> , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a>    <span class="fu">close</span>(binfileI)</span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a>    </span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a>    binfileR <span class="ot">&lt;-</span> <span class="fu">file</span>(<span class="fu">paste</span>(path, <span class="fu">sprintf</span>(<span class="st">&quot;/R-%02d&quot;</span>, year), <span class="st">&quot;.bin&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>), <span class="st">&quot;rb&quot;</span>)</span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a>    R.tmp <span class="ot">&lt;-</span> <span class="fu">readBin</span>(<span class="at">con =</span> binfileR, <span class="at">what =</span> <span class="st">&quot;int&quot;</span>, <span class="at">n =</span> Npoly <span class="sc">*</span> Npatho <span class="sc">*</span> Nhost <span class="sc">*</span> nTSpY</span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a>                     , <span class="at">size =</span> <span class="dv">4</span> , <span class="at">signed =</span> T, <span class="at">endian =</span> <span class="st">&quot;little&quot;</span>)</span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a>    <span class="fu">close</span>(binfileR)</span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a>    <span class="do">## Convert vectors in matrices or arrays</span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nTSpY) {</span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a>        H[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(H.tmp[((Nhost <span class="sc">*</span> Npoly) <span class="sc">*</span> (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Nhost <span class="sc">*</span> Npoly))]</span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a>                                 , <span class="at">ncol =</span> Nhost, <span class="at">byrow =</span> T)</span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a>        Hjuv[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(Hjuv.tmp[((Nhost<span class="sc">*</span>Npoly)<span class="sc">*</span>(t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t<span class="sc">*</span>(Nhost<span class="sc">*</span>Npoly))]</span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a>                                    , <span class="at">ncol=</span>Nhost,<span class="at">byrow=</span>T)</span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a>        P[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(P.tmp[((Npatho <span class="sc">*</span> Npoly) <span class="sc">*</span> (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly))]</span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a>                                 , <span class="at">ncol =</span> Npatho, <span class="at">byrow =</span> T)</span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a>        L[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="at">data =</span> L.tmp[((Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost) <span class="sc">*</span> </span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a>                                                (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost))]</span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a>                                , <span class="at">dim =</span> <span class="fu">c</span>(Nhost, Npatho, Npoly))</span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a>        I[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="at">data =</span> I.tmp[((Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost) <span class="sc">*</span> </span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a>                                                (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost))]</span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a>                                , <span class="at">dim =</span> <span class="fu">c</span>(Nhost, Npatho, Npoly))</span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a>        R[[t <span class="sc">+</span> index]] <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="at">data =</span> R.tmp[((Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost) <span class="sc">*</span> </span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a>                                                (t<span class="dv">-1</span>)<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(t <span class="sc">*</span> (Npatho <span class="sc">*</span> Npoly <span class="sc">*</span> Nhost))]</span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a>                                , <span class="at">dim =</span> <span class="fu">c</span>(Nhost, Npatho, Npoly))</span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a>    }</span>
+<span id="cb7-71"><a href="#cb7-71" tabindex="-1"></a>    </span>
+<span id="cb7-72"><a href="#cb7-72" tabindex="-1"></a>    index <span class="ot">&lt;-</span> index <span class="sc">+</span> nTSpY</span>
+<span id="cb7-73"><a href="#cb7-73" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 
 

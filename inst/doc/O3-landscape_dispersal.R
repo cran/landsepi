@@ -1,10 +1,10 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  library(sf)
 #  mylandscape <- st_read(dsn = "myshapefile.shp")
 #  library(landsepi)
@@ -12,15 +12,15 @@ knitr::opts_chunk$set(
 #  simul_params <- setLandscape(simul_params, mylandscape)
 #  simul_params@Landscape
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  mylandscape$year_1 <- c(13,2,4,1,1) # croptypes ID allocated to the different polygons
 #  mylandscape$year_2 <- c(2,2,13,1,1)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  simul_params <- setLandscape(simul_params, mylandscape)
 #  simul_params@Landscape
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  install.packages("RCALI")
 #  library(RCALI)
 #  library(landsepi)
@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 #  Npoly
 #  plot(landscape)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  file_land <- "land_rcali.txt"  ## input for califlopp
 #  file_disp <- "disp_rcali.txt"  ## output for califlopp (DO NOT WRITE A PATH)
 #  
@@ -50,19 +50,19 @@ knitr::opts_chunk$set(
 #  }
 #  cat(NULL, file=file_land, append=T, sep="\n")
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  param <- list(input=2, output=0, method="cub", dp=6000, dz=6000
 #                , warn.poly=FALSE, warn.conv=FALSE, verbose=FALSE)
 #  califlopp(file=file_land, dispf=1, param=param, resfile=file_disp)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  my_df <-function(x, a=40, b=7) ((b-2)*(b-1)/(2*a^2*pi)*(1+(abs(x)/a))^(-b))
 #  
 #  param <- list(input=2, output=0, method="cub", dp=6000, dz=6000, warn.poly=FALSE,
 #                warn.conv=FALSE, verbose=FALSE)
 #  califlopp(file=file_land, dispf=my_df, param=param, resfile=file_disp)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ## Import califlopp results
 #  disp_df <- getRes(file_disp)
 #  ## Double the table because only half of the flows have been calculated
@@ -104,21 +104,21 @@ knitr::opts_chunk$set(
 #  
 #  write(as.vector(matrix_f), file="dispersal.txt", sep=",")
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  disp_patho <- scan("dispersal.txt", sep=",")
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  landscape <- landscapeTEST1
 #  plot(landscape)
 #  plotland(landscape)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  poly <- 10
 #  colFields <- rep("white", length(landscape))
 #  colFields[poly] <- "red"
 #  plot(landscape, col = colFields)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ## convert dispersal in matrix
 #  mat <- matrix(disp_patho, nrow=sqrt(length(disp_patho)))
 #  poly <- 1
@@ -134,7 +134,7 @@ knitr::opts_chunk$set(
 #  ## Plot
 #  plot(landscape, col = col_disp[intvls_disp], main=paste("Dispersal from polygon", poly))
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  library(ggplot2)
 #  ggplot(landscape) + ggtitle(paste("Dispersal from polygon", poly)) +
 #      geom_sf(colour="black", aes(fill = dispToPlot)) +

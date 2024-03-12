@@ -290,51 +290,51 @@ Vector2D<int> Model::intro_H(const int& year) {
 
 /* Pathogen introduction : infectious sites from pathotype 0 in cultivar 0 */
 void Model::intro_I(Vector2D<int>& H, Vector3D<int>& I, Vector4D<int>& I2R, const Vector2D<int>& activeR) {
-    const int patho = 0; // Introduced pathotype is 0
-    const std::vector<int> aggr = switch_patho_to_aggr(patho);
-    int host = 0; // Introduction on cultivar 0
     const int t = 0; // Introduction at t=0
     
-    // select susceptible host id
-    for(std::size_t s=0; s<this->cultivars.size(); s++) {
-        if(this->cultivars[s].genes_id.size() == 0) {
-            host = (int)s;
-            break;
-        }    
-    }
-
-    for(int poly = 0; poly < this->Npoly; poly++) {
-        /* Infection */
-        double infection_rate_exp = this->pI0;
-        for(int g = 0; g < this->Ngene; g++) {
-            if(this->genes[g].target_trait == "IR") {
-                // Indicate if the cultivar has an active resistance gene
-                bool Rgene = get_resistance(g, host, t, activeR[poly][g]);
-                infection_rate_exp *= this->genes[g].aggressiveness_matrix[aggr[g]][Rgene];
-            }
-        }
-        I[poly][patho][host] = ran_binomial(infection_rate_exp, H[poly][host]);
-        H[poly][host] -= I[poly][patho][host];
-
-        /* Calculation of infectious period for infected sites at t=0 */
-        for(int i = 0; i < I[poly][patho][host]; i++) {
+    for(unsigned int poly=0; poly<this->pI0.size(); poly++)  {
+      for(unsigned int patho=0; patho<this->pI0[poly].size(); patho++)    {
+        for(unsigned int host=0; host<this->pI0[poly][patho].size(); host++)      {
+          // Infection of hosts (no consideration of resistance genes)
+          I[poly][patho][host] = ran_binomial(this->pI0[poly][patho][host], H[poly][host]);
+          H[poly][host] -= I[poly][patho][host];
+          
+          
+          
+          // Calculation of infectious period for infected sites at t=0 
+          const std::vector<int> aggr = switch_patho_to_aggr(patho);
+          for(int i = 0; i < I[poly][patho][host]; i++) {
             double infectious_period_mean_new = this->basic_patho.infectious_period_mean;
             for(int g = 0; g < this->Ngene; g++) {
-                if(this->genes[g].target_trait == "IP") {
-                    // Indicate if the cultivar has an active resistance gene
-                    bool Rgene = get_resistance(g, host, t, activeR[poly][g]);
-                    infectious_period_mean_new *= this->genes[g].aggressiveness_matrix[aggr[g]][Rgene];
-                }
+              if(this->genes[g].target_trait == "IP") {
+                // Indicate if the cultivar has an active resistance gene
+                bool Rgene = get_resistance(g, host, t, activeR[poly][g]);
+                infectious_period_mean_new *= this->genes[g].aggressiveness_matrix[aggr[g]][Rgene];
+              }
             }
             // Security to avoid problem in alpha calculation
             infectious_period_mean_new += 0.001 * (infectious_period_mean_new == 0);
             std::array<double, 2> infectious_period_alpha =
-                find_paramGamma(infectious_period_mean_new, this->basic_patho.infectious_period_var);
+              find_paramGamma(infectious_period_mean_new, this->basic_patho.infectious_period_var);
             int lag = static_cast<int>(ran_gamma(infectious_period_alpha[0], infectious_period_alpha[1]));
             lag += 1 * (lag == 0); // Security to avoid infectious duration of 0 day
             if(lag < this->time_steps_per_year) {
-                I2R[poly][patho][host][lag]++;
+              I2R[poly][patho][host][lag]++;
             }
+          }
+        
         }
+      }
     }
+    /*
+     With a multinomial draw instead 
+     for(int poly=0;poly<pI0_mat.size();poly++)  {
+        for(int patho=0;patho<pI0_mat[poly].size();patho++)    {
+           pI0_mat[poly][patho]=tmp;
+           pos++;
+           I[poly][patho] = ran_multinomial(pI0_mat[poly][patho], H[poly]);
+           H[poly] -= I[poly][patho];
+        }
+     }
+     */
 }

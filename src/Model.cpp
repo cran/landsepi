@@ -39,7 +39,7 @@ Model::Model(const int& Nyears, const int& time_steps_per_year, const int& Npoly
              const int& Ngene, const std::vector<double>& area, const Vector2D<int>& rotation,
              const gsl_rng* random_generator, const std::vector<Cultivar>& cultivars, const std::vector<Gene>& genes,
              const Basic_patho& basic_patho, const Treatment& treatment, const std::vector<Croptype>& croptypes, const double& sigmoid_kappa_host,
-             const double& sigmoid_sigma_host, const double& sigmoid_plateau_host, const double& pI0,
+             const double& sigmoid_sigma_host, const double& sigmoid_plateau_host, const Vector3D<double>& pI0,
              const Vector2D<double>& disp_patho_clonal, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed)
   : Nyears(Nyears),
     time_steps_per_year(time_steps_per_year),
@@ -473,44 +473,6 @@ void Model::mutation(std::vector<int>& P) {
 /* --------------------------------------- */
 /* Dispersal of new host and new pathogen propagules in the landscape */
 
-/* Update Hjuv and P */
-/*void Model::dispersal_old(const Vector2D<int>& H, Vector2D<int>& Hjuv, Vector2D<int>& P, const Vector2D<double>& disp_matrix) {
-  /* H, Hjuv, P are the numbers of individuals in a given poly */
-/*  Vector3D<int> Pdisp(this->Npatho, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
-  Vector3D<int> Hjuvtmp(this->Nhost, Vector2D<int>(this->Npoly, std::vector<int>(this->Npoly)));
-  
-  /* Production and dispersal of the host & dispersal of pathogen propagules */
-/*  for(int poly = 0; poly < this->Npoly; poly++) {
-    /* Pathogen dispersal */
-/*    for(int patho = 0; patho < this->Npatho; patho++) {
-      Pdisp[patho][poly] = ran_multinomial(P[poly][patho], disp_matrix[poly]);
-    }
-    /* Host reproduction: production and dispersal of Hjuv */
-/*    for(int host = 0; host < this->Nhost; host++) {
-      Hjuvtmp[host][poly] = ran_multinomial(
-        static_cast<int>(this->cultivars[host].reproduction_rate * H[poly][host]), this->disp_host[poly]);
-    }
-  }
-  
-  for(int poly = 0; poly < this->Npoly; poly++) {
-    /* Update the number of propagules (P) and Hjuv landing in each field */
-/*    for(int patho = 0; patho < this->Npatho; patho++) {
-      P[poly][patho] = 0;
-      for(int polyE = 0; polyE < this->Npoly; polyE++) {
-        P[poly][patho] += Pdisp[patho][polyE][poly];
-      }
-    }
-    
-    for(int host = 0; host < this->Nhost; host++) {
-      Hjuv[poly][host] = 0;
-      for(int polyE = 0; polyE < this->Npoly; polyE++) {
-        Hjuv[poly][host] += Hjuvtmp[host][polyE][poly];
-      }
-    }
-  }
-}*/
-
-
 /* Update Hjuv and P after dispersal */
 void Model::dispersal(Vector2D<int>& Propagules, const Vector2D<double>& disp_matrix, const int& Ngeno) {
   /* Propagules (either Hjuv or P) are the numbers of individuals in a given poly */
@@ -561,16 +523,18 @@ void Model::dispersal(Vector2D<int>& Propagules, const Vector2D<double>& disp_ma
 /*       BOTTLENECK AT THE END OF THE SEASON     */
 /* --------------------------------------------- */
 Vector3D<int> Model::bottleneck(const int& t, const Vector3D<int>& L, const Vector3D<int>& I,
-                                const Vector2D<int>& activeR) {
+                                const Vector2D<int>& activeR, const int& year) {
   Vector3D<int> eqIsurv(this->Npoly, Vector2D<int>(this->Npatho, std::vector<int>(this->Nhost)));
   
   for(int patho = 0; patho < this->Npatho; patho++) {
     const std::vector<int> aggr = this->switch_patho_to_aggr(patho);
     for(int host = 0; host < this->Nhost; host++) {
       for(int poly = 0; poly < this->Npoly; poly++) {
+        /* find the croptype corresponding to poly */
+        int id_croptype = (this->rotation[poly].size() == 1) ? this->rotation[poly][0] : this->rotation[poly][year];
         /* Reduce the number of infected hosts (bottleneck) */
         eqIsurv[poly][patho][host] =
-        ran_binomial(this->basic_patho.survival_prob, L[poly][patho][host] + I[poly][patho][host]);
+        ran_binomial(this->basic_patho.survival_prob[year][id_croptype], L[poly][patho][host] + I[poly][patho][host]);
         /* Calculate the mean infectious period */
         double infectious_period_mean_new = this->basic_patho.infectious_period_mean;
         for(int g = 0; g < this->Ngene; g++) {
@@ -1005,7 +969,6 @@ void Model:: dynepi() {
       }
       Rcpp::Rcout << "\n";
 #endif     
-      //this->dispersal_old(H, Hjuv, P_clonal_daily, this->disp_patho_clonal); // dispersal of clonal propagules 
       this->dispersal(P_clonal_daily, this->disp_patho_clonal, this->Npatho); // dispersal of clonal propagules
       
       // Get the sexually produced primary inoculum that will be released at time step t  
@@ -1016,9 +979,7 @@ void Model:: dynepi() {
       
       P_sex_daily = this->get_sum_Vector2D(P_sex_daily, P_sex_secondary);
       
-     // this->dispersal_old(H, Hjuv, P_sex_daily,this->disp_patho_sex); // dispersal of sexual propagules
       this->dispersal(P_sex_daily, this->disp_patho_sex, this->Npatho); // dispersal of sexual propagules
-      
       this->dispersal(Hjuv, this->disp_host, this->Nhost); // Host dispersal (Hjuv)
       
       // Update the number of propagules (sex + clonal; primary + secondary inoculum) after dispersal
@@ -1047,7 +1008,7 @@ void Model:: dynepi() {
     // Writing model output for last timestep
     this->write_HHjuvPLIR(H, Hjuv, P, L, I, R, fH, fHjuv, fP, fL, fI, fR);
     // Calculation of the equivalent number of I that survive and produce propagules for the next season
-    const Vector3D<int> eqIsurv = this->bottleneck(this->time_steps_per_year, L, I, activeR);
+    const Vector3D<int> eqIsurv = this->bottleneck(this->time_steps_per_year, L, I, activeR, year-1); // 'year-1' because the loop starts at 1
     
     /* Re-initialisation at 0 */
     this->init_HjuvLIR(Hjuv, L, I, R);
@@ -1269,15 +1230,11 @@ void Model:: dynepi() {
     //propagule dispersal
     // Get the clonally produced primary inoculum that will be released in the first day (t=0) of the following season 
     this->get_P_daily(P_clonal_daily, P_clonal_primary, 0); 
-    
-  //  this->dispersal_old(H, Hjuv, P_clonal_daily, this->disp_patho_clonal); // dispersal of clonally produced primary inoculum 
     this->dispersal(P_clonal_daily, this->disp_patho_clonal, this->Npatho); // dispersal of clonally produced primary inoculum
     // that will be released the first day of the following year
     
     // Get the sexually produced primary inoculum that will be released in the first day (t=0) of the following season 
     this->get_P_daily(P_sex_daily, P_sex_primary, 0); 
-    
-   // this->dispersal_old(H, Hjuv, P_sex_daily,this->disp_patho_sex); // dispersal of sexually produced primary inoculum
     this->dispersal(P_sex_daily, this->disp_patho_sex, this->Npatho); // dispersal of sexually produced primary inoculum
     //that will be released the first day of the following year
 
@@ -1315,7 +1272,7 @@ void Model:: dynepi() {
 #ifdef DEBUG
     Rcpp::Rcout << "computational time" << " " << duration.count()<< " " << "seconds. \n"; 
 #endif
-  }
+  }  // for year
 
   auto stop_tot = high_resolution_clock::now(); 
   auto duration_tot = duration_cast<seconds>(stop_tot - start_tot); 
@@ -1377,6 +1334,7 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
             croptypes_cultivars_prop(i,1),
             croptypes_cultivars_prop(i,2) ));                        
   }
+  const int Ncroptypes = croptypes.size();
   
   /*------------------------*/
   /*  Dispersal parameters  */
@@ -1397,11 +1355,7 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
     }
   }
   
-  /*----------------------*/
-  /*  Initial conditions  */
-  /*----------------------*/
-  const double pI0 = Rcpp::as<double>(inits["pI0"]);
-  
+
   /*-------------------*/
   /*  Host parameters  */
   /*-------------------*/
@@ -1453,7 +1407,19 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   double infectious_period_var = Rcpp::as<double>(basic_patho_param["infectious_period_var"]);
   // security to avoid variance = 0
   infectious_period_var += 1E-6 * (infectious_period_var == 0);
-  const double survival_prob = Rcpp::as<double>(basic_patho_param["survival_prob"]);
+  
+  // Survival prob
+  std::vector<double> survival_prob_tmp = Rcpp::as<std::vector<double>>(basic_patho_param["survival_prob"]);
+  Vector2D<double> survival_prob = Vector2D<double>(Nyears, std::vector<double>(Ncroptypes, 0));
+  int pos1=0;
+  for(int croptype=0; croptype<Ncroptypes; croptype++)  {  // Initialise matrix
+    for(int year=0; year<Nyears; year++)    {
+        survival_prob[year][croptype] = survival_prob_tmp[pos1];
+        pos1++;
+    }
+  }
+//  const double survival_prob = Rcpp::as<double>(basic_patho_param["survival_prob"]);
+  
   const std::vector<double> repro_sex_prob = Rcpp::as< std::vector<double> >(basic_patho_param["repro_sex_prob"]);
   double sigmoid_kappa = Rcpp::as<double>(basic_patho_param["sigmoid_kappa"]);
   // security to avoid kappa = 0
@@ -1492,6 +1458,7 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   const std::vector<double> mutation_prob = Rcpp::as<std::vector<double>>(genes_param["mutation_prob"]);
   const std::vector<double> efficiency = Rcpp::as<std::vector<double>>(genes_param["efficiency"]);
   const std::vector<double> adaptation_cost = Rcpp::as<std::vector<double>>(genes_param["adaptation_cost"]);
+  const std::vector<double> relative_advantage = Rcpp::as<std::vector<double>>(genes_param["relative_advantage"]);
   const std::vector<double> tradeoff_strength = Rcpp::as<std::vector<double>>(genes_param["tradeoff_strength"]);
   const std::vector<double> recombination_sd = Rcpp::as<std::vector<double>>(genes_param["recombination_sd"]);
 
@@ -1503,13 +1470,31 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   //for( int g=0; g < total_genes_id.size(); g++) {
   for(int g : total_genes_id) { // Only keep the gene used by the cultivars (Reduce Npatho)
     genes.push_back(Gene(age_of_activ_mean[g], age_of_activ_var[g], Nlevels_aggressiveness[g], target_trait[g],
-                         mutation_prob[g], efficiency[g], adaptation_cost[g], tradeoff_strength[g], recombination_sd[g]));
+                         mutation_prob[g], efficiency[g], adaptation_cost[g], relative_advantage[g], 
+                         tradeoff_strength[g], recombination_sd[g]));
   }
   const int Ngene = genes.size();
   
   int Npatho = 1;
   for(int g = 0; g < Ngene; g++) {
     Npatho *= genes[g].Nlevels_aggressiveness;
+  }
+
+  
+  /*----------------------*/
+  /*  Initial conditions  */
+  /*----------------------*/
+  std::vector<double> pI0_tmp = Rcpp::as<std::vector<double>>(inits["pI0"]);
+  Vector3D<double> pI0 = Vector3D<double>(Npoly, Vector2D<double>(Npatho, std::vector<double>(Nhost, 0)));
+  int pos2=0;
+  // Initialise matrix pI0
+  for(int poly=0; poly<Npoly; poly++)  {
+    for(int patho=0; patho<Npatho; patho++)    {
+      for(int host=0; host<Nhost; host++)      {
+        pI0[poly][patho][host] = pI0_tmp[pos2];
+        pos2++;
+      }
+    }
   }
   
   // Create the model
@@ -1520,7 +1505,7 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   /*--------------------------------------*/
   /* Write and Print the model parameters */
   /*--------------------------------------*/
-    model.print_param(seed, mutation_prob, efficiency, adaptation_cost, tradeoff_strength);
+    model.print_param(seed, mutation_prob, efficiency, adaptation_cost, relative_advantage, tradeoff_strength);
 
   /* -------------- */
   /* Epidemic model */

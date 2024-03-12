@@ -15,8 +15,9 @@ simul_landsepi(
   cultivars_genes_list = list(numeric(0)),
   genes = data.frame(geneName = character(0), mutation_prob = numeric(0), efficiency =
     numeric(0), tradeoff_strength = numeric(0), Nlevels_aggressiveness = numeric(0),
-    adaptation_cost = numeric(0), age_of_activ_mean = numeric(0), age_of_activ_var =
-    numeric(0), target_trait = character(0), recombination_sd = numeric(0)),
+    adaptation_cost = numeric(0), relative_advantage = numeric(0), age_of_activ_mean =
+    numeric(0), age_of_activ_var = numeric(0), target_trait = character(0),
+    recombination_sd = numeric(0)),
   landscape = NULL,
   area = 1e+06,
   rotation = data.frame(year_1 = c(0), year_2 = c(0), year_3 = c(0), year_4 = c(0),
@@ -27,14 +28,13 @@ simul_landsepi(
     sigmoid_kappa = 5.333, sigmoid_sigma = 3, sigmoid_plateau = 1,
     sex_propagule_viability_limit = 1, sex_propagule_release_mean = 1,
     clonal_propagule_gradual_release = 0),
-  repro_sex_prob = rep(0, time_param$nTSpY + 1),
   disp_patho_clonal = c(1),
   disp_patho_sex = c(1),
   disp_host = c(1),
   treatment = list(treatment_degradation_rate = 0.1, treatment_efficiency = 0,
     treatment_timesteps = logical(0), treatment_cultivars = logical(0), treatment_cost =
     0, treatment_application_threshold = logical(0)),
-  pI0 = 5e-04,
+  pI0 = c(5e-04),
   epid_outputs = "all",
   evol_outputs = "all",
   thres_breakdown = 50000,
@@ -93,7 +93,9 @@ IR, 1/LAT, IP and PR),
 \item Nlevels_aggressiveness: number of adaptation levels related to each resistance gene (i.e. 1 + number
 of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene),
 \item adaptation_cost: fitness penalties paid by pathogen genotypes fully adapted
-to the considered resistance genes on host that do not carry the resistance genes,
+to the considered resistance genes on all hosts,
+\item relative_advantage: fitness advantages of pathogen genotype fully adapted to the considered resistance
+genes on hosts carrying these genes, relative to those that do not carry these genes,
 \item tradeoff_strength: strengths of the trade-off relationships between the level of aggressiveness
 on hosts that do and do not carry the resistance genes.
 \item recombination_sd: standard deviation of the normal distribution used for recombination of quantitative traits during sexual reproduction (infinitesimal model)
@@ -115,8 +117,10 @@ for a pathogen genotype not adapted to resistance and ii. sexual reproduction pa
 \item latent_period_var = variance of the latent period duration,
 \item infectious_period_mean = maximal expected duration of the infectious period,
 \item infectious_period_var = variance of the infectious period duration,
-\item survival_prob = probability for a propagule to survive the off-season,
-\item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning,
+\item survival_prob = probability for a propagule to survive the off-season (can be entered as a matrix
+to give a different probability for every year (rows) and every croptype (columns)),
+\item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning
+(can be entered as a vector of size \code{time_param$nSTpY+1} to give a different probability for every time step),
 \item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
 \item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
 \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
@@ -124,9 +128,6 @@ for a pathogen genotype not adapted to resistance and ii. sexual reproduction pa
 \item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
 \item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 }}
-
-\item{repro_sex_prob}{a vector of size \code{time_param$nSTpY+1} giving the probability for an infectious host to reproduce
-via sex rather than via cloning for every time step,}
 
 \item{disp_patho_clonal}{a vectorized matrix giving the probability of pathogen dispersal
 from any field of the landscape to any other field.}
@@ -148,8 +149,11 @@ of pathogen infection rate at the time of application),
 above which the treatment is applied in a polygon
 }}
 
-\item{pI0}{initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
-at the beginning of the simulation. Must be between 0 and 1.}
+\item{pI0}{probability for the first cultivar to be infected (and infectious, i.e. state I) by the
+first pathogen genotype in all polygons of the landscape at t=0 (i.e. the beginning of the simulation).
+It can also be entered as a vector of length Nhost\emph{Npatho}Npoly giving the probability
+for each cultivar, pathogen genotype and polygon (independently from the possible presence of
+cultivars carrying resistance genes).}
 
 \item{epid_outputs}{a character string (or a vector of character strings if several outputs are to be computed)
 specifying the type of epidemiological and economic outputs to generate (see details):
@@ -220,7 +224,7 @@ of a pathogen in a heterogeneous landscape and generating a wide range of epidem
 and economic outputs.
 }
 \details{
-See ?landsepi for details on the model and assumptions.
+See \code{?landsepi} for details on the model and assumptions.
 Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
 (‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions
 with 'susceptible host') structure with a discrete time step. It simulates the spread and
@@ -229,7 +233,7 @@ of a pathogen in a heterogeneous cropping landscape, across cropping seasons spl
 potential bottlenecks to the pathogen. A wide array of resistance deployment strategies
 (possibly including chemical treatments) can be simulated and evaluated using several possible
 outputs to assess the epidemiological, evolutionary and economic performance
-of deployment strategies (See ?epid_output and ?evol_output for details).
+of deployment strategies (See \code{?epid_output} and \code{?evol_output} for details).
 }
 \examples{
 \dontrun{
@@ -246,27 +250,26 @@ area <- c(100000, 100000)
 rotation <- data.frame(year_1 = c(0, 1), year_2 = c(0, 1), year_3 = c(0, 1), year_4 = c(0, 1))
 croptype_names <- c("Susceptible crop", "Resistant crop")
 croptypes_cultivars_prop <- data.frame(
-  croptypeID = c(0, 1),
-  cultivarID = c(0, 1),
-  proportion = c(1, 1)
+croptypeID = c(0, 1),
+cultivarID = c(0, 1),
+proportion = c(1, 1)
 )
 cultivars <- rbind(
-  loadCultivar(name = "Susceptible", type = "growingHost"),
-  loadCultivar(name = "Resistant", type = "growingHost")
+loadCultivar(name = "Susceptible", type = "growingHost"),
+loadCultivar(name = "Resistant", type = "growingHost")
 )
 genes <- loadGene(name = "MG", type = "majorGene")
 cultivars_genes_list <- list(numeric(0), 0)
 
 ## Run simulation
 simul_landsepi(
-  seed = 12345, time_param, croptype_names, croptypes_cultivars_prop, cultivars,
-  cultivars_genes_list, genes, landscape = NULL, area, rotation,
-  basic_patho_param = loadPathogen(disease = "rust"),
-  repro_sex_prob = rep(0, time_param$nTSpY+1),
-  disp_patho_clonal = c(0.99, 0.01, 0.01, 0.99),
-  disp_patho_sex = c(0.99, 0.01, 0.01, 0.99),
-  disp_host = c(1, 0, 0, 1),
-  pI0 = 5e-4
+seed = 12345, time_param, croptype_names, croptypes_cultivars_prop, cultivars,
+cultivars_genes_list, genes, landscape = NULL, area, rotation,
+basic_patho_param = loadPathogen(disease = "rust"),
+disp_patho_clonal = c(0.99, 0.01, 0.01, 0.99),
+disp_patho_sex = c(0.99, 0.01, 0.01, 0.99),
+disp_host = c(1, 0, 0, 1),
+pI0 = c(5e-4)
 )
 
 
@@ -276,14 +279,15 @@ simul_landsepi(
 
 ## Simulation and Landscape parameters
 Nyears <- 10
+nTSpY <- 120
 landscape <- loadLandscape(1)
 Npoly <- length(landscape)
 library(sf)
 area <- st_area(st_as_sf(landscape))
 rotation <- AgriLand(landscape, Nyears,
-  rotation_period = 1, rotation_realloc = FALSE,
-  rotation_sequence = c(0, 1, 2, 3),
-  prop = rep(1 / 4, 4), aggreg = 0.5, graphic = TRUE, outputDir = getwd()
+rotation_period = 1, rotation_realloc = FALSE,
+rotation_sequence = c(0, 1, 2, 3),
+prop = rep(1 / 4, 4), aggreg = 0.5, graphic = TRUE, outputDir = getwd()
 )
 rotation <- data.frame(rotation)[, 1:(Nyears + 1)]
 croptype_names <- c("Susceptible crop"
@@ -291,31 +295,32 @@ croptype_names <- c("Susceptible crop"
 , "Resistant crop 2"
 , "Resistant crop 3")
 croptypes_cultivars_prop <- data.frame(croptypeID = c(0, 1, 2, 3), cultivarID = c(0, 1, 2, 3),
-                                       proportion = c(1, 1, 1, 1))
+proportion = c(1, 1, 1, 1))
 cultivars <- data.frame(rbind(
-  loadCultivar(name = "Susceptible", type = "growingHost"),
-  loadCultivar(name = "Resistant1", type = "growingHost"),
-  loadCultivar(name = "Resistant2", type = "growingHost"),
-  loadCultivar(name = "Resistant3", type = "growingHost")
+loadCultivar(name = "Susceptible", type = "growingHost"),
+loadCultivar(name = "Resistant1", type = "growingHost"),
+loadCultivar(name = "Resistant2", type = "growingHost"),
+loadCultivar(name = "Resistant3", type = "growingHost")
 ), stringsAsFactors = FALSE)
+Nhost <- nrow(cultivars)
 genes <- data.frame(rbind(
-  loadGene(name = "MG 1", type = "majorGene"),
-  loadGene(name = "MG 2", type = "majorGene"),
-  loadGene(name = "MG 3", type = "majorGene")
+loadGene(name = "MG 1", type = "majorGene"),
+loadGene(name = "MG 2", type = "majorGene"),
+loadGene(name = "MG 3", type = "majorGene")
 ), stringsAsFactors = FALSE)
 cultivars_genes_list <- list(numeric(0), 0, 1, 2)
+Npatho <- prod(genes$Nlevels_aggressiveness)
 
 ## Run simulation
 simul_landsepi(
-  seed = 12345, time_param = list(Nyears = Nyears, nTSpY = 120),
-  croptype_names, croptypes_cultivars_prop, cultivars,
-  cultivars_genes_list, genes, landscape, area, rotation,
-  basic_patho_param = loadPathogen(disease = "rust"),
-  repro_sex_prob = rep(0, 120+1),
-  disp_patho_clonal = loadDispersalPathogen(1)[[1]],
-  disp_patho_sex = as.numeric(diag(Npoly)),
-  disp_host = as.numeric(diag(Npoly)),
-  pI0 = 5e-4
+seed = 12345, time_param = list(Nyears = Nyears, nTSpY = nTSpY),
+croptype_names, croptypes_cultivars_prop, cultivars,
+cultivars_genes_list, genes, landscape, area, rotation,
+basic_patho_param = loadPathogen(disease = "rust"),
+disp_patho_clonal = loadDispersalPathogen(1)[[1]],
+disp_patho_sex = as.numeric(diag(Npoly)),
+disp_host = as.numeric(diag(Npoly)),
+pI0 = c(5E-4)
 )
 }
 

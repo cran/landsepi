@@ -10,8 +10,8 @@ dnl #################################################################
 dnl -----------------------------------------------
 dnl Package name and version number (user defined)
 dnl -----------------------------------------------
-define([THE_PACKAGE_NAME],    [landsepiDev])
-define([THE_PACKAGE_VERSION], [1.3.0])
+define([THE_PACKAGE_NAME],    [landsepi])
+define([THE_PACKAGE_VERSION], [1.4.0])
 define([THE_PACKAGE_MAINTAINER],  [jean-francois.rey@inrae.fr])
 
 dnl --------------------------------

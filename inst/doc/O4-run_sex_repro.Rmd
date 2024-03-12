@@ -39,8 +39,7 @@ simul_params@Seed
 Nyears = 6 
 nTSpY = 120
 simul_params <- setTime(simul_params, Nyears = Nyears, nTSpY = nTSpY)
-## Inoculum
-simul_params <- setInoculum(simul_params, val = 5e-4)
+
 ## Landscape
 landscape <- loadLandscape(id = 1)
 simul_params <- setLandscape(simul_params, land = landscape)
@@ -78,10 +77,10 @@ repro_sex_probs <- c(rep(0.0, nTSpY), 1.0)
 ```
 
 The vector containing the probability of sexual reproduction for each timestep is used 
-to fuel the object `simul_params` via the function `setReproSexProb()`:
+to fuel the object `simul_params` via the function `updateReproSexProb()`:
 ```{r}
-simul_params <- setReproSexProb(simul_params, repro_sex_probs)
-simul_params@ReproSexProb 
+simul_params <- updateReproSexProb(simul_params, repro_sex_probs)
+simul_params@Pathogen 
 ```
 
 ## Setting the time of release of propagules produced at the end of a cropping season
@@ -219,6 +218,9 @@ simul_params <- allocateLandscapeCroptypes(simul_params
                                            , prop = prop
                                            , aggreg = aggreg
                                            , graphic = FALSE)
+
+## Inoculum
+simul_params <- setInoculum(simul_params, 5e-4) 
 
 # Choosing output variables
 outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")

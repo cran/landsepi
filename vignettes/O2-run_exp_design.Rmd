@@ -81,8 +81,6 @@ for (i in 1:n){
     basic_patho_param$infection_rate <- myDesign$infection_rate[i]  ## update inf. rate
     simul_params <- setPathogen(simul_params, basic_patho_param)    
     
-    ## Initial conditions 
-    simul_params <- setInoculum(simul_params, myDesign$pI0[i])  ## update pI0
     
     ## Landscape parameters
     landscape <- loadLandscape(myDesign$id_landscape[i])   ## update landscape
@@ -135,6 +133,10 @@ for (i in 1:n){
                                                prop = prop,
                                                aggreg = aggreg,
                                                graphic = FALSE)
+    
+    ## Initial conditions 
+    simul_params <- setInoculum(simul_params, myDesign$pI0[i])  ## update pI0
+    #Only susceptible hosts are infected, see vignette1 for a more complex inoculum
     
     ## configure outputs
     outputlist <- loadOutputs(epid_outputs = "audpc", evol_outputs = "durability")

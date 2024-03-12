@@ -14,7 +14,7 @@ a landscape in sp format
 }
 \description{
 Loads one of the five built-in landscapes simulated using a T-tesselation algorithm
-and composed of 155, 154, 152, 153 and 156 fields, respectively.
+and composed of 155, 154, 152, 153 and 156 polygons, respectively.
 Each landscape is identified by a numeric from 1 to 5.
 }
 \examples{

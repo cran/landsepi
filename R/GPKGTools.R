@@ -156,6 +156,7 @@ GPKGAddTables <- function(gpkgfile) {
                                                   mutation_prob REAL NOT NULL CHECK(mutation_prob BETWEEN 0 AND 1),
                                                   Nlevels_aggressiveness INTEGER NOT NULL CHECK(Nlevels_aggressiveness >= 1),
                                                   adaptation_cost REAL NOT NULL CHECK(adaptation_cost BETWEEN 0 AND 1),
+                                                  relative_advantage REAL NOT NULL CHECK(relative_advantage BETWEEN 0 AND 1),
                                                   tradeoff_strength REAL NOT NULL CHECK(tradeoff_strength > 0),
                                                   target_trait TEXT NOT NULL,
                                                   recombination_sd REAL CHECK(recombination_sd > 0));"

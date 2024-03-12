@@ -26,6 +26,7 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
+#include "functions.hpp"
 
 // Pathogen aggressiveness components on a susceptible host for a pathogen genotype not adapted to resistance
 struct Basic_patho {
@@ -35,7 +36,7 @@ struct Basic_patho {
     const double latent_period_var;     // Variance of the latent period duration
     const double infectious_period_mean; // Maximal expected infectious period duration
     const double infectious_period_var; // Variance of the infectious period duration
-    const double survival_prob;         // Off-season survival probability of a propagule
+    const Vector2D<double> survival_prob;         // Off-season survival probability of a propagule for each croptype and each year
     const std::vector<double> repro_sex_prob;        // Probability for an infectious host to reproduce via sex
     const double sigmoid_kappa;         // Kappa parameter of the sigmoid contamination function
     const double sigmoid_sigma;         // Sigma parameter of the sigmoid contamination function
@@ -47,7 +48,7 @@ struct Basic_patho {
     Basic_patho();
     Basic_patho(const double& infection_rate, const double& propagule_prod_rate, const double& latent_period_mean,
                 const double& latent_period_var, const double& infectious_period_mean,
-                const double& infectious_period_var, const double& survival_prob, const std::vector<double>& repro_sex_prob,
+                const double& infectious_period_var, const Vector2D<double>& survival_prob, const std::vector<double>& repro_sex_prob,
                 const double& sigmoid_kappa, const double& sigmoid_sigma, const double& sigmoid_plateau,
                 const int& sex_propagule_viability_limit, const double& sex_propagule_release_mean,
                 const bool& clonal_propagule_gradual_release);

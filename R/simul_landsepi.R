@@ -63,7 +63,9 @@
 #' \item Nlevels_aggressiveness: number of adaptation levels related to each resistance gene (i.e. 1 + number
 #' of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene),
 #' \item adaptation_cost: fitness penalties paid by pathogen genotypes fully adapted
-#' to the considered resistance genes on host that do not carry the resistance genes,
+#' to the considered resistance genes on all hosts,
+#' \item relative_advantage: fitness advantages of pathogen genotype fully adapted to the considered resistance 
+#' genes on hosts carrying these genes, relative to those that do not carry these genes,
 #' \item tradeoff_strength: strengths of the trade-off relationships between the level of aggressiveness
 #' on hosts that do and do not carry the resistance genes.
 #' \item recombination_sd: standard deviation of the normal distribution used for recombination of quantitative traits during sexual reproduction (infinitesimal model)
@@ -81,8 +83,10 @@
 #' \item latent_period_var = variance of the latent period duration,
 #' \item infectious_period_mean = maximal expected duration of the infectious period,
 #' \item infectious_period_var = variance of the infectious period duration,
-#' \item survival_prob = probability for a propagule to survive the off-season,
-#' \item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning,
+#' \item survival_prob = probability for a propagule to survive the off-season (can be entered as a matrix 
+#' to give a different probability for every year (rows) and every croptype (columns)),
+#' \item repro_sex_prob = probability for an infectious host to reproduce via sex rather than via cloning 
+#' (can be entered as a vector of size \code{time_param$nSTpY+1} to give a different probability for every time step),
 #' \item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
 #' \item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
 #' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
@@ -90,8 +94,6 @@
 #' \item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released,
 #' \item clonal_propagule_gradual_release = Whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
 #' }
-#' @param repro_sex_prob a vector of size \code{time_param$nSTpY+1} giving the probability for an infectious host to reproduce
-#'  via sex rather than via cloning for every time step,
 #' @param disp_patho_clonal a vectorized matrix giving the probability of pathogen dispersal
 #' from any field of the landscape to any other field.
 #' @param disp_patho_sex a vectorized matrix giving the probability of pathogen dispersal for sexual propagules
@@ -108,8 +110,11 @@
 #' \item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar) 
 #' above which the treatment is applied in a polygon
 #' }
-#' @param pI0 initial probability for the first host (whose index is 0) to be infectious (i.e. state I)
-#' at the beginning of the simulation. Must be between 0 and 1.
+#' @param pI0 probability for the first cultivar to be infected (and infectious, i.e. state I) by the 
+#' first pathogen genotype in all polygons of the landscape at t=0 (i.e. the beginning of the simulation). 
+#' It can also be entered as a vector of length Nhost*Npatho*Npoly giving the probability 
+#' for each cultivar, pathogen genotype and polygon (independently from the possible presence of 
+#' cultivars carrying resistance genes).
 #' @param epid_outputs a character string (or a vector of character strings if several outputs are to be computed)
 #' specifying the type of epidemiological and economic outputs to generate (see details):  
 #' \itemize{
@@ -149,7 +154,7 @@
 #' Works only if graphic=TRUE and epid_outputs="audpc_rel" (or epid_outputs="all").
 #' @param keepRawResults a logical indicating if binary files must be kept after the end of the simulation (default=FALSE).
 #' Careful, many files may be generated if keepRawResults=TRUE.
-#' @details See ?landsepi for details on the model and assumptions.  
+#' @details See \code{?landsepi} for details on the model and assumptions.  
 #' Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an individual field), based on a SEIR
 #'  (‘susceptible-exposed-infectious-removed’, renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions
 #'  with 'susceptible host') structure with a discrete time step. It simulates the spread and
@@ -158,7 +163,7 @@
 #'  potential bottlenecks to the pathogen. A wide array of resistance deployment strategies 
 #'  (possibly including chemical treatments) can be simulated and evaluated using several possible 
 #'  outputs to assess the epidemiological, evolutionary and economic performance
-#'  of deployment strategies (See ?epid_output and ?evol_output for details).
+#'  of deployment strategies (See \code{?epid_output} and \code{?evol_output} for details).
 #'
 #' @return A list containing all outputs that have been required via "epid_outputs" and "evol_outputs".
 #' A set of text files, graphics and a video showing epidemic dynamics can be generated.
@@ -190,27 +195,26 @@
 #' rotation <- data.frame(year_1 = c(0, 1), year_2 = c(0, 1), year_3 = c(0, 1), year_4 = c(0, 1))
 #' croptype_names <- c("Susceptible crop", "Resistant crop")
 #' croptypes_cultivars_prop <- data.frame(
-#'   croptypeID = c(0, 1),
-#'   cultivarID = c(0, 1),
-#'   proportion = c(1, 1)
+#' croptypeID = c(0, 1),
+#' cultivarID = c(0, 1),
+#' proportion = c(1, 1)
 #' )
 #' cultivars <- rbind(
-#'   loadCultivar(name = "Susceptible", type = "growingHost"),
-#'   loadCultivar(name = "Resistant", type = "growingHost")
+#' loadCultivar(name = "Susceptible", type = "growingHost"),
+#' loadCultivar(name = "Resistant", type = "growingHost")
 #' )
 #' genes <- loadGene(name = "MG", type = "majorGene")
 #' cultivars_genes_list <- list(numeric(0), 0)
-#'
+#' 
 #' ## Run simulation
 #' simul_landsepi(
-#'   seed = 12345, time_param, croptype_names, croptypes_cultivars_prop, cultivars,
-#'   cultivars_genes_list, genes, landscape = NULL, area, rotation,
-#'   basic_patho_param = loadPathogen(disease = "rust"),
-#'   repro_sex_prob = rep(0, time_param$nTSpY+1),
-#'   disp_patho_clonal = c(0.99, 0.01, 0.01, 0.99),
-#'   disp_patho_sex = c(0.99, 0.01, 0.01, 0.99),
-#'   disp_host = c(1, 0, 0, 1),
-#'   pI0 = 5e-4
+#' seed = 12345, time_param, croptype_names, croptypes_cultivars_prop, cultivars,
+#' cultivars_genes_list, genes, landscape = NULL, area, rotation,
+#' basic_patho_param = loadPathogen(disease = "rust"),
+#' disp_patho_clonal = c(0.99, 0.01, 0.01, 0.99),
+#' disp_patho_sex = c(0.99, 0.01, 0.01, 0.99),
+#' disp_host = c(1, 0, 0, 1),
+#' pI0 = c(5e-4)
 #' )
 #'
 #'
@@ -220,14 +224,15 @@
 #'
 #' ## Simulation and Landscape parameters
 #' Nyears <- 10
+#' nTSpY <- 120
 #' landscape <- loadLandscape(1)
 #' Npoly <- length(landscape)
 #' library(sf)
 #' area <- st_area(st_as_sf(landscape))
 #' rotation <- AgriLand(landscape, Nyears,
-#'   rotation_period = 1, rotation_realloc = FALSE,
-#'   rotation_sequence = c(0, 1, 2, 3),
-#'   prop = rep(1 / 4, 4), aggreg = 0.5, graphic = TRUE, outputDir = getwd()
+#' rotation_period = 1, rotation_realloc = FALSE,
+#' rotation_sequence = c(0, 1, 2, 3),
+#' prop = rep(1 / 4, 4), aggreg = 0.5, graphic = TRUE, outputDir = getwd()
 #' )
 #' rotation <- data.frame(rotation)[, 1:(Nyears + 1)]
 #' croptype_names <- c("Susceptible crop"
@@ -235,34 +240,35 @@
 #' , "Resistant crop 2"
 #' , "Resistant crop 3")
 #' croptypes_cultivars_prop <- data.frame(croptypeID = c(0, 1, 2, 3), cultivarID = c(0, 1, 2, 3),
-#'                                        proportion = c(1, 1, 1, 1))
+#' proportion = c(1, 1, 1, 1))
 #' cultivars <- data.frame(rbind(
-#'   loadCultivar(name = "Susceptible", type = "growingHost"),
-#'   loadCultivar(name = "Resistant1", type = "growingHost"),
-#'   loadCultivar(name = "Resistant2", type = "growingHost"),
-#'   loadCultivar(name = "Resistant3", type = "growingHost")
+#' loadCultivar(name = "Susceptible", type = "growingHost"),
+#' loadCultivar(name = "Resistant1", type = "growingHost"),
+#' loadCultivar(name = "Resistant2", type = "growingHost"),
+#' loadCultivar(name = "Resistant3", type = "growingHost")
 #' ), stringsAsFactors = FALSE)
+#' Nhost <- nrow(cultivars)
 #' genes <- data.frame(rbind(
-#'   loadGene(name = "MG 1", type = "majorGene"),
-#'   loadGene(name = "MG 2", type = "majorGene"),
-#'   loadGene(name = "MG 3", type = "majorGene")
+#' loadGene(name = "MG 1", type = "majorGene"),
+#' loadGene(name = "MG 2", type = "majorGene"),
+#' loadGene(name = "MG 3", type = "majorGene")
 #' ), stringsAsFactors = FALSE)
 #' cultivars_genes_list <- list(numeric(0), 0, 1, 2)
-#'
+#' Npatho <- prod(genes$Nlevels_aggressiveness)
+#' 
 #' ## Run simulation
 #' simul_landsepi(
-#'   seed = 12345, time_param = list(Nyears = Nyears, nTSpY = 120),
-#'   croptype_names, croptypes_cultivars_prop, cultivars,
-#'   cultivars_genes_list, genes, landscape, area, rotation,
-#'   basic_patho_param = loadPathogen(disease = "rust"),
-#'   repro_sex_prob = rep(0, 120+1),
-#'   disp_patho_clonal = loadDispersalPathogen(1)[[1]],
-#'   disp_patho_sex = as.numeric(diag(Npoly)),
-#'   disp_host = as.numeric(diag(Npoly)),
-#'   pI0 = 5e-4
+#' seed = 12345, time_param = list(Nyears = Nyears, nTSpY = nTSpY),
+#' croptype_names, croptypes_cultivars_prop, cultivars,
+#' cultivars_genes_list, genes, landscape, area, rotation,
+#' basic_patho_param = loadPathogen(disease = "rust"),
+#' disp_patho_clonal = loadDispersalPathogen(1)[[1]],
+#' disp_patho_sex = as.numeric(diag(Npoly)),
+#' disp_host = as.numeric(diag(Npoly)),
+#' pI0 = c(5E-4)
 #' )
 #' }
-#'
+#' 
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018).
 #' Assessing the durability andefficiency of landscape-based strategies to deploy 
 #' plant resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
@@ -279,6 +285,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 1
                            , genes = data.frame(geneName = character(0), mutation_prob = numeric(0)
                                              , efficiency = numeric(0) , tradeoff_strength = numeric(0)
                                              , Nlevels_aggressiveness = numeric(0), adaptation_cost = numeric(0)
+                                             , relative_advantage = numeric(0)
                                              , age_of_activ_mean = numeric(0) , age_of_activ_var = numeric(0)
                                              , target_trait = character(0)
                                              , recombination_sd = numeric(0))
@@ -291,7 +298,6 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 1
                                                       , sigmoid_kappa = 5.333, sigmoid_sigma = 3, sigmoid_plateau = 1
                                                       , sex_propagule_viability_limit  = 1, sex_propagule_release_mean = 1
                                                       , clonal_propagule_gradual_release = 0)
-                           , repro_sex_prob=rep(0, time_param$nTSpY+1)
                            , disp_patho_clonal=c(1), disp_patho_sex=c(1), disp_host=c(1)
                            , treatment=list(treatment_degradation_rate=0.1, 
                                           treatment_efficiency=0, 
@@ -299,10 +305,35 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 1
                                           treatment_cultivars=logical(0),
                                           treatment_cost=0,
                                           treatment_application_threshold = logical(0))
-                           , pI0 = 5e-4
+                           , pI0 = c(5e-4)
                            , epid_outputs = "all", evol_outputs = "all", thres_breakdown = 50000
                            , audpc100S = 0.76 #8.48 for downy mildew,
                            , writeTXT = TRUE, graphic = TRUE, videoMP4 = FALSE, keepRawResults = FALSE) {
+
+  ## Convert scalars into matrices of vectors
+  Nyears <- time_param$Nyears
+  nTSpY <- time_param$nTSpY
+  Npoly <- length(area)
+  Ncroptypes <- length(croptype_names)
+  Nhost <- nrow(cultivars)
+  Npatho <- prod(genes$Nlevels_aggressiveness)
+  if (length(basic_patho_param$survival_prob) == 1){
+    basic_patho_param$survival_prob <- rep(basic_patho_param$survival_prob, Nyears*Ncroptypes)
+  }
+  if (length(basic_patho_param$repro_sex_prob) == 1){
+    basic_patho_param$repro_sex_prob <- rep(basic_patho_param$repro_sex_prob, nTSpY+1)
+  }
+  if (length(pI0) == 1){
+    ## Default scenario : only the 1st pathogen genotype on the 1st cultivar (in all possible polygons)
+    pI0_tmp <- array(data = 0, dim = c(Nhost, Npatho, Npoly))
+    for (poly in 1:Npoly){
+      id_croptype <- rotation[poly, "year_1"]  ## index of the croptype in poly at year 1 (starts at 0) 
+      ## is the 1st host (index 0) present in the croptype of poly ?
+      host_present <- sum(croptypes_cultivars_prop$croptypeID==id_croptype & croptypes_cultivars_prop$cultivarID==0) > 0      
+      pI0_tmp[1, 1, poly] <- host_present * pI0
+    }
+    pI0 <- as.vector(pI0_tmp)
+  }
 
   # Host parameters
   cultivars_param <- list(name = as.character(cultivars$cultivarName),
@@ -326,6 +357,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 1
   # Evolution parameters
   genes_param <- list(name = as.character(genes$geneName),
                       adaptation_cost = as.numeric(genes$adaptation_cost),
+                      relative_advantage = as.numeric(genes$relative_advantage),
                       mutation_prob = as.numeric(genes$mutation_prob),
                       efficiency = as.numeric(genes$efficiency),
                       tradeoff_strength = as.numeric(genes$tradeoff_strength),
@@ -346,13 +378,12 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 1
   )
 
   
-  basic_patho_param$repro_sex_prob <- repro_sex_prob
-  
   ####
   #### Run the model (C++)
   ####
   
   print("Run the C++ model")
+  
 
   model_landsepi(
     time_param = time_param,
@@ -373,9 +404,7 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 1
   ####  Generate outputs
   ####
   print("Compute model outputs")
-  Npoly <- length(area)
 
-  
   ## Evolutionary output
   Npatho <- prod(genes_param$Nlevels_aggressiveness)
   if (Npatho > 1 & evol_outputs[1] != "") {
@@ -397,11 +426,10 @@ simul_landsepi <- function(seed = 12345, time_param = list(Nyears = 5, nTSpY = 1
 
   ## Video
   if (videoMP4 & !is.null(epid_res[["audpc_rel"]])) {
-    video(
-      epid_res[["audpc_rel"]], time_param, Npatho, landscape, area, rotation, croptypes_cultivars_prop,
-      croptype_names, cultivars_param
-      # , audpc100S
-      , evol_res$durability
+    video(epid_res[["audpc_rel"]], time_param, Npatho, landscape, area, rotation, croptypes_cultivars_prop,
+          croptype_names, cultivars_param
+          # , audpc100S
+          , evol_res$durability
     )
   }
 

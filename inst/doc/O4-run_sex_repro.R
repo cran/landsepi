@@ -1,13 +1,13 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ---- results="hide", message=FALSE-------------------------------------------
+## ----results="hide", message=FALSE--------------------------------------------
 library(landsepi)
 
-## ---- results="hide", message="FALSE"-----------------------------------------
+## ----results="hide", message="FALSE"------------------------------------------
 ## Initialisation of the simulation
 simul_params <- createSimulParams(outputDir = getwd())
 ## Seed
@@ -18,8 +18,7 @@ simul_params@Seed
 Nyears = 6 
 nTSpY = 120
 simul_params <- setTime(simul_params, Nyears = Nyears, nTSpY = nTSpY)
-## Inoculum
-simul_params <- setInoculum(simul_params, val = 5e-4)
+
 ## Landscape
 landscape <- loadLandscape(id = 1)
 simul_params <- setLandscape(simul_params, land = landscape)
@@ -38,8 +37,8 @@ basic_patho_param
 repro_sex_probs <- c(rep(0.0, nTSpY), 1.0)  
 
 ## -----------------------------------------------------------------------------
-simul_params <- setReproSexProb(simul_params, repro_sex_probs)
-simul_params@ReproSexProb 
+simul_params <- updateReproSexProb(simul_params, repro_sex_probs)
+simul_params@Pathogen 
 
 ## -----------------------------------------------------------------------------
 basic_patho_param$sex_propagule_release_mean = 1
@@ -125,14 +124,17 @@ simul_params <- allocateLandscapeCroptypes(simul_params
                                            , aggreg = aggreg
                                            , graphic = FALSE)
 
+## Inoculum
+simul_params <- setInoculum(simul_params, 5e-4) 
+
 # Choosing output variables
 outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")
 simul_params <- setOutputs(simul_params, outputlist)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  checkSimulParams(simul_params)
 #  runSimul(simul_params, graphic = TRUE, videoMP4 = FALSE)
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 system(paste("rm -rf ", simul_params@OutputDir))
 

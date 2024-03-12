@@ -10,19 +10,20 @@ setDispersalHost(params, mat)
 \item{params}{a LandsepiParams Object.}
 
 \item{mat}{a square matrix giving the probability of host dispersal
-from any field of the landscape to any other field.
+from any polygon of the landscape to any other polygon.
 It can be generated manually, or, alternatively, via \code{\link{loadDispersalHost}}.
-The size of the matrix must match the number of fields in the landscape.}
+The size of the matrix must match the number of polygons in the landscape.}
 }
 \value{
 a LandsepiParam object.
 }
 \description{
 Updates a LandsepiParams object with a host dispersal matrix.
+Note that landscape parameters must be set before updating setting dispersal.
 }
 \details{
-the dispersal matrix gives the probability for a host individual in a field i (row)
-to migrate to field j (column) through dispersal.
+the dispersal matrix gives the probability for a host individual in a polygon i (row)
+to migrate to polygon j (column) through dispersal.
 If the host is a cultivated plant: seeds are harvested and do not disperse.
 Thus the dispersal matrix is the identity matrix.
 }

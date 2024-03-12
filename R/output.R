@@ -762,7 +762,6 @@ switch_patho_to_aggr <- function(index_patho, Ngenes, Nlevels_aggressiveness) {
 }
 
 
-
 #' @title Generation of evolutionary model outputs
 #' @name evol_output
 #' @description Generates evolutionary outputs from model simulations.

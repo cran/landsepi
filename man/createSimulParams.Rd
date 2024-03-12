@@ -14,7 +14,7 @@ a LandsepiParams object initialised with the following context:
 \itemize{
 \item random seed
 \item all pathogen parameters fixed at 0
-\item no between-field dispersal (neither pathogen nor host)
+\item no between-polygon dispersal (neither pathogen nor host)
 \item no pathogen introduction
 \item no resistance gene
 \item no chemical treatment

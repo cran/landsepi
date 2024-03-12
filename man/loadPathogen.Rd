@@ -23,8 +23,8 @@ Available diseases:
 \item "rust" (genus \emph{Puccinia}, e.g. stripe rust, stem rust and leaf rust of wheat and barley)
 \item "mildew" (\emph{Plasmopara viticola}, downy mildew of grapevine)
 \item "sigatoka" (\emph{Pseudocercospora fijiensis}, black sigatoka of banana)
-Note that when disease = "mildew" a price reduction between 0\% and 5\% is applied to the market value
-according to disease severity.
+Note that when disease = "mildew" a price reduction between 0\% and 5\% is applied to the
+market value according to disease severity.
 }
 }
 \examples{

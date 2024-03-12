@@ -55,31 +55,33 @@ Algorithm "exp" is preferable for big landscapes.}
 }
 \value{
 a LandsepiParams object with Landscape updated with the layer "croptypeID".
-It contains croptype allocation in every field of the landscape for all years of simulation.
+It contains croptype allocation in every polygon of the landscape for all years of simulation.
 }
 \description{
 Updates the landscape of a LandsepiParams object with croptype allocation in
-every field of the landscape and every year of simulation. Allocation is based on an algorithm
+every polygon of the landscape and every year of simulation. Allocation is based on an algorithm
 which controls croptype proportions (in surface) and spatio-temporal aggregation.
+Note that time, landscape and croptype parameters must be set before allocating
+landscape croptypes.
 }
 \details{
-An algorithm based on latent Gaussian fields is used to allocate two different croptypes
-across the simulated landscapes (e.g. a susceptible and a resistant cultivar, denoted as
-SC and RC, respectively). This algorithm allows the control of the proportions of each croptype
-in terms of surface coverage, and their level of spatial aggregation.
+An algorithm based on latent Gaussian fields is used to allocate two different
+croptypes across the simulated landscapes (e.g. a susceptible and a resistant cultivar,
+denoted as SC and RC, respectively). This algorithm allows the control of the proportions of
+each croptype in terms of surface coverage, and their level of spatial aggregation.
 A random vector of values is drawn from a multivariate normal distribution with expectation 0
 and a variance-covariance matrix which depends on the pairwise distances between
-the centroids of the fields. Next, the croptypes are allocated to different fields
+the centroids of the polygons. Next, the croptypes are allocated to different polygons
 depending on whether each value drawn from the multivariate normal distribution is above
-or below a threshold. The proportion of each cultivar in the landscape is controlled by the value
-of this threshold. To allocate more than two croptypes, \code{AgriLand} uses sequentially
-this algorithm. For instance, the allocation of three croptypes (e.g. SC, RC1 and RC2)
-is performed as follows:
+or below a threshold. The proportion of each cultivar in the landscape is controlled by
+the value of this threshold. To allocate more than two croptypes, \code{AgriLand} uses
+sequentially this algorithm. For instance, the allocation of three croptypes
+(e.g. SC, RC1 and RC2) is performed as follows:
 \enumerate{
-\item the allocation algorithm is run once to segregate the fields where the susceptible
+\item the allocation algorithm is run once to segregate the polygons where the susceptible
 cultivar is grown, and
 \item the two resistant cultivars (RC1 and RC2) are assigned to the remaining candidate
-fields by re-running the allocation algorithm.
+polygons by re-running the allocation algorithm.
 }
 }
 \examples{

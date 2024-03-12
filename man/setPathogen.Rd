@@ -24,9 +24,12 @@ than via cloning,
 \item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
 \item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
 \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
-\item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
-\item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released.
-\item clonal_propagule_gradual_release = whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
+\item sex_propagule_viability_limit = maximum number of cropping seasons up to which
+a sexual propagule is viable
+\item sex_propagule_release_mean = average number of seasons after which a sexual
+propagule is released.
+\item clonal_propagule_gradual_release = whether or not clonal propagules surviving
+the bottleneck are gradually released along the following cropping season.
 }
 It can be generated manually, or, alternatively, via \code{\link{loadPathogen}}.}
 }
@@ -37,8 +40,8 @@ a LandsepiParams object
 Updates a LandsepiParams object with pathogen parameters
 }
 \details{
-a set of parameters representative of rust fungi, downy mildew or black sigatoka can be loaded via
-\code{\link{loadPathogen}}.
+a set of parameters representative of rust fungi, downy mildew or black sigatoka
+can be loaded via \code{\link{loadPathogen}}.
 }
 \examples{
 \dontrun{

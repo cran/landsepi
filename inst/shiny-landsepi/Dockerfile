@@ -46,7 +46,7 @@ RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION 
   && rm -f version.txt ss-latest.deb \
   && rm -rf /var/lib/apt/lists/*
 
-RUN Rscript -e "install.packages(c('shiny','shinyBS', 'htmltools', 'DT', 'shinyjs', 'Rcpp', 'rgdal', 'sp', 'devtools', 'Matrix', 'mvtnorm', 'rgeos', 'maptools', 'fields', 'splancs', 'sf', 'RSQLite', 'foreach', 'parallel', 'doParallel', 'gridExtra', 'png', 'grid', 'future', 'promises', 'shinyalert', 'deSolve'), repos='https://cran.biotools.fr/')"
+RUN Rscript -e "install.packages(c('shiny','shinyBS', 'htmltools', 'DT', 'shinyjs', 'Rcpp', 'sp', 'devtools', 'Matrix', 'mvtnorm', 'fields', 'splancs', 'sf', 'RSQLite', 'foreach', 'parallel', 'doParallel', 'gridExtra', 'png', 'grid', 'future', 'promises', 'shinyalert', 'deSolve'), repos='https://cran.biotools.fr/')"
 
 RUN echo 'run_as shiny;\n\
   preserve_logs true;\n\

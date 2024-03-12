@@ -123,9 +123,9 @@ pathogenTab <- {
         inputId = "defaultPathogen",
         label = "Default Pathogen",
         choices = list(
-          "Rust" = "Rust",
-          "Mildew" = "Mildew",
-          "Black Sigatoka" = "Sigatoka",
+          "Rust of wheat" = "Rust",
+          "Grapevine downy mildew" = "Mildew",
+          "Banana black sigatoka" = "Sigatoka",
           "No Pathogen" = "No Pathogen"
         ),
         width = "25%"
@@ -136,7 +136,7 @@ pathogenTab <- {
     shiny::fluidRow(
       shiny::numericInput(
         inputId = "inoculum",
-        label = "Initial probability of infection for the first susceptible host",
+        label = "Initial probability of infection for the first susceptible cultivar",
         value = 0.0005,
         min = 0.0,
         max = 1.0,

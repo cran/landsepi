@@ -37,7 +37,31 @@ simul_params <- createSimulParams(outputDir = getwd())
 ```
 
 In the following, the object `simul_params` is to be updated with all simulation parameters using `set*()` functions. 
-To help parameterisation, built-in parameters are available and may be loaded via `load*()` functions. 
+For some specific parameters already set using `set*()` functions, they may be next updated using `update*()` functions.
+To help parameterisation, built-in parameters are available and may be loaded via `load*()` functions.  
+
+To avoid dependency issues between functions, we recommend to parameterise the simulation with the following order 
+(**functions in bold are crucial to run a simulation**, others are optional):  
+- **createSimulParams()**  
+- setSeed()  
+- **setTime()**  
+- setPathogen()  
+- updateReproSexProb()  
+- **setLandscape()**  
+- setDispersal()  
+- setGenes()  
+- **setCultivars()**  
+- allocateCultivarGenes()  
+- **allocateCroptypeCultivars()**  
+- **setCroptypes()**  
+- **allocateLandscapeCroptypes()**  
+- setInoculum()  
+- updateSurvivalProb()  
+- setTreatments()  
+- setOutputs()  
+- checkSimulParams()  
+- **runSimul()**  
+
 
 ## Setting the seed and time parameters
 
@@ -104,15 +128,6 @@ simul_params <- setPathogen(simul_params, patho_params = basic_patho_param)
 simul_params@Pathogen
 ```
 
-## Setting inoculum
-
-The function `setInoculum()` updates `simul_params` with the probability for an individual to be infectious 
-(i.e. state I) at the beginning of the simulation. Note that the inoculum is present on the first cultivar 
-only (usually defined as the susceptible cultivar) and is not adapted to any plant resistance gene. 
-```{r}
-simul_params <- setInoculum(simul_params, val = 5e-4) 
-simul_params@PI0
-```
 
 ## Setting the landscape and pathogen dispersal
 
@@ -161,7 +176,7 @@ to generate each line of the dataframe. The only difference between the types "g
 forest, fallows, etc. i.e. everything that is not planted, does not cost anything and does not 
 yield anything (with regard to the subject of the study).  
 **It is advised to implement a susceptible cultivar at first line of the dataframe to allow 
-pathogen initial inoculation.**
+pathogen initial inoculation in default parameterisation.**
 ```{r}
 cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
 cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
@@ -207,8 +222,8 @@ with $N_t$ the total number of individual hosts at time-step $t$ and $K$ the car
 This part can be skipped if no resistance gene is to be simulated.
 Characteristics of each plant resistance gene and each corresponding pathogenicity gene are summarised in a dataframe.  
 A built-in parameterisation for classical resistance sources is available using `loadGene()` to generate each line of the 
-dataframe. Type "majorGene" is for completely efficient resistance to which pathogen may adapt via a single mutation. Type "APR" 
-stands for Adult Plant Resistance, i.e. a major gene which activates after a delay after planting, and type "QTL" is a 
+dataframe. Type "majorGene" is for completely efficient resistance to which pathogen may adapt via a single mutation.  
+Type "APR" stands for Adult Plant Resistance, i.e. a major gene which activates after a delay after planting, and type "QTL" is a 
 partially efficient resistance source to which the pathogen may adapt gradually. The type "immunity" code for a completely 
 efficient resistance gene that cannot be overcome, in such a way that infection is totally impossible; it is helpful 
 to parameterise non-host cultivars. 
@@ -233,10 +248,11 @@ Alternatively, the dataframe `genes` can also be generated entirely from scratch
 genes_new <- data.frame(geneName =               c("MG1", "MG2"),
                         efficiency =             c(1.0  , 0.8  ),
                         age_of_activ_mean =      c(0.0  , 0.0  ),
-                        age_of_activ_var =      c(0.0  , 0.0  ),
+                        age_of_activ_var =       c(0.0  , 0.0  ),
                         mutation_prob =          c(1E-7 , 1E-4),
                         Nlevels_aggressiveness = c(2    , 2    ),
-                        adaptation_cost =           c(0.50 , 0.75 ),
+                        adaptation_cost =        c(0.50 , 0.75 ),
+                        relative_advantage =     c(0.50 , 0.75 ),
                         tradeoff_strength =      c(1.0  , 1.0  ),
                         target_trait =           c("IR" , "LAT"),
                         recombination_sd =       c(1.0,1.0),
@@ -248,7 +264,7 @@ Note that the column "efficiency" refers to the percentage of reduction of the t
 component on hosts carrying the gene. 
 For example, a 80% efficient resistance against infection rate (target_trait = "IR") 
 means that the infection rate of a non-adapted pathogen is reduced by 80% on a resistant host compared 
-to what it is on a susceptible host. For resistances targetting the latent period, 
+to what it is on a susceptible host. For resistances targeting the latent period, 
 the percentage of reduction is applied to the inverse of the latent period in such a way that latent 
 period is higher in resistant than in susceptible hosts.
 
@@ -274,7 +290,7 @@ simul_params <- allocateCultivarGenes(simul_params
 simul_params <- allocateCultivarGenes(simul_params
                                       , cultivarName = "Resistant3"
                                       , listGenesNames = c("nonhost resistance"))
-simul_params@Cultivars
+simul_params@CultivarsGenes
 ```
 
 With this example of parameterisation:  
@@ -370,6 +386,171 @@ simul_params <- allocateLandscapeCroptypes(simul_params
                                            , graphic = TRUE)
 # plot(simul_params@Landscape)
 ```
+
+
+## Setting the inoculum
+
+To set the inoculum, the function `setInoculum()` is used. Several scenarios may be simulated and are summarized below.
+For the default scenario (see below), the function is simply parameterised with the probability for individual 
+hosts to be infectious (i.e. at state 'I') at the beginning of the simulation (i.e. at t=0).
+
+For more complex scenarios (i.e. to specify the location and genetic structure of the inoculum), 
+the function `setInoculum()` can be used with a 3D-array of dimensions (Nhost, Npatho, Npoly) 
+indicating the initial probability to be infectious, for each cultivar, pathogen genotype and polygon, respectively.
+To define this array, the functions `getMatrixGenePatho()`, `getMatrixCultivarPatho()`, `getMatrixCroptypePatho()` 
+and `getMatrixPolyPatho()` acknowledge which pathogen genotypes can infect which genes, cultivars, croptypes 
+and polygons respectively. Each function returns a matrix indicating if there is compatibility (value of 1, 
+i.e. infection is possible) or not (value of 0, i.e. the cultivar is not present, or protected by a fully efficient 
+resistance gene targeting the infection rate from the beginning of the cropping season).
+```{r}
+getMatrixGenePatho(simul_params)
+getMatrixCultivarPatho(simul_params)
+getMatrixCroptypePatho(simul_params)
+getMatrixPolyPatho(simul_params)[1:10,]
+```
+
+Finally, the function `loadInoculum()` helps build the inoculum array as follows:  
+Let $\phi_{v,p,i}$ be the probability for an individual of cultivar $v$ to be infected by pathogen genotype $p$ 
+in field $i$ at the beginning of the simulation. This probability is computed as follows:
+$$\phi_{v, p, i} = \phi^0 \times \phi^{host}_{v} \times \phi^{patho}_{p} \times \phi^{poly}_{i} \times I^{present}_{v,i} \times I^{compatible}_{v,p}$$
+with:  
+$\phi^{host}$ the vector of probabilities for every host (parameter `pI0_host`),  
+$\phi^{patho}$ the vector of probabilities for every pathogen genotype (parameter `pI0_patho`),  
+$\phi^{poly}$ the vector of probabilities for every polygon (parameter `pI0_poly`),  
+$\phi^0$ a multiplicative constant (parameter `pI0_all`).  
+$I^{present}_{v,i}$ a binary variable equal to 1 if cultivar $v$ is grown in field $i$ (and 0 otherwise),  
+$I^{compatible}_{v,p}$ a binary variable equal to 1 if pathogen genotype $p$ can infect cultivar $v$ at the beginning of 
+the cropping season (and 0 otherwise). 
+
+
+### Scenario 1 (default). Only the avirulent pathogen on the susceptible cultivar in all fields (global inoculum)
+The default scenario is the presence of a pathogen genotype not adapted to any resistance gene, 
+and present in all fields of the landscape where a susceptible cultivar is grown. 
+In this situation, it is important that the susceptible cultivar is entered at the first line of the table cultivars.
+Then, one can simply use:
+```{r}
+# Option 1: simply use the default parameterisation
+simul_params <- setInoculum(simul_params, 5E-4)
+ 
+# Option 2: use loadInoculum()
+Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
+Nhost <- nrow(simul_params@Cultivars)
+pI0 <- loadInoculum(simul_params, pI0_all=5E-4, pI0_host=c(1,rep(0, Nhost-1)), pI0_patho=c(1,rep(0, Npatho-1)))
+simul_params <- setInoculum(simul_params, pI0)
+```
+
+### Scenario 2. Only the avirulent pathogen on the susceptible cultivar in only some fields (local inoculum)
+To specify the location of the inoculum, the parameters `pI0_host`, `pI0_patho` and `pI0_poly` are filled with values of 1 and 0 indicating 
+if the cultivar, pathogen genotype and field are inoculated or not. The probability is given by the constant `pI0_all`. 
+In this example, 5 fields in the landscape are randomly chosen among those cultivated with the susceptible cultivar:
+```{r, eval=FALSE}
+Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)  ## Nb of pathogen genotypes
+Nhost <- nrow(simul_params@Cultivars)  ## Nb of cultivars
+Npoly <- nrow(simul_params@Landscape)  ## Nb of polygons in the landscape
+Npoly_inoc <- 5  ## number of inoculated polygons
+compatible_poly <- getMatrixPolyPatho(simul_params)[,1]  ## whether the avr pathogen can infect the polygons
+id_poly <- sample(grep(1, compatible_poly), Npoly_inoc)  ## random polygon picked among compatible ones
+pI0_poly <- as.numeric(1:Npoly %in% id_poly)  
+pI0 <- loadInoculum(simul_params, pI0_all=5E-4, pI0_host=c(1,rep(0, Nhost-1)), pI0_patho=c(1,rep(0, Npatho-1)), 
+                    pI0_poly=pI0_poly)
+simul_params <- setInoculum(simul_params, pI0)
+```
+
+### Scenario 3. A diversity of pathogen genotypes in the inoculum, in all fields (global inoculum)
+This scenario matches with situations where several pathogen genotypes (including those adapted to resistance) 
+are initially present in the landscape at the beginning of the simulation. 
+In this example, different probabilities are given to the different pathogen genotypes 
+using the parameters `pI0_patho` (the same rationale can be used for different probabilities on the different hosts using 
+`pI0_host`).
+```{r, eval=FALSE}
+## Example with 4 pathogen genotypes and 2 cultivars
+pI0 <- loadInoculum(simul_params, pI0_patho=c(1E-3,1E-4,1E-4,1E-5), pI0_host=c(1,1))
+simul_params <- setInoculum(simul_params, pI0)
+```
+
+### Scenario 4. A diversity of pathogen genotypes in the inoculum, in some fields only (local inoculum)
+Here, the example is similar as the previous one but only 5 fields are inoculated:
+```{r, eval=FALSE}
+Npoly <- nrow(simul_params@Landscape)
+Npoly_inoc <- 5  ## number of inoculated polygons 
+id_poly <- sample(1:Npoly, Npoly_inoc)  ## random polygon 
+pI0_poly <- as.numeric(1:Npoly %in% id_poly) 
+pI0 <- loadInoculum(simul_params, pI0_patho=c(1E-3,1E-4,1E-4,1E-5), pI0_host=c(1,1), pI0_poly=pI0_poly)
+simul_params <- setInoculum(simul_params, pI0)
+```
+
+### Scenario 5. Custom 3D array to define the inoculum
+At last, if one wants to run a simulation with a custom inoculum on the whole landscape, it can simply be entered in 
+the function `setInoculum()` as an array of dimension (Nhost, Npatho, Npoly). 
+Note that in this situation, host individuals may be infected regardless the resistance 
+gene they carry. 
+```{r, eval=FALSE}
+## example with 2 cultivars, 4 pathogen genotypes and 5 fields
+Nhost=2
+Npatho=4
+Npoly=5
+pI0 <- array(data = 1:40 / 100, dim = c(Nhost, Npatho, Npoly))
+simul_params <- setInoculum(simul_params, pI0)
+```
+
+To generate an array that accounts for the fact that (i) the cultivars are not grown in all polygons, and 
+(ii) cultivars may carry a resistance gene that prevent initial infection by some pathogen genotypes, one can 
+use the function `loadInoculum()` as follows:
+```{r, eval=FALSE}
+corrected_pI0 <- loadInoculum(simul_params, pI0_mat=pI0)
+simul_params <- setInoculum(simul_params, corrected_pI0)
+```
+
+### Visualization
+
+The 3D-array inoculum can be vizualised using the function `inoculumToMatrix()`:
+```{r}
+inoculumToMatrix(simul_params)[,,1:5]
+```
+
+
+## Updating the survival probability during the off-season
+
+At the end of each cropping season, pathogens experience a bottleneck representing the
+off-season. The probability for a pathogen propagule to survive the off-season depends on the capacity 
+of the "green bridge" to host the pathogen. This green bridge can, for example, be a wild reservoir or 
+volunteer plants remaining in the field (e.g. owing to seedlings or incomplete harvest). It is assumed 
+that the probability of survival is the same every year and in every polygon, but this assumption can 
+be relaxed by updating the probability with a matrix indicating a probability for every croptype and 
+every year. This simulates different management strategies or agronomic practices during the off-season. 
+The function `updateSurvivalProb()` creates this matrix as follows:  
+  
+Let $\lambda_{y,c}$ be the probability for a pathogen propagule to survive the off-season between year 
+$y$ and year $y+1$ in a polygon cultivated with croptype $c$. Unless the matrix is directly entered 
+via the parameter `mat`, it is computed by $\lambda_{y,c} = \lambda_{y} \times \lambda_{c}$ with:  
+$\lambda_{y}$ the vector of probabilities for every year (parameter `mat_year`),  
+$\lambda_{c}$ the vector of probabilities for every croptype (parameter `mat_croptype`).  
+```{r}
+Ncroptypes <- nrow(simul_params@Croptypes)
+Nyears <- simul_params@TimeParam$Nyears
+## Same probability in every croptype:
+simul_params <- updateSurvivalProb(simul_params, mat_year=1:Nyears/100)
+simul_params@Pathogen
+## Same probability every year:
+simul_params <- updateSurvivalProb(simul_params, mat_croptype=1:Ncroptypes/10)
+simul_params@Pathogen
+## specific probability for different croptypes and years:
+simul_params <- updateSurvivalProb(simul_params, mat_year=1:Nyears/100, mat_croptype=1:Ncroptypes/10)
+simul_params@Pathogen
+## One probability per year and per croptype:
+simul_params <- updateSurvivalProb(simul_params, mat=matrix(runif(Nyears*Ncroptypes), ncol=Ncroptypes))
+simul_params@Pathogen
+```
+
+
+### Visualization
+
+The matrix of survival probabilities for every year and croptype, as well as for every polygon and year, 
+can be vizualised using the function `survivalProbToMatrix()`:
+```{r}
+survivalProbToMatrix(simul_params)
+```
+
 
 ## Setting chemical treatments
 

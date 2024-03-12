@@ -24,7 +24,8 @@ dfGenes is a data.frame of parameters associated with each resistance gene and
 with the evolution of each corresponding pathogenicity gene. Columns of the dataframe are:
 \itemize{
 \item geneName: names of resistance genes,
-\item target_trait: aggressiveness components ("IR", "LAT", "IP", or "PR") targeted by resistance genes,
+\item target_trait: aggressiveness components ("IR", "LAT", "IP", or "PR") targeted by
+resistance genes,
 \item efficiency: resistance gene efficiencies, i.e. the percentage of reduction of the targeted
 aggressiveness component (IR, 1/LAT, IP and PR),
 \item age_of_activ_mean: expected delays to resistance activation (for APRs),
@@ -35,16 +36,19 @@ corresponding to a resistance gene),
 (i.e. 1 + number of required mutations for a pathogenicity gene to fully adapt to the
 corresponding resistance gene),
 \item adaptation_cost: fitness penalties paid by pathogen genotypes
-fully adapted to the considered resistance genes on host that do not carry these genes,
+fully adapted to the considered resistance genes on all hosts,
+\item relative_advantage: fitness advantages of pathogen genotypes fully adapted to the
+resistance genes on hosts carrying these genes, relative to those that do not carry these genes,
 \item tradeoff_strength: strengths of the trade-off relationships between the
 level of aggressiveness on hosts that do and do not carry the resistance genes.
-\item recombination_sd: standard deviation of the normal distribution used for recombination of quantitative traits during sexual reproduction (infinitesimal model)
+\item recombination_sd: standard deviation of the normal distribution used for recombination
+of quantitative traits during sexual reproduction (infinitesimal model)
 }
 
-The data.frame must be defined as follow (example):\tabular{llllllllll}{
-   geneName \tab efficiency \tab age_of_activ_mean \tab age_of_activ_var \tab mutation_prob \tab Nlevels_agressiveness \tab adaptation_cost \tab tradeoff_strength \tab target_trait \tab recombination_sd \cr
-   MG1 \tab 1 \tab 0 \tab 0 \tab 1e-07 \tab 2 \tab 0.5 \tab 1 \tab IR \tab 0.27 \cr
-   QTL1 \tab 0.5 \tab 0 \tab 0 \tab 0.0001 \tab 10 \tab 0.74 \tab 1 \tab LAT \tab 0.27 \cr
+The data.frame must be defined as follow (example):\tabular{lllllllllll}{
+   geneName \tab efficiency \tab age_of_activ_mean \tab age_of_activ_var \tab mutation_prob \tab Nlevels_agressiveness \tab adaptation_cost \tab relative advantage \tab tradeoff_strength \tab target_trait \tab recombination_sd \cr
+   MG1 \tab 1 \tab 0 \tab 0 \tab 1e-07 \tab 2 \tab 0.5 \tab 0.5 \tab 1 \tab IR \tab 0.27 \cr
+   QTL1 \tab 0.5 \tab 0 \tab 0 \tab 0.0001 \tab 10 \tab 0.74 \tab 0.74 \tab 1 \tab LAT \tab 0.27 \cr
 }
 }
 \examples{

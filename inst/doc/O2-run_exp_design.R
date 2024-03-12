@@ -1,10 +1,10 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ---- eval=FALSE, message=FALSE-----------------------------------------------
+## ----eval=FALSE, message=FALSE------------------------------------------------
 #  library(landsepi)
 
 ## -----------------------------------------------------------------------------
@@ -25,10 +25,10 @@ n <- nrow(myDesign)
 myDesign <- cbind(simul = 1:n, seed = sample(n*100, n), myDesign)
 myDesign
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  simul_params <- createSimulParams(outputDir = getwd())
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  for (i in 1:n){
 #      print(paste("Running simulation", i, "/", n))
 #  
@@ -46,8 +46,6 @@ myDesign
 #      basic_patho_param$infection_rate <- myDesign$infection_rate[i]  ## update inf. rate
 #      simul_params <- setPathogen(simul_params, basic_patho_param)
 #  
-#      ## Initial conditions
-#      simul_params <- setInoculum(simul_params, myDesign$pI0[i])  ## update pI0
 #  
 #      ## Landscape parameters
 #      landscape <- loadLandscape(myDesign$id_landscape[i])   ## update landscape
@@ -101,6 +99,10 @@ myDesign
 #                                                 aggreg = aggreg,
 #                                                 graphic = FALSE)
 #  
+#      ## Initial conditions
+#      simul_params <- setInoculum(simul_params, myDesign$pI0[i])  ## update pI0
+#      #Only susceptible hosts are infected, see vignette1 for a more complex inoculum
+#  
 #      ## configure outputs
 #      outputlist <- loadOutputs(epid_outputs = "audpc", evol_outputs = "durability")
 #      simul_params <- setOutputs(simul_params, outputlist)
@@ -127,7 +129,7 @@ myDesign
 #  
 #  myDesign
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ## Disable computation of outputs:
 #  outputlist <- loadOutputs(epid_outputs = "", evol_outputs = "")
 #  simul_params <- setOutputs(simul_params, outputlist)
@@ -135,7 +137,7 @@ myDesign
 #  ## Run simulation and keep raw binary files:
 #  runSimul(simul_params, writeTXT=FALSE, graphic = FALSE, keepRawResults = TRUE)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ##  retrieve parameters from the object simul_params
 #  path <- simul_params@OutputDir
 #  Nyears <- simul_params@TimeParam$Nyears

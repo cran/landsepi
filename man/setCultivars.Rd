@@ -36,7 +36,8 @@ associated with hosts in sanitary status L as if cultivated in pure crop,
 associated with hosts in sanitary status I as if cultivated in pure crop,
 \item yield_R: theoretical yield (in weight or volume units / ha / cropping season)
 associated with hosts in sanitary status R as if cultivated in pure crop,
-\item planting_cost = planting costs (in monetary units / ha / cropping season) as if cultivated in pure crop,
+\item planting_cost = planting costs (in monetary units / ha / cropping season) as if
+cultivated in pure crop,
 \item market_value = market values of the production (in monetary units / weight or volume unit).
 }
 

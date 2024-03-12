@@ -12,11 +12,12 @@ are to be computed) specifying the type of epidemiological and economic outputs 
 (see details):\itemize{
 \item "audpc" : Area Under Disease Progress Curve (average number of diseased host individuals
 per time step and square meter)
-\item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of diseased host
-individuals relative to the total number of existing hosts)
-\item "gla" : Green Leaf Area (average number of healthy host individuals per time step and square meter)
-\item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals relative to the
-total number of existing hosts)
+\item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of
+diseased host individuals relative to the total number of existing hosts)
+\item "gla" : Green Leaf Area (average number of healthy host individuals per time step and
+square meter)
+\item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals
+relative to the total number of existing hosts)
 \item "eco_yield" : total crop yield (in weight or volume units per ha)
 \item "eco_cost" : operational crop costs (in monetary units per ha)
 \item "eco_product" : total crop products (in monetary units per ha)

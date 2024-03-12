@@ -66,7 +66,7 @@ setClass(
     Genes = "data.frame",
     Pathogen = "list",
     ReproSexProb = "vector",
-    PI0 = "numeric",
+    PI0 = "vector",
     DispHost = "vector",
     DispPathoClonal = "vector",
     DispPathoSex = "vector",

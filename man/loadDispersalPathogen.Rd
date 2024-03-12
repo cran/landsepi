@@ -15,9 +15,9 @@ a vectorised dispersal matrix representing the dispersal of clonal propagules,
 and a vectorised dispersal identity matrix for sexual propagules. All by columns.
 }
 \description{
-It loads one of the five built-in vectorised dispersal matrices of rust fungi associated with the
-five built-in landscapes. Landscape and DispersalPathogen ID must be the same. And set a vectorized identity matrix
-for sexual reproduction dispersal.
+It loads one of the five built-in vectorised dispersal matrices of rust fungi
+associated with the five built-in landscapes. Landscape and DispersalPathogen ID must be
+the same. And set a vectorized identity matrix for sexual reproduction dispersal.
 }
 \details{
 \emph{landsepi} includes built-in dispersal matrices to represent rust dispersal in the

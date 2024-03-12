@@ -40,10 +40,10 @@ every compartment: \itemize{
 \item I: infectious hosts,
 \item R: removed hosts,
 \item P: propagules.}
-Each file indicates for every time step the number of individuals in each field, and when
+Each file indicates for every time step the number of individuals in each polygon, and when
 appropriate for each host and pathogen genotype. Additionally, a binary file called TFI is
-generated and gives the Treatment Frequency Indicator (expressed as the number of treatment applications
-per polygon).
+generated and gives the Treatment Frequency Indicator (expressed as the number of treatment
+applications per polygon).
 }
 \description{
 Runs a simulation with landsepi,
@@ -52,12 +52,12 @@ of a pathogen in a heterogeneous landscape and generating a wide range of epidem
 evolutionary and economic outputs.
 }
 \details{
-See ?landsepi for details on the model, assumptions and outputs, and our vignettes
-for tutorials (\code{browseVignettes("landsepi")}). The function runs the model simulation using
-a LandsepiParams object.
+See \code{?landsepi} for details on the model, assumptions and outputs, and our
+vignettes for tutorials (\code{browseVignettes("landsepi")}). The function runs the model
+simulation using a LandsepiParams object.
 Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an
-individual field), based on a SEIR (‘susceptible-exposed-infectious-removed’, renamed HLIR
-for 'healthy-latent-infectious-removed' to avoid confusions with 'susceptible host')
+individual field or polygon), based on a SEIR (‘susceptible-exposed-infectious-removed’,
+renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions with 'susceptible host')
 structure with a discrete time step. It simulates the spread and
 evolution (via mutation, recombination through sexual reproduction, selection and drift)
 of a pathogen in a heterogeneous cropping landscape, across cropping seasons split
@@ -76,9 +76,8 @@ simul_params <- createSimulParams(outputDir = getwd())
 ## Seed & Time parameters
 simul_params <- setSeed(simul_params, seed = 1)
 simul_params <- setTime(simul_params, Nyears = 10, nTSpY = 120)
-## Pathogen & inoculum parameters
+## Pathogen parameters
 simul_params <- setPathogen(simul_params, loadPathogen("rust"))
-simul_params <- setInoculum(simul_params, 5e-4)
 ## Landscape & dispersal
 simul_params <- setLandscape(simul_params, loadLandscape(1))
 simul_params <- setDispersalPathogen(simul_params, loadDispersalPathogen[[1]])
@@ -112,6 +111,8 @@ aggreg <- 10 ## aggregated landscape
 simul_params <- allocateLandscapeCroptypes(simul_params, rotation_period = rotation_period,
 rotation_sequence = rotation_sequence,
 rotation_realloc = FALSE, prop = prop, aggreg = aggreg)
+Set the inoculum
+simul_params <- setInoculum(simul_params, 5e-4)
 ## list of outputs to be generated
 simul_params <- setOutputs(simul_params, loadOutputs())
 ## Check simulation parameters
@@ -138,18 +139,21 @@ myLand <- SpatialPolygons(list(myLand))
 simul_params <- setLandscape(simul_params, myLand)
 
 ## Simulation, pathogen, landscape and dispersal parameters
-simul_params <- setInoculum(simul_params, 5e-4)
 simul_params <- setDispersalPathogen(simul_params, c(1))
 
 ## Cultivars
 simul_params <- setCultivars(simul_params, loadCultivar(name = "Susceptible", type = hostType))
 
 ## Croptypes
-croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop"), Susceptible = 1)
+croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop")
+, Susceptible = 1)
 simul_params <- setCroptypes(simul_params, croptype)
 simul_params <- allocateLandscapeCroptypes(simul_params,
 rotation_period = 0, rotation_sequence = list(c(0)),
 rotation_realloc = FALSE, prop = 1, aggreg = 1)
+
+## Inoculum
+simul_params <- setInoculum(simul_params, 5e-4)
 
 ## list of outputs to be generated
 outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "")

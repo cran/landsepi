@@ -1,13 +1,13 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ---- results="hide", message=FALSE-------------------------------------------
+## ----results="hide", message=FALSE--------------------------------------------
 library(landsepi)
 
-## ---- results="hide", message="FALSE"-----------------------------------------
+## ----results="hide", message="FALSE"------------------------------------------
 simul_params <- createSimulParams(outputDir = getwd())
 
 ## -----------------------------------------------------------------------------
@@ -51,10 +51,6 @@ basic_patho_param <- list(infection_rate = 0.4
 ## -----------------------------------------------------------------------------
 simul_params <- setPathogen(simul_params, patho_params = basic_patho_param)
 simul_params@Pathogen
-
-## -----------------------------------------------------------------------------
-simul_params <- setInoculum(simul_params, val = 5e-4) 
-simul_params@PI0
 
 ## -----------------------------------------------------------------------------
 landscape <- loadLandscape(id = 1)
@@ -115,10 +111,11 @@ genes
 genes_new <- data.frame(geneName =               c("MG1", "MG2"),
                         efficiency =             c(1.0  , 0.8  ),
                         age_of_activ_mean =      c(0.0  , 0.0  ),
-                        age_of_activ_var =      c(0.0  , 0.0  ),
+                        age_of_activ_var =       c(0.0  , 0.0  ),
                         mutation_prob =          c(1E-7 , 1E-4),
                         Nlevels_aggressiveness = c(2    , 2    ),
-                        adaptation_cost =           c(0.50 , 0.75 ),
+                        adaptation_cost =        c(0.50 , 0.75 ),
+                        relative_advantage =     c(0.50 , 0.75 ),
                         tradeoff_strength =      c(1.0  , 1.0  ),
                         target_trait =           c("IR" , "LAT"),
                         recombination_sd =       c(1.0,1.0),
@@ -141,7 +138,7 @@ simul_params <- allocateCultivarGenes(simul_params
 simul_params <- allocateCultivarGenes(simul_params
                                       , cultivarName = "Resistant3"
                                       , listGenesNames = c("nonhost resistance"))
-simul_params@Cultivars
+simul_params@CultivarsGenes
 
 ## -----------------------------------------------------------------------------
 croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop"
@@ -199,6 +196,81 @@ simul_params <- allocateLandscapeCroptypes(simul_params
 # plot(simul_params@Landscape)
 
 ## -----------------------------------------------------------------------------
+getMatrixGenePatho(simul_params)
+getMatrixCultivarPatho(simul_params)
+getMatrixCroptypePatho(simul_params)
+getMatrixPolyPatho(simul_params)[1:10,]
+
+## -----------------------------------------------------------------------------
+# Option 1: simply use the default parameterisation
+simul_params <- setInoculum(simul_params, 5E-4)
+ 
+# Option 2: use loadInoculum()
+Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
+Nhost <- nrow(simul_params@Cultivars)
+pI0 <- loadInoculum(simul_params, pI0_all=5E-4, pI0_host=c(1,rep(0, Nhost-1)), pI0_patho=c(1,rep(0, Npatho-1)))
+simul_params <- setInoculum(simul_params, pI0)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)  ## Nb of pathogen genotypes
+#  Nhost <- nrow(simul_params@Cultivars)  ## Nb of cultivars
+#  Npoly <- nrow(simul_params@Landscape)  ## Nb of polygons in the landscape
+#  Npoly_inoc <- 5  ## number of inoculated polygons
+#  compatible_poly <- getMatrixPolyPatho(simul_params)[,1]  ## whether the avr pathogen can infect the polygons
+#  id_poly <- sample(grep(1, compatible_poly), Npoly_inoc)  ## random polygon picked among compatible ones
+#  pI0_poly <- as.numeric(1:Npoly %in% id_poly)
+#  pI0 <- loadInoculum(simul_params, pI0_all=5E-4, pI0_host=c(1,rep(0, Nhost-1)), pI0_patho=c(1,rep(0, Npatho-1)),
+#                      pI0_poly=pI0_poly)
+#  simul_params <- setInoculum(simul_params, pI0)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  ## Example with 4 pathogen genotypes and 2 cultivars
+#  pI0 <- loadInoculum(simul_params, pI0_patho=c(1E-3,1E-4,1E-4,1E-5), pI0_host=c(1,1))
+#  simul_params <- setInoculum(simul_params, pI0)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  Npoly <- nrow(simul_params@Landscape)
+#  Npoly_inoc <- 5  ## number of inoculated polygons
+#  id_poly <- sample(1:Npoly, Npoly_inoc)  ## random polygon
+#  pI0_poly <- as.numeric(1:Npoly %in% id_poly)
+#  pI0 <- loadInoculum(simul_params, pI0_patho=c(1E-3,1E-4,1E-4,1E-5), pI0_host=c(1,1), pI0_poly=pI0_poly)
+#  simul_params <- setInoculum(simul_params, pI0)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  ## example with 2 cultivars, 4 pathogen genotypes and 5 fields
+#  Nhost=2
+#  Npatho=4
+#  Npoly=5
+#  pI0 <- array(data = 1:40 / 100, dim = c(Nhost, Npatho, Npoly))
+#  simul_params <- setInoculum(simul_params, pI0)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  corrected_pI0 <- loadInoculum(simul_params, pI0_mat=pI0)
+#  simul_params <- setInoculum(simul_params, corrected_pI0)
+
+## -----------------------------------------------------------------------------
+inoculumToMatrix(simul_params)[,,1:5]
+
+## -----------------------------------------------------------------------------
+Ncroptypes <- nrow(simul_params@Croptypes)
+Nyears <- simul_params@TimeParam$Nyears
+## Same probability in every croptype:
+simul_params <- updateSurvivalProb(simul_params, mat_year=1:Nyears/100)
+simul_params@Pathogen
+## Same probability every year:
+simul_params <- updateSurvivalProb(simul_params, mat_croptype=1:Ncroptypes/10)
+simul_params@Pathogen
+## specific probability for different croptypes and years:
+simul_params <- updateSurvivalProb(simul_params, mat_year=1:Nyears/100, mat_croptype=1:Ncroptypes/10)
+simul_params@Pathogen
+## One probability per year and per croptype:
+simul_params <- updateSurvivalProb(simul_params, mat=matrix(runif(Nyears*Ncroptypes), ncol=Ncroptypes))
+simul_params@Pathogen
+
+## -----------------------------------------------------------------------------
+survivalProbToMatrix(simul_params)
+
+## -----------------------------------------------------------------------------
 treatment <- list(treatment_degradation_rate = 0.1,
                   treatment_efficiency = 0.8,
                   treatment_timesteps =  seq(1,120,14) ,
@@ -219,13 +291,13 @@ audpc100S <- compute_audpc100S("sigatoka", "banana", area=1E6, nTSpY=182)
 ## -----------------------------------------------------------------------------
 simul_params <- setOutputs(simul_params, outputlist)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  checkSimulParams(simul_params)
 #  simul_params <- saveDeploymentStrategy(simul_params)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  runSimul(simul_params, graphic = TRUE, videoMP4 = FALSE)
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 system(paste("rm -rf ", simul_params@OutputDir))
 

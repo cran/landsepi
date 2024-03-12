@@ -6,7 +6,7 @@ simul_params <- setTime(simul_params, Nyears = 10, nTSpY = 120)
 simul_params <- setPathogen(simul_params, loadPathogen("rust"))
 simul_pathogen("rust")
 ## Initial conditions
-simul_params <- setInoculum(simul_params, 5e-4)
+# simul_params <- setInoculum(simul_params, 5e-4)
 
 ## Outputs
 simul_params <- setOutputs(simul_params, list(
@@ -317,9 +317,9 @@ server <- function(input, output, session) {
       simul_params <<- setTime(simul_params, Nyears = as.numeric(input$nYear), nTSpY = as.numeric(input$nTSpY))
       can_run_simul$nTSpY <<- TRUE
       if (input$patho_repro_sex_active == TRUE) {
-        simul_params <<- setReproSexProb(simul_params, c(rep(0, simul_params@TimeParam$nTSpY), 1))
+        simul_params <<- updateReproSexProb(simul_params, c(rep(0, simul_params@TimeParam$nTSpY), 1))
       } else {
-        simul_params <<- setReproSexProb(simul_params, rep(0, simul_params@TimeParam$nTSpY + 1))
+        simul_params <<- updateReproSexProb(simul_params, rep(0, simul_params@TimeParam$nTSpY + 1))
       }
     }
   })
@@ -386,7 +386,8 @@ server <- function(input, output, session) {
       can_run_simul$inoculum <<- FALSE
     }
     else {
-      simul_params <<- setInoculum(simul_params, input$inoculum)
+      #simul_params <<- setInoculum(simul_params, input$inoculum)
+      # Have to be set when all landscape, cultivars and pathogen have been set
       can_run_simul$inoculum <<- TRUE
     }
   })
@@ -573,12 +574,12 @@ server <- function(input, output, session) {
       # force check
       updateNumericInput(session = session, inputId = "patho_sex_propagule_viability_limit", value = simul_params@Pathogen$sex_propagule_viability_limit)
       updateNumericInput(session = session, inputId = "patho_sex_propagule_release_mean", value = simul_params@Pathogen$sex_propagule_release_mean)
-      simul_params <<- setReproSexProb(simul_params, c(rep(0, simul_params@TimeParam$nTSpY), 1))
+      simul_params <<- updateReproSexProb(simul_params, c(rep(0, simul_params@TimeParam$nTSpY), 1))
     }
     else {
       shiny::removeUI(selector = "#pathoDorLimError")
       shiny::removeUI(selector = "#pathoMuExpError")
-      simul_params <<- setReproSexProb(simul_params, rep(0, simul_params@TimeParam$nTSpY + 1))
+      simul_params <<- updateReproSexProb(simul_params, rep(0, simul_params@TimeParam$nTSpY + 1))
     }
   })
 
@@ -873,6 +874,8 @@ server <- function(input, output, session) {
     printVerbose(simul_params, level = 2)
 
     withProgress(message = "Running Simulation, please wait...", value = 0, {
+
+      simul_params <<- setInoculum(simul_params, input$inoculum)
       progressBar <- Progress$new()
       progressBar$set(value = NULL, message = "Running Simulation, please wait...")
       # setwd(paste0(ROOT_PATH,"/www/tmp/"))

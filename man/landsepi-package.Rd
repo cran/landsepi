@@ -4,7 +4,6 @@
 \encoding{UTF-8}
 \name{landsepi-package}
 \alias{landsepi-package}
-\alias{_PACKAGE}
 \alias{landsepi}
 \title{Landscape Epidemiology and Evolution}
 \description{
@@ -16,8 +15,8 @@ resistance deployment strategies.
 \tabular{ll}{
 Package: \tab landsepi\cr
 Type: \tab Package\cr
-Version: \tab 1.3.0\cr
-Date: \tab 2023-07-11\cr
+Version: \tab 1.4.0\cr
+Date: \tab 2024-02-12\cr
 License: \tab GPL (>=2)\cr
 }
 
@@ -61,8 +60,9 @@ Through mutation of pathogenicity genes, the pathogen can restore its aggressive
 adapt to resistance (leading to sudden breakdown or gradual erosion of resistance genes).
 Pathogenicity genes may also be reassorted via sexual reproduction or gene recombination.
 Increased aggressiveness on a resistant host (i.e. adaptation to the corresponding resistance genes)
-can be penalised by a fitness cost on susceptible hosts, i.e. pathogen genotypes adapted to a resistance gene have
-a reduced aggressiveness on hosts that do not carry this gene.
+can be penalised by a fitness cost, either on all hosts, or only on susceptible hosts (in the latter case,
+pathogen genotypes adapted to a resistance gene have a reduced aggressiveness on hosts that do not carry this gene,
+and a 'relative advantage' on host that do carry such gene).
 The relation between pathogen aggressiveness on susceptible and resistant hosts
 is defined by a trade-off relationship whose shape depends on the strength of the trade-off.
 Strong trade-off means that the gain in fitness on resistant hosts is smaller than the cost on susceptible hosts.
@@ -111,8 +111,8 @@ are fixed prior to simulations but only polygons where disease severity exceeds 
 interaction nor competition for space, and harvests are segregated). If one component is treated
 with a chemical, it does not affect other components.
 \item The pathogen is haploid.
-\item Initially, the pathogen is not adapted to any source of resistance, and is only present on
-susceptible hosts (at state I).
+\item \strong{Initially, the pathogen is not adapted to any source of resistance, and is only present on
+susceptible hosts (at state I).}
 \item \strong{Pathogen dispersal is isotropic (i.e. equally probable in every direction).}
 \item \strong{Boundaries of the landscape are reflective: propagules stay in the system as if it was closed.}
 \item Pathogen reproduction can be purely clonal, purely sexual, or mixed (alternation of clonal
@@ -129,8 +129,9 @@ parental traits, following the infinitesimal model (Fisher 1919).
 (e.g. infection rate, latent period duration, etc.) but each of them has their own dispersal and survival
 abilities (see after).
 \item At the end of each cropping season, pathogens experience a bottleneck representing the
-off-season and then propagules are produced (either via clonal or sexual reproduction). Clonal
-propagules are released during the following season only, either altogether at the first day of
+off-season and then propagules are produced (either via clonal or sexual reproduction).
+\strong{The probability of survival is the same every year and in every polygon.}
+Clonal propagules are released during the following season only, either altogether at the first day of
 the season, or progressively (in that case the day of release of each propagule is sampled from
 a uniform distribution). Sexual propagules are gradually released during several of the following
 seasons (between-season release). The season of release of each propagule is sampled from an
@@ -140,7 +141,8 @@ given season is sampled from a uniform distribution (within-season release).
 \item \strong{Pathogen adaptation to a given resistance gene consists in restoring the same aggressiveness
 component as the one targeted by the resistance gene.}
 \item If a fitness cost penalises pathogen adaptation to a given resistance gene, this cost is paid
-on hosts that do not carry this gene, and consists in a reduction in the same aggressiveness
+\strong{on hosts that do not carry this gene, or, alternatively, on all hosts with possibly a relative
+advantage on hosts carrying the resistance gene}. It consists in a reduction in the same aggressiveness
 component as the one targeted by the resistance gene.
 \item When there is a delay for activation of a given resistance gene (APR), the age of activation
 is the same for all hosts carrying this gene and located in the same polygon.
@@ -189,7 +191,7 @@ the cost of a single application) in monetary units per hectare.
 
 Future versions of the package will include in particular:\itemize{
 \item Sets of pathogen parameters to simulate other pathosystems (e.g. Cucumber mosaic virus on pepper, potato virus Y on pepper).
-\item More flexible initial conditions (e.g. size, location and composition of pathogen inoculum at the beginning of the simulation).
+\item An updated version of the shiny interface.
 }
 \strong{Dependencies:}
 
@@ -257,6 +259,8 @@ Jean-Francois Rey \email{jean-francois.rey@inrae.fr}
 Marta Zaffaroni \email{marta.zaffaroni@inrae.fr}
 
 Jean-Loup Gaussen \email{jean-loup-thomas.gaussen@inrae.fr}
+
+Manon Couty \email{manon.couty@insa-lyon.fr}
 
 Maintainer: Jean-Francois Rey \email{jean-francois.rey@inrae.fr}
 }

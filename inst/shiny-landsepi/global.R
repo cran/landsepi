@@ -167,7 +167,7 @@ checkCultivarsTable <- function(data) {
       || sum(grepl("^\\s*$",as.character(data[,"cultivarName"]))) != 0) {
     
     showErrorMessage(id = "cultivarsNameError", selectorafter= "#generateLandscape",
-                     message = "Cultivar names must be strings")
+                     message = "Cultivar names must be strings without spaces")
     isok <- FALSE
   }
   
@@ -268,9 +268,9 @@ checkGenesTable <- function(data){
   }
   
   shiny::removeUI(selector = "#GenesUpper1Error")
-  if( sum(data[, c("efficiency", "mutation_prob", "adaptation_cost", "recombination_sd")] > 1) != 0) {
+  if( sum(data[, c("efficiency", "mutation_prob", "adaptation_cost", "relative_advantage", "recombination_sd")] > 1) != 0) {
     showErrorMessage(id = "GenesUpper1Error", selectorafter= "#generateLandscape",
-                     message = paste0("Gene 'efficiency' / 'mutation_prob' / 'adaptation_cost' / 'recombination_sd' values should lower than 1"))
+                     message = paste0("Gene 'efficiency' / 'mutation_prob' / 'adaptation_cost' / 'relative_advantage' / 'recombination_sd' values should lower than 1"))
     isok <- FALSE
   }
   
@@ -500,10 +500,10 @@ STOP_SIMULATION <- "Force to stop the simulation"
 EXPORT_SIMULATION <- "Download a GPKG and txt files containing most of the parameters"
 ROTATION_PERIOD <- "Rotation period, in years, between two configurations: (1) croptypes 0 and 1; and (2) croptypes 0 and 2. If Rotation period is 0, there is no rotation"
 
-CULTIVARS_TOOLTIP <- c("Name of the cultivar",
+CULTIVARS_TOOLTIP <- c("Name of the cultivar (DO NOT INCLUDE SPACES)",
                       "Host individuals density (in pure crop) per surface unit at the beginning of the cropping season",
                       "Maximum host individuals density (in pure crop) per surface unit at the end of the cropping season",
-                      "Growth rate",
+                      "Growth rate of the host",
                       "Reproduction rate",
                       "Theoretical yield in pure crop (in weight or volume unit / ha / cropping season) associated with the sanitary status ‘H’",
                       "Theoretical yield in pure crop (in weight or volume unit / ha / cropping season) associated with the sanitary status ‘L’",
@@ -517,7 +517,8 @@ GENES_TOOLTIP <- c("Name of the resistance gene",
                    "Variance of the delay to resistance activation (for APRs)",
                    "Probability for a pathogenicity gene to mutate",
                    "Number of adaptation levels related to each resistance gene (i.e. 1 + number of required mutations for a pathogenicity gene to fully adapt to the corresponding resistance gene)",
-                   "maximal fitness penalty paid by a pathogen genotype fully adapted to the resistance gene on hosts that do not carry this gene",
+                   "Fitness penalty paid by a pathogen genotype fully adapted to the resistance gene on all hosts",
+                   "Fitness advantage of a pathogen genotype fully adapted to the resistance gene on hosts carrying this gene, relative to those that do not carry this gene",
                    "Strength of the trade-off relationship between the level of aggressiveness hosts that do and do not carry the resistance gene",
                    "Aggressiveness component targeted by the resistance gene",
                    "Variance for sexual recombination (only QTL)")

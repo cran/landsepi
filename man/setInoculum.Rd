@@ -9,14 +9,28 @@ setInoculum(params, val = 5e-04)
 \arguments{
 \item{params}{a LandsepiParams object.}
 
-\item{val}{a numeric value (default = 5e-4). Must be between 0 and 1.}
+\item{val}{a numeric value (default = 5e-4) indicating the probability for the first cultivar
+to be infected by the first pathogen genotype in all polygons of the landscape
+(must be between 0 and 1).
+The parameter can also be entered as a 3D array of dimensions (1:Nhost,1:Npatho,1:Npoly)
+indicating the initial probability to be infectious, for each cultivar, pathogen genotype and
+polygon (independently from the possible presence of cultivars carrying resistance genes).
+It can be generated manually or, alternatively, via \code{\link{loadInoculum}}.}
 }
 \value{
 a LandsepiParams object
 }
 \description{
-Updates a LandsepiParams object with the initial probability for the first host
-(whose index is 0) to be infectious (i.e. state I) at the beginning of the simulation.
+Updates a LandsepiParams object with the initial probability for an individual host
+to be infectious (i.e. state I) at the beginning of the simulation (i.e. t=0).
+}
+\details{
+Before setting the inoculum, one can use \code{getMatrixGenePatho()},
+\code{getMatrixCultivarPatho()},
+\code{getMatrixCroptypePatho()} and \code{getMatrixPolyPatho()} to acknowledge which
+pathogen genotypes are compatible to which genes, cultivars, croptypes and polygons.\cr
+Once \code{setInoculum()} is used, one can call \code{inoculumToMatrix()} to get
+the inoculum as a 3D array (1:Nhost,1:Npatho,1:Npoly)\cr
 }
 \examples{
 \dontrun{
@@ -24,4 +38,7 @@ simul_params <- createSimulParams()
 simul_params <- setInoculum(simul_params, 1E-3)
 simul_params@PI0
 }
+}
+\seealso{
+\link{inoculumToMatrix}, \link{loadInoculum}
 }

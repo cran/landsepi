@@ -18,7 +18,7 @@ a vectorised dispersal matrix.
 It loads a vectorised diagonal matrix to simulate no host dispersal.
 }
 \details{
-as the size of the matrix depends on the number of fields in the landscape,
+as the size of the matrix depends on the number of polygons in the landscape,
 the landscape must be defined before calling \code{loadDispersalHost}.
 }
 \examples{

@@ -26,6 +26,7 @@
 .cultivarsGenesColNames <- c()
 .geneColNames <- c("geneName", "efficiency", "age_of_activ_mean", "age_of_activ_var"
                    , "mutation_prob", "Nlevels_aggressiveness", "adaptation_cost"
+                   , "relative_advantage"
                    , "tradeoff_strength", "target_trait", "recombination_sd")
 
 
@@ -44,18 +45,17 @@
 #' the evolution of each corresponding pathogenicity gene.
 #' @param Pathogen a list of pathogen aggressiveness parameters on a susceptible host
 #' for a pathogen genotype not adapted to resistance.
-#' @param ReproSexProb a vector of size TimeParam$nTSpY +1 (end of season) of the probabilities for an infectious host to reproduce via sex rather 
-#' than via cloning at each time step (days).
-#' @param PI0 initial probability for the first host (whose index is 0) to be infectious 
-#' (i.e. state I) at the beginning of the simulation. Must be between 0 and 1.
+#' @param PI0 vector of length Npoly.Nhost.Npatho filled with the initial probabilities for hosts 
+#' to be infectious (i.e. state I), for each pathogen genotype,
+#' at the beginning of the simulation.
 #' @param DispHost a vectorized matrix giving the probability of host dispersal
-#' from any field of the landscape to any other field
+#' from any polygon of the landscape to any other polygon
 #' @param DispPathoClonal a vectorized matrix giving the probability of pathogen dispersal
-#' from any field of the landscape to any other field.
+#' from any polygon of the landscape to any other polygon.
 #' @param DispPathoSex a vectorized matrix giving the probability of pathogen dispersal
-#' from any field of the landscape to any other field (sexual propagule).
-#' @param Treatment a list of chemical treatment parameters (indices of treated cultivars, times of application, 
-#' efficiency and degradation rate)
+#' from any polygon of the landscape to any other polygon (sexual propagule).
+#' @param Treatment a list of chemical treatment parameters (indices of treated cultivars, 
+#' times of application, efficiency and degradation rate)
 #' @param OutputDir the directory for simulation outputs 
 #' @param OutputGPKG the name of the output GPKG file containing parameters of the 
 #' deployment strategy
@@ -94,8 +94,8 @@ setMethod(
              sex_propagule_release_mean = 0,
              clonal_propagule_gradual_release = 0
            ),
-           ReproSexProb = vector(),
-           PI0 = 0,
+           # ReproSexProb = vector(),
+           PI0 = 0, #vector(),
            DispHost = vector(),
            DispPathoClonal = vector(),
            DispPathoSex = vector(),
@@ -121,7 +121,7 @@ setMethod(
     .Object@CultivarsGenes <- CultivarsGenes
     .Object@Genes <- Genes
     .Object@Pathogen <- Pathogen
-    .Object@ReproSexProb <- ReproSexProb
+    # .Object@ReproSexProb <- ReproSexProb
     .Object@PI0 <- PI0
     .Object@DispHost <- DispHost
     .Object@DispPathoClonal <- DispPathoClonal
@@ -165,14 +165,14 @@ setMethod("print", "LandsepiParams", function(x, ...) {
   print(x@Genes)
   print("### Pathogen")
   print(x@Pathogen)
-  print("### Pathogen ReproSexProb")
-  print(x@ReproSexProb)
+  # print("### Pathogen ReproSexProb")
+  # print(x@ReproSexProb)
 
   print("### Treatment")
   print(x@Treatment)
   
   print("### Inoculum : ")
-  print(x@PI0)
+  print(inoculumToMatrix(x))
   print("### Nyears : ")
   print(x@TimeParam$Nyears)
   print("### nTSpY Number of step by year : ")
@@ -239,8 +239,8 @@ setMethod("summary", "LandsepiParams", function(object) {
   } else {
     summary(object@Pathogen)
   }
-  message("### Reproduction Sex Probabilities :")
-  summary(object@ReproSexProb)
+  # message("### Reproduction Sex Probabilities :")
+  # summary(object@ReproSexProb)
 
   message("### Pathogen Dispersal Matrix (as vector) : ")
   if (length(object@DispPathoClonal) == 0) {
@@ -263,7 +263,7 @@ setMethod("summary", "LandsepiParams", function(object) {
     summary(object@DispHost)
   }
 
-  message("### Inoculum : ", object@PI0)
+  message("### Inoculum : ", inoculumToMatrix(object))
   
   message("### Treatment")
   summary(object@Treatment)
@@ -309,6 +309,7 @@ checkSimulParams <- function(params) {
   validity <- validity && checkDispersalHost(params)
   validity <- validity && checkDispersalPathogen(params)
   validity <- validity && checkInoculum(params)
+  #validity <- validity && checkInoculumLandscape(params)
   validity <- validity && checkTime(params)
   validity <- validity && checkOutputs(params)
   
@@ -328,7 +329,7 @@ checkSimulParams <- function(params) {
 #' \itemize{
 #' \item random seed
 #' \item all pathogen parameters fixed at 0
-#' \item no between-field dispersal (neither pathogen nor host)
+#' \item no between-polygon dispersal (neither pathogen nor host)
 #' \item no pathogen introduction
 #' \item no resistance gene
 #' \item no chemical treatment
@@ -385,7 +386,7 @@ loadSimulParams <- function(inputGPKG = "") {
   ## TODO get all parameters from GPKG and parameters.txt if exist
   ## TODO: doesn't seem to work with croptypes, cultivars and cultivarGenes
 
-  message("not implemented yet for DispHost, DispPathoClonal, PI0, pathogen, seed, time, outputs...")
+  message("Not yet implemented for DispHost, DispPathoClonal, PI0, pathogen, time, outputs...")
 
   return(lp)
 }
@@ -445,7 +446,8 @@ loadSimulParams <- function(inputGPKG = "") {
 #' simul_params <- saveDeploymentStrategy(simul_params)
 #' }
 #' @export
-saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg", overwrite = FALSE) {
+saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg"
+                                   , overwrite = FALSE) {
   
   params@OutputGPKG <- outputGPKG
   
@@ -469,7 +471,7 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
     }
   }
 
-  # try to add one more fields (year_Nyears+1), if missing
+  # try to add one more polygons (year_Nyears+1), if missing
   if (length(grep("^year_", colnames(params@Landscape))) == params@TimeParam$Nyears) {
     params@Landscape[, paste0("year_", params@TimeParam$Nyears + 1)] <- as.data.frame(
       params@Landscape[, paste0("year_", params@TimeParam$Nyears)])[, 1]
@@ -517,12 +519,12 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' Works only if graphic=TRUE and audpc_rel is computed.
 #' @param keepRawResults a logical indicating if binary files must be kept after the end of 
 #' the simulation (default=FALSE). Careful, many files may be generated if keepRawResults=TRUE.
-#' @details See ?landsepi for details on the model, assumptions and outputs, and our vignettes 
-#' for tutorials (\code{browseVignettes("landsepi")}). The function runs the model simulation using 
-#' a LandsepiParams object.
+#' @details See \code{?landsepi} for details on the model, assumptions and outputs, and our 
+#' vignettes for tutorials (\code{browseVignettes("landsepi")}). The function runs the model 
+#' simulation using a LandsepiParams object.
 #' Briefly, the model is stochastic, spatially explicit (the basic spatial unit is an 
-#' individual field), based on a SEIR (‘susceptible-exposed-infectious-removed’, renamed HLIR 
-#' for 'healthy-latent-infectious-removed' to avoid confusions with 'susceptible host') 
+#' individual field or polygon), based on a SEIR (‘susceptible-exposed-infectious-removed’, 
+#' renamed HLIR for 'healthy-latent-infectious-removed' to avoid confusions with 'susceptible host') 
 #' structure with a discrete time step. It simulates the spread and
 #'  evolution (via mutation, recombination through sexual reproduction, selection and drift) 
 #'  of a pathogen in a heterogeneous cropping landscape, across cropping seasons split 
@@ -542,10 +544,10 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #'  \item I: infectious hosts,
 #'  \item R: removed hosts,
 #'  \item P: propagules.}
-#' Each file indicates for every time step the number of individuals in each field, and when 
+#' Each file indicates for every time step the number of individuals in each polygon, and when 
 #' appropriate for each host and pathogen genotype. Additionally, a binary file called TFI is 
-#' generated and gives the Treatment Frequency Indicator (expressed as the number of treatment applications 
-#'  per polygon).
+#' generated and gives the Treatment Frequency Indicator (expressed as the number of treatment 
+#' applications per polygon).
 #' @seealso \link{demo_landsepi}
 #' @examples \dontrun{
 #' ### Here is an example of simulation of a mosaic of three cultivars (S + R1 + R2). See our 
@@ -555,9 +557,8 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' ## Seed & Time parameters
 #' simul_params <- setSeed(simul_params, seed = 1)
 #' simul_params <- setTime(simul_params, Nyears = 10, nTSpY = 120)
-#' ## Pathogen & inoculum parameters
+#' ## Pathogen parameters
 #' simul_params <- setPathogen(simul_params, loadPathogen("rust"))
-#' simul_params <- setInoculum(simul_params, 5e-4)
 #' ## Landscape & dispersal
 #' simul_params <- setLandscape(simul_params, loadLandscape(1))
 #' simul_params <- setDispersalPathogen(simul_params, loadDispersalPathogen[[1]])
@@ -591,6 +592,8 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' simul_params <- allocateLandscapeCroptypes(simul_params, rotation_period = rotation_period,
 #' rotation_sequence = rotation_sequence,
 #' rotation_realloc = FALSE, prop = prop, aggreg = aggreg)
+#' Set the inoculum
+#' simul_params <- setInoculum(simul_params, 5e-4)
 #' ## list of outputs to be generated
 #' simul_params <- setOutputs(simul_params, loadOutputs())
 #' ## Check simulation parameters
@@ -618,19 +621,22 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #'simul_params <- setLandscape(simul_params, myLand)
 #'
 #'## Simulation, pathogen, landscape and dispersal parameters
-#'simul_params <- setInoculum(simul_params, 5e-4)
 #'simul_params <- setDispersalPathogen(simul_params, c(1))
 #'
 #'## Cultivars
 #'simul_params <- setCultivars(simul_params, loadCultivar(name = "Susceptible", type = hostType))
 #'
 #'## Croptypes
-#'croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop"), Susceptible = 1)
+#'croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop")
+#', Susceptible = 1)
 #'simul_params <- setCroptypes(simul_params, croptype)
 #'simul_params <- allocateLandscapeCroptypes(simul_params,
 #'rotation_period = 0, rotation_sequence = list(c(0)),
 #'rotation_realloc = FALSE, prop = 1, aggreg = 1)
 #'
+#'## Inoculum
+#' simul_params <- setInoculum(simul_params, 5e-4)
+#' 
 #'## list of outputs to be generated
 #'outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "")
 #'simul_params <- setOutputs(simul_params, outputlist)
@@ -646,7 +652,7 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 runSimul <- function(params, graphic=TRUE, writeTXT=TRUE, videoMP4=FALSE, keepRawResults=FALSE) {
 
   ### !!!!! BE CAREFUL !!!!! ###
-  ### croptypes, cultivars, genes and cultivarsGenes have to be ordored all in the same way
+  ### croptypes, cultivars, genes and cultivarsGenes have to be ordered all in the same way
   ### ID have to match row index and col index
 
   initPath <- getwd()
@@ -678,6 +684,8 @@ runSimul <- function(params, graphic=TRUE, writeTXT=TRUE, videoMP4=FALSE, keepRa
   rotation <- as.matrix(cdf[, grep("^year_", colnames(cdf))], ncol = ncol)
   croptypes_cultivars_prop <- params2CroptypeBDD(params)[, c(2, 3, 4)]
 
+  
+  
   ## Run the simulation
   outputs <- simul_landsepi(
     seed = params@Seed,
@@ -691,7 +699,7 @@ runSimul <- function(params, graphic=TRUE, writeTXT=TRUE, videoMP4=FALSE, keepRa
     rotation = rotation,
     croptypes_cultivars_prop = croptypes_cultivars_prop,
     basic_patho_param = params@Pathogen,
-    repro_sex_prob = params@ReproSexProb,
+    # repro_sex_prob = params@ReproSexProb,
     disp_patho_clonal = params@DispPathoClonal,
     disp_patho_sex = params@DispPathoSex,
     disp_host = params@DispHost,
@@ -851,7 +859,7 @@ setLandscape <- function(params, land) {
 #' @name loadLandscape
 #' @title Load a landscape
 #' @description Loads one of the five built-in landscapes simulated using a T-tesselation algorithm 
-#' and composed of 155, 154, 152, 153 and 156 fields, respectively.
+#' and composed of 155, 154, 152, 153 and 156 polygons, respectively.
 #' Each landscape is identified by a numeric from 1 to 5.
 #' @param id a landscape ID between 1 to 5 (default = 1)
 #' @return a landscape in sp format
@@ -908,23 +916,25 @@ checkLandscape <- function(params) {
 #' @name setDispersalPathogen
 #' @title Set pathogen dispersal
 #' @description Updates a LandsepiParams object with a pathogen dispersal matrix.
+#' Note that landscape parameters must be set before updating setting dispersal.
 #' @details See tutorial (vignettes) on how to 
 #' use your own landscape and compute your own pathogen dispersal kernel. 
-#' The disersal matrix a square matrix whose size is the number of fields in the landscape and whose elements are, 
-#' for each line i and each column i' the probability that propagules migrate from field i to field i'. 
+#' The dispersal matrix a square matrix whose size is the number of polygons in the landscape 
+#' and whose elements are, for each line i and each column i' the probability that propagules 
+#' migrate from polygon i to polygon i'. 
 #' Lines of the matrix can be normalised to sum to 1 (reflective boundaries); 
 #' otherwise propagules dispersing outside the landscape are lost (absorbing boundaries).  
 #' @param params a LandsepiParams Object.
-#' @param mat_clonal a square matrix giving the probability of pathogen dispersal (clonal propagules)
-#' from any field of the landscape to any other field. 
+#' @param mat_clonal a square matrix giving the probability of pathogen dispersal 
+#' (clonal propagules) from any polygon of the landscape to any other polygon. 
 #' It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}. 
-#' The size of the matrix must match the number of fields in the landscape, and lines of the matrix may sum 
-#' to 1 (reflecting boundaries) or be <1 (absorbing boundaries).
+#' The size of the matrix must match the number of polygons in the landscape, and lines of 
+#' the matrix may sum to 1 (reflecting boundaries) or be <1 (absorbing boundaries).
 #' @param mat_sex a square matrix giving the probability of pathogen dispersal (sexual propagules) 
-#' from any field of the landscape to any other field (default identity matrix) . 
+#' from any polygon of the landscape to any other polygon (default identity matrix) . 
 #' It can be generated manually, or, alternatively, via \code{\link{loadDispersalPathogen}}. 
-#' The size of the matrix must match the number of fields in the landscape, and lines of the matrix may sum 
-#' to 1 (reflecting boundaries) or be <1 (absorbing boundaries).
+#' The size of the matrix must match the number of polygons in the landscape, and lines of 
+#' the matrix may sum to 1 (reflecting boundaries) or be <1 (absorbing boundaries).
 #' @return a LandsepiParam object.
 #' @seealso \link{loadDispersalPathogen}
 #' @examples
@@ -944,7 +954,8 @@ setDispersalPathogen <- function(params, mat_clonal, mat_sex=NULL) {
   }
   
   if(is.null(mat_sex)) {
-    params@DispPathoSex = c(diag(1,sqrt(length(params@DispPathoClonal)), sqrt(length(params@DispPathoClonal))))
+    params@DispPathoSex = c(diag(1,sqrt(length(params@DispPathoClonal))
+                                 , sqrt(length(params@DispPathoClonal))))
   }
   else {
     if (class(mat_sex)[1] == "matrix") {
@@ -962,9 +973,9 @@ setDispersalPathogen <- function(params, mat_clonal, mat_sex=NULL) {
 
 #' @name loadDispersalPathogen
 #' @title Load pathogen dispersal matrices
-#' @description It loads one of the five built-in vectorised dispersal matrices of rust fungi associated with the 
-#' five built-in landscapes. Landscape and DispersalPathogen ID must be the same. And set a vectorized identity matrix 
-#' for sexual reproduction dispersal.
+#' @description It loads one of the five built-in vectorised dispersal matrices of rust fungi 
+#' associated with the five built-in landscapes. Landscape and DispersalPathogen ID must be 
+#' the same. And set a vectorized identity matrix for sexual reproduction dispersal.
 #' @param id a matrix ID between 1 to 5 (must match the ID of the landscape loaded with 
 #' \code{\link{loadLandscape}}).
 #' @details *landsepi* includes built-in dispersal matrices to represent rust dispersal in the 
@@ -1032,15 +1043,16 @@ checkDispersalPathogen <- function(params) {
 #' @name setDispersalHost
 #' @title Set host dispersal
 #' @description Updates a LandsepiParams object with a host dispersal matrix.
-#' @details the dispersal matrix gives the probability for a host individual in a field i (row)
-#' to migrate to field j (column) through dispersal. 
+#' Note that landscape parameters must be set before updating setting dispersal.
+#' @details the dispersal matrix gives the probability for a host individual in a polygon i (row)
+#' to migrate to polygon j (column) through dispersal. 
 #' If the host is a cultivated plant: seeds are harvested and do not disperse. 
 #' Thus the dispersal matrix is the identity matrix.
 #' @param params a LandsepiParams Object.
 #' @param mat a square matrix giving the probability of host dispersal
-#' from any field of the landscape to any other field. 
+#' from any polygon of the landscape to any other polygon. 
 #' It can be generated manually, or, alternatively, via \code{\link{loadDispersalHost}}.
-#' The size of the matrix must match the number of fields in the landscape.
+#' The size of the matrix must match the number of polygons in the landscape.
 #' @return a LandsepiParam object.
 #' @seealso \link{loadDispersalHost}
 #' @examples
@@ -1069,7 +1081,7 @@ setDispersalHost <- function(params, mat) {
 #' @name loadDispersalHost
 #' @title Load a host dispersal matrix
 #' @description It loads a vectorised diagonal matrix to simulate no host dispersal.
-#' @details as the size of the matrix depends on the number of fields in the landscape, 
+#' @details as the size of the matrix depends on the number of polygons in the landscape, 
 #' the landscape must be defined before calling \code{loadDispersalHost}. 
 #' @param params a LandsepiParams Object.
 #' @param type a character string specifying the type of dispersal ("no" for no dispersal)
@@ -1125,8 +1137,10 @@ checkDispersalHost <- function(params) {
 #' @name allocateLandscapeCroptypes
 #' @title Allocate croptypes to the landscape
 #' @description Updates the landscape of a LandsepiParams object with croptype allocation in 
-#' every field of the landscape and every year of simulation. Allocation is based on an algorithm 
+#' every polygon of the landscape and every year of simulation. Allocation is based on an algorithm 
 #' which controls croptype proportions (in surface) and spatio-temporal aggregation.
+#' Note that time, landscape and croptype parameters must be set before allocating 
+#' landscape croptypes.
 #' @param params a LandsepiParams Object.
 #' @param rotation_period number of years before rotation of the landscape. There is no rotation 
 #' if rotation_period=0 or rotation_period=Nyears.
@@ -1156,26 +1170,26 @@ checkDispersalHost <- function(params) {
 #' If algo="random", the parameter aggreg is not used. 
 #' Algorithm "exp" is preferable for big landscapes.
 #' @param graphic a logical indicating if graphics must be generated (TRUE) or not (FALSE).
-#' @details An algorithm based on latent Gaussian fields is used to allocate two different croptypes 
-#' across the simulated landscapes (e.g. a susceptible and a resistant cultivar, denoted as 
-#' SC and RC, respectively). This algorithm allows the control of the proportions of each croptype 
-#' in terms of surface coverage, and their level of spatial aggregation. 
+#' @details An algorithm based on latent Gaussian fields is used to allocate two different 
+#' croptypes across the simulated landscapes (e.g. a susceptible and a resistant cultivar, 
+#' denoted as SC and RC, respectively). This algorithm allows the control of the proportions of 
+#' each croptype in terms of surface coverage, and their level of spatial aggregation. 
 #' A random vector of values is drawn from a multivariate normal distribution with expectation 0 
 #' and a variance-covariance matrix which depends on the pairwise distances between
-#' the centroids of the fields. Next, the croptypes are allocated to different fields 
+#' the centroids of the polygons. Next, the croptypes are allocated to different polygons 
 #' depending on whether each value drawn from the multivariate normal distribution is above 
-#' or below a threshold. The proportion of each cultivar in the landscape is controlled by the value
-#' of this threshold. To allocate more than two croptypes, \code{AgriLand} uses sequentially 
-#' this algorithm. For instance, the allocation of three croptypes (e.g. SC, RC1 and RC2) 
-#' is performed as follows:
+#' or below a threshold. The proportion of each cultivar in the landscape is controlled by 
+#' the value of this threshold. To allocate more than two croptypes, \code{AgriLand} uses 
+#' sequentially this algorithm. For instance, the allocation of three croptypes 
+#' (e.g. SC, RC1 and RC2) is performed as follows:
 #' \enumerate{
-#' \item the allocation algorithm is run once to segregate the fields where the susceptible 
+#' \item the allocation algorithm is run once to segregate the polygons where the susceptible 
 #' cultivar is grown, and
 #' \item the two resistant cultivars (RC1 and RC2) are assigned to the remaining candidate 
-#' fields by re-running the allocation algorithm.
+#' polygons by re-running the allocation algorithm.
 #' }
 #' @return a LandsepiParams object with Landscape updated with the layer "croptypeID". 
-#' It contains croptype allocation in every field of the landscape for all years of simulation.
+#' It contains croptype allocation in every polygon of the landscape for all years of simulation.
 #' @examples
 #' \dontrun{
 #' ## Initialisation
@@ -1240,21 +1254,24 @@ allocateLandscapeCroptypes <- function(params, rotation_period, rotation_sequenc
 
 #' @name loadTreatment
 #' @title Load treatment parameters
-#' @description Loads the list of treatment parameters required by the model (initialised at 0
+#' @description Loads a list of treatment parameters for a specific disease (initialised at 0
 #' , i.e. absence of treatments)
-#' @details Chemical treatment is applied in a polygon only if disease severity (i.e. I/N) in this polygon 
-#' exceeds the threshold given by `treatment_application_threshold`. 
+#' @param disease a disease name, among "mildew", "sigatoka" and "no pathogen"
+#' @details Chemical treatment is applied in a polygon only if disease severity (i.e. I/N) in 
+#' this polygon exceeds the threshold given by `treatment_application_threshold`. 
 #' Treatment efficiency is maximum (i.e. equal to the parameter treatment_efficiency) 
 #' at the time of treatment application (noted \eqn{t*}); then it decreases with time 
-#' (i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:
+#' (i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected 
+#' by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:
 #' \eqn{ efficiency(t) = treatment\_efficiency / (1 + exp(a-b*C(t))) }
 #' with \eqn{ C(t)= C_1 * C_2}: \itemize{
 #' \item{\eqn{C_1 = exp(- treatment\_degradation\_rate * \Delta t) } is the reduction of 
 #' fungicide concentration due to time (e.g. natural degradation, volatilization, weathering), 
 #' with \eqn{\Delta t = t - t*} the timelag passed since the time of 
 #' treatment application.}
-#' \item{ \eqn{ C_2 = min(1, N(t*) / N(t)) } is the reduction of fungicide concentration due to plant growth, 
-#' since new plant tissue is not covered by fungicide. \eqn{N(t*)} and \eqn{N(t)} being the number of 
+#' \item{ \eqn{ C_2 = min(1, N(t*) / N(t)) } is the reduction of fungicide concentration due 
+#' to plant growth, since new plant tissue is not covered by fungicide. 
+#' \eqn{N(t*)} and \eqn{N(t)} being the number of 
 #' host individuals  a the time of treatment \eqn{t*} and at time \eqn{t}, respectively.}
 #' \item{ \eqn{a \in [3.5 ; 4.5]} and \eqn{b \in [8 ; 9]} are shape parameters.}
 #' } 
@@ -1266,56 +1283,79 @@ allocateLandscapeCroptypes <- function(params, rotation_period, rotation_sequenc
 #' \item treatment_timesteps = vector of time steps corresponding to treatment application dates,
 #' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 #' \item treatment_cost = cost of a single treatment application (monetary units/ha)
-#' \item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar) 
-#' above which the treatment is applied in a polygon.
+#' \item treatment_application_threshold = vector of thresholds (i.e. disease severity, one 
+#' for each treated cultivar) above which the treatment is applied in a polygon.
 #' }
 #' @seealso \link{setTreatment}
 #' @examples
-#' treat <- loadTreatment()
+#' treat <- loadTreatment("sigatoka")
 #' treat
 #' @export
-loadTreatment <- function() {
-  treatment <- list(
-                treatment_degradation_rate = 0.1,
-                treatment_efficiency = 0.0,
-                treatment_timesteps = numeric(),
-                treatment_cultivars = numeric(),
-                treatment_cost = 0,
-                treatment_application_threshold = numeric()
-                )
+loadTreatment <- function(disease="no pathogen") {
+  treatment <- switch(disease,
+                      "mildew" = list(treatment_degradation_rate = 0.1,
+                                      treatment_efficiency = 0.0,
+                                      treatment_timesteps = numeric(),
+                                      treatment_cultivars = numeric(),
+                                      treatment_cost = 0,
+                                      treatment_application_threshold = numeric())
+                      
+                      , "sigatoka" = list(treatment_degradation_rate = 0.1,
+                                          treatment_efficiency = 1.0,
+                                          treatment_timesteps = seq(5,182,5),
+                                          treatment_cultivars = 0,
+                                          treatment_cost = 1,
+                                          treatment_application_threshold = 0)
+                      
+                      , list(treatment_degradation_rate = 0.1,
+                             treatment_efficiency = 0.0,
+                             treatment_timesteps = numeric(),
+                             treatment_cultivars = numeric(),
+                             treatment_cost = 0,
+                             treatment_application_threshold = numeric())
+  )
+  
+  if (length(treatment) == 0) {
+    warning('Unknown type of disease: "', disease
+            , '". Currently the only possible types are: "midlew", "sigatoka"')
+  }
   return(treatment)
 }
 
 #' @name setTreatment
 #' @title Set chemical treatments
 #' @description Updates a LandsepiParams object with treatment parameters
-#' @details Chemical treatment is applied in a polygon only if disease severity (i.e. I/N) in this polygon 
-#' exceeds the threshold given by `treatment_application_threshold`. 
+#' @details Chemical treatment is applied in a polygon only if disease severity (i.e. I/N) in 
+#' this polygon exceeds the threshold given by `treatment_application_threshold`. 
 #' Treatment efficiency is maximum (i.e. equal to the parameter treatment_efficiency) 
 #' at the time of treatment application (noted \eqn{t*}); then it decreases with time 
-#' (i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:
+#' (i.e. natural pesticide degradation) and host growth (i.e. new biomass is not protected 
+#' by treatments):                                                                                                                                                                                     protected by treatments):Efficiency of the treatment at time t after the application date is given by:
 #' \eqn{ efficiency(t) = treatment\_efficiency / (1 + exp(a-b*C(t))) }
 #' with \eqn{ C(t)= C_1 * C_2}: \itemize{
 #' \item{\eqn{C_1 = exp(- treatment\_degradation\_rate * \Delta t) } is the reduction of 
 #' fungicide concentration due to time (e.g. natural degradation, volatilization, weathering), 
 #' with \eqn{\Delta t = t - t*} the timelag passed since the time of 
 #' treatment application.}
-#' \item{ \eqn{ C_2 = min(1, N(t*) / N(t)) } is the reduction of fungicide concentration due to plant growth, 
-#' since new plant tissue is not covered by fungicide. \eqn{N(t*)} and \eqn{N(t)} being the number of 
+#' \item{ \eqn{ C_2 = min(1, N(t*) / N(t)) } is the reduction of fungicide concentration due 
+#' to plant growth, since new plant tissue is not covered by fungicide. 
+#' \eqn{N(t*)} and \eqn{N(t)} being the number of 
 #' host individuals  a the time of treatment \eqn{t*} and at time \eqn{t}, respectively.}
 #' \item{ \eqn{a \in [3.5 ; 4.5]} and \eqn{b \in [8 ; 9]} are shape parameters.}
 #' } 
-#' An empty list of treatments (i.e. absence of application) can be loaded using \code{\link{loadPathogen}}.
+#' An empty list of treatments (i.e. absence of application) can be loaded using 
+#' \code{\link{loadPathogen}}.
 #' @param params a LandsepiParams Object.
 #' @param treatment_params list of parameters related to pesticide treatments: \itemize{ 
 #' \item treatment_degradation_rate = degradation rate (per time step) of chemical concentration,
-#' \item treatment_efficiency = maximal efficiency of chemical treatments (i.e. fractional reduction 
-#' of pathogen infection rate at the time of application),
+#' \item treatment_efficiency = maximal efficiency of chemical treatments 
+#' (i.e. fractional reduction of pathogen infection rate at the time of application),
 #' \item treatment_timesteps = vector of time steps corresponding to treatment application dates,
 #' \item treatment_cultivars = vector of indices of the cultivars that receive treatments,
 #' \item treatment_cost = cost of a single treatment application (monetary units/ha)
-#' \item treatment_application_threshold = vector of thresholds (i.e. disease severity, one for each treated cultivar) 
-#' above which the treatment is applied in a polygon.
+#' \item treatment_application_threshold = vector of thresholds 
+#' (i.e. disease severity, one for each treated cultivar) above which the treatment 
+#' is applied in a polygon.
 #' }
 #' @return a LandsepiParams object
 #' @seealso \link{loadTreatment}
@@ -1381,8 +1421,8 @@ checkTreatment <- function(params) {
 #' * "rust" (genus \emph{Puccinia}, e.g. stripe rust, stem rust and leaf rust of wheat and barley)
 #' * "mildew" (\emph{Plasmopara viticola}, downy mildew of grapevine)
 #' * "sigatoka" (\emph{Pseudocercospora fijiensis}, black sigatoka of banana)
-#' Note that when disease = "mildew" a price reduction between 0% and 5% is applied to the market value
-#' according to disease severity. 
+#' Note that when disease = "mildew" a price reduction between 0% and 5% is applied to the 
+#' market value according to disease severity. 
 #' @param disease a disease name, among "rust" (default), "mildew", "sigatoka" and "no pathogen"
 #' @return a list of pathogen parameters on a susceptible host
 #' for a pathogen genotype not adapted to resistance
@@ -1472,8 +1512,8 @@ loadPathogen <- function(disease = "rust") {
 #' @name setPathogen
 #' @title Set the pathogen
 #' @description Updates a LandsepiParams object with pathogen parameters
-#' @details a set of parameters representative of rust fungi, downy mildew or black sigatoka can be loaded via 
-#' \code{\link{loadPathogen}}.
+#' @details a set of parameters representative of rust fungi, downy mildew or black sigatoka 
+#' can be loaded via \code{\link{loadPathogen}}.
 #' @param params a LandsepiParams Object.
 #' @param patho_params a list of pathogen aggressiveness parameters on a susceptible host
 #' for a pathogen genotype not adapted to resistance: \itemize{
@@ -1490,9 +1530,12 @@ loadPathogen <- function(disease = "rust") {
 #' \item sigmoid_kappa = kappa parameter of the sigmoid contamination function,
 #' \item sigmoid_sigma = sigma parameter of the sigmoid contamination function,
 #' \item sigmoid_plateau = plateau parameter of the sigmoid contamination function,
-#' \item sex_propagule_viability_limit = maximum number of cropping seasons up to which a sexual propagule is viable
-#' \item sex_propagule_release_mean = average number of seasons after which a sexual propagule is released.
-#' \item clonal_propagule_gradual_release = whether or not clonal propagules surviving the bottleneck are gradually released along the following cropping season.
+#' \item sex_propagule_viability_limit = maximum number of cropping seasons up to which 
+#' a sexual propagule is viable
+#' \item sex_propagule_release_mean = average number of seasons after which a sexual 
+#' propagule is released.
+#' \item clonal_propagule_gradual_release = whether or not clonal propagules surviving 
+#' the bottleneck are gradually released along the following cropping season.
 #' }
 #' It can be generated manually, or, alternatively, via \code{\link{loadPathogen}}.
 #' @return a LandsepiParams object
@@ -1507,42 +1550,230 @@ loadPathogen <- function(disease = "rust") {
 setPathogen <- function(params, patho_params) {
   params@Pathogen <- patho_params
   
-  if( length(params@ReproSexProb) == 0 && is.na(params@ReproSexProb[1]) ) {
-    params@ReproSexProb <- rep(patho_params$repro_sex_prob, params@TimeParam$nTSpY +1)
-  }
+  # if( length(params@Pathogen$repro_sex_prob) != params@TimeParam$nTSpY+1 ) {
+  #   params@Pathogen$repro_sex_prob <- rep(patho_params$repro_sex_prob, params@TimeParam$nTSpY +1)
+  # }
   checkPathogen(params)
 
   return(params)
 }
 
 
-#' @name setReproSexProb
-#' @title Set the vector of probabilities of sexual reproduction
+#' @name updateReproSexProb
+#' @title Update the probability of sexual reproduction
 #' @description set the probabilities for an infectious host to reproduce via sex rather 
 #' than via cloning at every time step.
+#' Note that time parameters must be set before updating sexual reproduction probabilities.
 #' @param params a LandsepiParams object
-#' @param vec a vector of size TimeParam$nTSpY +1 (season end) with the probabilities for an infectious host
-#'  to reproduce via sex rather than via cloning at each time step. 
+#' @param vec a vector of size TimeParam$nTSpY +1 (season end) with the probabilities 
+#' for an infectious host to reproduce via sex rather than via cloning at each time step. 
 #' @return a LandsepiParams object updated
 #' @examples
 #' \dontrun{
 #' simul_params <- createSimulParams()
 #' simul_params <- setTime(simul_params, Nyears=10, nTSpY=120)
+#' simul_params <- setPathogen(simul_params, loadPathogen("rust"))
 #' repro_sex_probs <- c(rep(0.0, 120), 1.0)  
-#' simul_params <- setReproSexProb(simul_params, repro_sex_probs)
-#' simul_params@ReproSexProb
+#' simul_params <- updateReproSexProb(simul_params, repro_sex_probs)
+#' simul_params@Pathogen
 #' }
 #' @export
-setReproSexProb <- function(params, vec) {
+updateReproSexProb <- function(params, vec) {
   if( params@TimeParam$nTSpY+1 != length(vec) ){
-    warning("Vector of Probability of sexual reproduction differ from the nSTpY value")
+    warning("Vector of Probability of sexual reproduction not compatible with the nSTpY value")
   }
   else {
-    params@ReproSexProb <- vec
+    params@Pathogen$repro_sex_prob <- vec
   }
 
   return(params)
 }
+
+
+#' @name updateSurvivalProb
+#' @title Update pathogen survival probability during the off-season
+#' @description update survival probability of the pathogen with a probability value for every 
+#' simulated year (number of years = Nyears) and every croptype (number of croptypes = Ncroptypes). 
+#' Note that time parameters, pathogen and croptypes must be set before updating 
+#' survival probabilities.
+#' @param params a LandsepiParams object
+#' @param mat_year a vector of size Nyear, giving survival probabilities for every year 
+#' (replicated for every croptype).
+#' @param mat_croptype a vector of size Ncroptypes, giving survival probabilities for 
+#' every croptype (replicated for every year).
+#' @param mat a matrix of dimension (Nyears, Ncroptypes) giving survival probabilities 
+#' for every year (rows) 
+#' and every croptype (columns).
+#' @details Unless the matrix \code{mat} is filled, the matrix containing the survival 
+#' probability during the offseason 
+#' is computed for every year and croptype with 
+#' \code{mat[year, croptype] = mat_year[year] * mat_croptype[croptype]}. \cr
+#' @return a LandsepiParams object updated.
+#' @seealso \link{survivalProbToMatrix}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' simul_params <- setTime(simul_params, Nyears=10, nTSpY=120)
+#' simul_params <- setPathogen(simul_params, loadPathogen("rust"))
+#'
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
+#' simul_params <- setCultivars(simul_params, cultivars)
+#' 
+#' croptypes <- loadCroptypes(simul_params
+#' , names = c("Susceptible crop", "Resistant crop", "Mixture"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop", "Resistant")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Mixture", c("Susceptible", "Resistant"))
+#' simul_params <- setCroptypes(simul_params, croptypes)
+#' Ncroptypes <- nrow(simul_params@Croptypes)
+#' Nyears <- simul_params@TimeParam$Nyears
+#' 
+#' ## Same probability in every croptype:
+#' simul_params <- updateSurvivalProb(simul_params, mat_year=1:Nyears/100)
+#' simul_params@Pathogen
+#' ## Same probability every year:
+#' simul_params <- updateSurvivalProb(simul_params, mat_croptype=1:Ncroptypes/10)
+#' simul_params@Pathogen
+#' ## specific probability for different croptypes and years:
+#' simul_params <- updateSurvivalProb(simul_params
+#' , mat_year=1:Nyears/100, mat_croptype=1:Ncroptypes/10)
+#' simul_params@Pathogen
+#' ## One probability per year and per croptype:
+#' simul_params <- updateSurvivalProb(simul_params
+#' , mat=matrix(runif(Nyears*Ncroptypes), ncol=Ncroptypes))
+#' simul_params@Pathogen
+#' survivalProbToMatrix(simul_params)
+#' }
+#' @export
+updateSurvivalProb <- function(params, mat_year=NULL, mat_croptype=NULL, mat=NULL) {
+  Nyears <- params@TimeParam$Nyears
+  Ncroptypes <- nrow(params@Croptypes)
+  
+  if (Nyears==0 | Ncroptypes==0){
+    stop("Please set the number of years and a set of croptypes before updating 
+         survival probabilities")
+  }
+  
+  if (all(missing(mat), missing(mat_year), missing(mat_croptype)))
+    stop("Missing argument: The probability of survival must be defined")
+  
+  if (!is.null(mat)){
+    if(any(dim(mat) != c(Nyears, Ncroptypes))){
+      stop("The matrix of survival probabilities ('mat') must be of dimensions 
+           (Nyears, Ncroptypes)")
+    }else{
+      if (any(!is.null(mat_year), !is.null(mat_croptype)))
+        warning("'mat_year', 'mat_croptype' are not accounted if 'mat' is filled")
+    }
+  } else {  ## i.e. mat is null
+    
+    if (is.null(mat_year)){
+      mat_year <- rep(1, Nyears)
+    }else{
+      if (length(mat_year) != Nyears)
+        stop("'mat_year' must have the same length as the number of years")
+    }
+    if (is.null(mat_croptype)){
+      mat_croptype <- rep(1, Ncroptypes)
+    }else{
+      if (length(mat_croptype) != Ncroptypes)
+        stop("'mat_croptype' must have the same length as the number of croptypes")
+    } 
+    
+    ## Computation of the matrix of survival probabilities
+    mat <- matrix(0, nrow=Nyears, ncol=Ncroptypes)
+    for (year in 1:Nyears){
+      for (croptype in 1:Ncroptypes){
+        mat[year, croptype] <- mat_year[year] * mat_croptype[croptype]
+      }
+    }
+  } ## else mat is null
+  
+  params@Pathogen$survival_prob <- as.vector(mat)
+  return(params)
+}
+
+
+#' @name survivalProbToMatrix
+#' @title Survival probability To Matrix
+#' @description Transform the off-season survival probability of the pathogen 
+#' (1D vector of length Nyears*Ncroptypes) into a matrix (for visualization purpose)
+#' @details After updating the off-season survival probability with \code{updateSurvivalProb()}, 
+#' this function returns the probability as a matrix for every year (rows) and croptypes (columns) 
+#' as well as, if croptypes have been previously allocated to a landscape, a matrix for every 
+#' polygon (rows) and year (columns). 
+#' @param params a LandsepiParams object.
+#' @return a list containing a matrix of dimensions (Nyears, Ncroptypes) as well as a matrix of 
+#' dimensions (Npoly, Nyears)
+#' @seealso \link{updateSurvivalProb}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' simul_params <- setTime(simul_params, Nyears=10, nTSpY=120)
+#' simul_params <- setPathogen(simul_params, loadPathogen("rust"))
+#'
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
+#' simul_params <- setCultivars(simul_params, cultivars)
+#' 
+#' croptypes <- loadCroptypes(simul_params
+#' , names = c("Susceptible crop", "Resistant crop", "Mixture"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop", "Resistant")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Mixture", c("Susceptible", "Resistant"))
+#' simul_params <- setCroptypes(simul_params, croptypes)
+#' 
+#' Ncroptypes <- nrow(simul_params@Croptypes)
+#' Nyears <- simul_params@TimeParam$Nyears
+#' 
+#' landscape <- loadLandscape(1)
+#' simul_params <- setLandscape(simul_params, landscape)
+#' simul_params <- allocateLandscapeCroptypes(simul_params,
+#' rotation_period = 0, rotation_sequence = croptypes$croptypeID,
+#' rotation_realloc = FALSE,
+#' prop = rep(1/Ncroptypes, Ncroptypes),
+#' aggreg = 0.05, graphic = FALSE)
+#' 
+#' ## One probability per year and per croptype:
+#' simul_params <- updateSurvivalProb(simul_params
+#' , mat=matrix(runif(Nyears*Ncroptypes), ncol=Ncroptypes))
+#' simul_params@Pathogen
+#' survivalProbToMatrix(simul_params)
+#' }
+#' @export
+survivalProbToMatrix <- function(params){ 
+  Nyears <- params@TimeParam$Nyears
+  croptypes <- params@Croptypes
+  Ncroptypes <- nrow(croptypes)
+  cdf <- as.data.frame(params@Landscape)
+  ncol <- length(grep("^year_", colnames(cdf)) %in% colnames(cdf))
+  rotation <- as.matrix(cdf[, grep("^year_", colnames(cdf))], ncol = ncol)
+  Npoly <- nrow(rotation)
+  
+  survival_prob <- matrix(params@Pathogen$survival_prob, nrow=Nyears, ncol=Ncroptypes)
+  rownames(survival_prob) <- paste0("year_", 1:Nyears)
+  colnames(survival_prob) <- croptypes$croptypeName
+  
+  if(Npoly>0){
+    survival_prob_poly <- matrix(NA, nrow=Npoly, ncol=Nyears)
+    colnames(survival_prob_poly) <- paste0("year_", 1:Nyears)
+    rownames(survival_prob_poly) <- paste0("poly_", 1:Npoly)
+    for (poly in 1:Npoly){
+      for (year in 1:Nyears){
+        survival_prob_poly[poly, year] <- survival_prob[year, rotation[poly, year]+1] 
+        ##+1 because of C indices starting at 0
+      }
+    }
+    return(list(survival_prob=survival_prob, survival_prob_poly=survival_prob_poly))
+    
+  }else{
+    return(survival_prob)
+  }
+}
+
 
 #' @name checkPathogen
 #' @title Check pathogen
@@ -1553,7 +1784,9 @@ checkPathogen <- function(params) {
   
   ret <- TRUE
   if (length(params@Pathogen) == 0 ||
-      sum( sapply(params@Pathogen, length) != rep(1,length(params@Pathogen)) ) > 0 ){
+      sum( sapply(params@Pathogen[names(params@Pathogen)!="repro_sex_prob" 
+                                  & names(params@Pathogen)!="survival_prob"]
+                  , length) != rep(1,length(params@Pathogen)-2) ) > 0 ){
     warning("Invalid parameters for Pathogen, use setPathogen()")
     ret <- FALSE
     return(ret)
@@ -1570,19 +1803,20 @@ checkPathogen <- function(params) {
     ret <- FALSE
   }
   if (!is.numeric(params@Pathogen$survival_prob) ||
-      !is.in.01(params@Pathogen$survival_prob) ){
+      sum(params@Pathogen$survival_prob < 0) > 0 || 
+      sum(params@Pathogen$survival_prob > 1) > 0){      
     warning("Survival probability must be between 0 and 1")
     ret <- FALSE
   }
   if (!is.numeric(params@Pathogen$repro_sex_prob) || 
-      params@Pathogen$repro_sex_prob < 0 || 
-      params@Pathogen$repro_sex_prob > 1){
+      sum(params@Pathogen$repro_sex_prob < 0) > 0 || 
+      sum(params@Pathogen$repro_sex_prob > 1) > 0){
     warning("Probability of sexual reproduction must be between 0 and 1")
     ret <- FALSE
   }
 
-  # if( params@TimeParam$nTSpY+1 != length(params@ReproSexProb)){
-  #   warning("Vector of Probability of sexual reproduction differ from the nSTpY value")
+  # if( params@TimeParam$nTSpY+1 != length(params@Pathogen$repro_sex_prob)){
+  #   warning("Vector of Probability of sexual reproduction not compatible with the nSTpY value")
   #   ret <- FALSE
   # }
   
@@ -1608,10 +1842,6 @@ checkPathogen <- function(params) {
     ret <- FALSE
   }
   
-  if( params@TimeParam$nTSpY+1 != length(params@ReproSexProb)){
-    warning("Vector of Probability of sexual reproduction differ from the nSTpY value")
-    ret <- FALSE
-  }
   if (!is.numeric(params@Pathogen$sex_propagule_viability_limit ) ||
       sum(!is.wholenumber(params@Pathogen$sex_propagule_viability_limit) > 0) ||
       !is.strict.positive( params@Pathogen$sex_propagule_viability_limit)){
@@ -1633,7 +1863,8 @@ checkPathogen <- function(params) {
 #' @title Load Croptypes
 #' @description Creates a data.frame containing croptype parameters and filled with 0
 #' @param params a LandsepiParams Object.
-#' @param croptypeIDs a vector of indices of croptypes (must start at 0 and match with croptype IDs in the landscape)
+#' @param croptypeIDs a vector of indices of croptypes (must start at 0 and match with 
+#' croptype IDs in the landscape)
 #' @param names a vector containing the names of all croptypes
 #' @details Croptypes need to be later updated with \code{\link{allocateCroptypeCultivars}}.
 #' If neither croptypeIDs nor names are given, it will automatically generate
@@ -1729,7 +1960,9 @@ allocateCroptypeCultivars <- function(croptypes, croptypeName, cultivarsInCropty
 #' @name setCroptypes
 #' @title Set croptypes
 #' @description Updates a LandsepiParams object with croptypes and their composition with regard 
-#' to cultivar proportions
+#' to cultivar proportions.
+#' Note that landscape and cultivar parameters may be required if not all information is 
+#' present to set croptypes.
 #' @details
 #' The data.frame for cultivar allocations into croptypes must take this format (example):
 #'
@@ -1738,7 +1971,8 @@ allocateCroptypeCultivars <- function(croptypes, croptypeName, cultivarsInCropty
 #' | 0          |  "cropt1"     |  1            | 0             | ... |
 #' | 1          |  "cropt2"     |  0.5          | 0.5           | ... |
 #'
-#' croptypeIDs must start at 0 and match with values from landscape "croptypeID" layer with feature year_X. 
+#' croptypeIDs must start at 0 and match with values from landscape "croptypeID" layer with 
+#' feature year_X. 
 #' Cultivars names have to match cultivar names in the cultivars data.frame.
 #'
 #' @param params a LandsepiParams Object.
@@ -1869,7 +2103,8 @@ checkCroptypes <- function(params) {
 #' @title Load a cultivar
 #' @description create a data.frame containing cultivar parameters depending of his type
 #' @param name a character string (without space) specifying the cultivar name.
-#' @param type the cultivar type, among: "growingHost" (default), "nongrowingHost", "grapevine", "banana" or "nonCrop".
+#' @param type the cultivar type, among: "growingHost" (default), "nongrowingHost", 
+#' "grapevine", "banana" or "nonCrop".
 #' @details 
 #' * "growingHost" is adapted to situations where the infection unit is a piece of leaf 
 #' (e.g. where a fungal lesion can develop); the number of available infection units 
@@ -1897,7 +2132,8 @@ loadCultivar <- function(name, type = "growingHost") {
   culti <- as.data.frame(culti, stringsAsFactors = FALSE)
   if (length(culti) <= 1) {
     warning('Unknown type of host: "', type
-            , '". Possible types are: "growingHost", "nongrowingHost", "grapevine", "banana", "nonCrop"')
+            , '". Possible types are: 
+            "growingHost", "nongrowingHost", "grapevine", "banana", "nonCrop"')
   } else {
     # To be sure of the columns names
     colnames(culti) <- .cultivarsColNames
@@ -1931,7 +2167,8 @@ loadCultivar <- function(name, type = "growingHost") {
 #' associated with hosts in sanitary status I as if cultivated in pure crop,
 #' \item yield_R: theoretical yield (in weight or volume units / ha / cropping season) 
 #' associated with hosts in sanitary status R as if cultivated in pure crop,
-#' \item planting_cost = planting costs (in monetary units / ha / cropping season) as if cultivated in pure crop,
+#' \item planting_cost = planting costs (in monetary units / ha / cropping season) as if 
+#' cultivated in pure crop,
 #' \item market_value = market values of the production (in monetary units / weight or volume unit).
 #' }
 #' 
@@ -2098,6 +2335,7 @@ loadGene <- function(name, type = "majorGene") {
       "mutation_prob" = 0.0000001,
       "Nlevels_aggressiveness" = 2,
       "adaptation_cost" = 0.5,
+      "relative_advantage" = 0.5,
       "tradeoff_strength" = 1.0,
       "target_trait" = "IR",
       "recombination_sd" = 1.0
@@ -2110,6 +2348,7 @@ loadGene <- function(name, type = "majorGene") {
       "mutation_prob" = 0.0000001,
       "Nlevels_aggressiveness" = 2,
       "adaptation_cost" = 0.5,
+      "relative_advantage" = 0.5,
       "tradeoff_strength" = 1.0,
       "target_trait" = "IR",
       "recombination_sd" = 1.0
@@ -2122,6 +2361,7 @@ loadGene <- function(name, type = "majorGene") {
       "mutation_prob" = 0.0001,
       "Nlevels_aggressiveness" = 6,
       "adaptation_cost" = 0.5,
+      "relative_advantage" = 0.5,
       "tradeoff_strength" = 1.0,
       "target_trait" = "IR",
       "recombination_sd" = 0.27
@@ -2134,6 +2374,7 @@ loadGene <- function(name, type = "majorGene") {
       "mutation_prob" = 0,
       "Nlevels_aggressiveness" = 1,
       "adaptation_cost" = 0,
+      "relative_advantage" = 0,
       "tradeoff_strength" = 1,
       "target_trait" = "IR",
       "recombination_sd" = 1.0
@@ -2161,7 +2402,8 @@ loadGene <- function(name, type = "majorGene") {
 #' with the evolution of each corresponding pathogenicity gene. Columns of the dataframe are:
 #' \itemize{
 #' \item geneName: names of resistance genes,
-#' \item target_trait: aggressiveness components ("IR", "LAT", "IP", or "PR") targeted by resistance genes,
+#' \item target_trait: aggressiveness components ("IR", "LAT", "IP", or "PR") targeted by 
+#' resistance genes,
 #' \item efficiency: resistance gene efficiencies, i.e. the percentage of reduction of the targeted 
 #' aggressiveness component (IR, 1/LAT, IP and PR),
 #' \item age_of_activ_mean: expected delays to resistance activation (for APRs),
@@ -2172,18 +2414,21 @@ loadGene <- function(name, type = "majorGene") {
 #' (i.e. 1 + number of required mutations for a pathogenicity gene to fully adapt to the 
 #' corresponding resistance gene),
 #' \item adaptation_cost: fitness penalties paid by pathogen genotypes 
-#' fully adapted to the considered resistance genes on host that do not carry these genes, 
+#' fully adapted to the considered resistance genes on all hosts, 
+#' \item relative_advantage: fitness advantages of pathogen genotypes fully adapted to the 
+#' resistance genes on hosts carrying these genes, relative to those that do not carry these genes,
 #' \item tradeoff_strength: strengths of the trade-off relationships between the 
 #' level of aggressiveness on hosts that do and do not carry the resistance genes.
-#' \item recombination_sd: standard deviation of the normal distribution used for recombination of quantitative traits during sexual reproduction (infinitesimal model)
+#' \item recombination_sd: standard deviation of the normal distribution used for recombination 
+#' of quantitative traits during sexual reproduction (infinitesimal model)
 #' }
 #' 
 #' The data.frame must be defined as follow (example):
 #'
-#' | geneName | efficiency | age_of_activ_mean | age_of_activ_var | mutation_prob | Nlevels_agressiveness | adaptation_cost | tradeoff_strength | target_trait | recombination_sd |
-#' | -------- | ---------- | ----------------- | ----------------- | ------------- | --------------------- | ------------ | ----------------- | ------------ | ------------------------ |
-#' | MG1      |  1         |  0                | 0                 | 1e-07         | 2                     | 0.5          | 1                 | IR           | 0.27                     |
-#' | QTL1     | 0.5        |  0                | 0                 | 0.0001        | 10                    | 0.74         | 1                 | LAT          | 0.27                     |
+#' | geneName | efficiency | age_of_activ_mean | age_of_activ_var | mutation_prob | Nlevels_agressiveness | adaptation_cost | relative advantage | tradeoff_strength | target_trait | recombination_sd |
+#' | -------- | ---------- | ----------------- | ----------------- | ------------- | --------------------- | ------------ | --------------- | ----------------- | ------------ | ------------------------ |
+#' | MG1      |  1         |  0                | 0                 | 1e-07         | 2                     | 0.5          | 0.5             | 1                 | IR           | 0.27                     |
+#' | QTL1     | 0.5        |  0                | 0                 | 0.0001        | 10                    | 0.74         | 0.74            | 1                 | LAT          | 0.27                     |
 #'
 #' @param params a LandsepiParams object
 #' @param dfGenes a data.frame containing gene parameters. It can be defined manually, or, 
@@ -2244,11 +2489,14 @@ checkGenes <- function(params) {
   if (!is.numeric(params@Genes$efficiency) ||
       !is.numeric(params@Genes$mutation_prob) ||
       !is.numeric(params@Genes$adaptation_cost) ||
+      !is.numeric(params@Genes$relative_advantage) ||
       
       sum(!is.in.01(params@Genes$efficiency) > 0) || 
       sum(!is.in.01(params@Genes$mutation_prob) > 0) || 
-      sum(!is.in.01(params@Genes$adaptation_cost) > 0) ){
-    warning("efficiencies, mutation probabilities and adaptation costs must be between 0 and 1")
+      sum(!is.in.01(params@Genes$adaptation_cost) > 0) ||
+      sum(!is.in.01(params@Genes$relative_advantage) > 0) ){
+    warning("efficiencies, mutation probabilities, adaptation costs and relative advantage 
+            must be between 0 and 1")
     ret <- FALSE
   } 
   
@@ -2309,7 +2557,8 @@ checkGenes <- function(params) {
 #' simul_params@CultivarsGenes
 #' }
 #' @export
-allocateCultivarGenes <- function(params, cultivarName, listGenesNames = c(""), force.clean=FALSE) {
+allocateCultivarGenes <- function(params, cultivarName, listGenesNames = c("")
+                                  , force.clean=FALSE) {
   if (isTRUE(force.clean) || length(params@CultivarsGenes) == 0 
       || nrow(params@CultivarsGenes) != nrow(params@Cultivars) 
       || nrow(params@Genes) != ncol(params@CultivarsGenes)) {
@@ -2360,13 +2609,220 @@ checkCultivarsGenes <- function(params) {
   return(ret)
 }
 
+
+#' @name loadInoculum
+#' @title Load Inoculum
+#' @description Loads an inoculum for the beginning of the simulation (t=0), with 
+#' controlled localisation (polygons), infected cultivars and pathogen genotypes.
+#' Note that landscape, gene, cultivar and croptype parameters must be set before 
+#' loading the inoculum.
+#' @param params a LandsepiParams object.
+#' @param pI0_all a numeric indicating the (same) probability to infect a host for all 
+#' pathogen genotypes, all cultivars and in all polygons
+#' @param pI0_host a vector of length Nhost indicating the probabilities to infect an host, 
+#' for each cultivar (for all pathogen genotypes and all polygons).
+#' @param pI0_patho a vector of length Npatho indicating the probabilities to infect an host, 
+#' for each pathogen genotype (for all cultivars and all polygons).
+#' @param pI0_poly a vector of length Npoly indicating the probabilities to infect an host, 
+#' for each polygon (for all pathogen genotypes and all cultivars).
+#' @param pI0_mat a 3D array of dimensions (1:Nhost,1:Npatho,1:Npoly) indicating the 
+#' probability to infect an host, for each cultivar, pathogen genotype and polygon. 
+#' Note that \code{pI0_all}, \code{pI0_host}, \code{pI0_patho} and \code{pI0_poly} 
+#' are not accounted if \code{pI0_mat} is filled.
+#' @details The different options enable different types of inoculum (localisation, 
+#' infected cultivars and pathogen genetic diversity, 
+#' see different options in Examples).\cr
+#' Unless the array \code{pI0_mat} is filled, the probability for a host to be infected 
+#' at the beginning of the simulation is computed in every polygon (poly), cultivar (host) 
+#' and pathogen genotype (patho) with 
+#' \code{pI0[host, patho, poly] = pI0_all * pI0_patho[patho] * pI0_host[host] * pI0_poly[poly]}. \cr
+#' Before loading the inoculum, one can use 
+#' \code{getMatrixGenePatho()}, \code{getMatrixCultivarPatho()} and \code{getMatrixCroptypePatho()} 
+#' to acknowledge which pathogen genotypes are adapted to which genes, cultivars and croptypes.\cr
+#' Once \code{setInoculum()} is used, one can call \code{inoculumToMatrix()} to get the inoculum 
+#' as a 3D array (1:Nhost,1:Npatho,1:Npoly)\cr
+#' @return a 3D array of dimensions (1:Nhost,1:Npatho,1:Npoly)
+#' @seealso \link{inoculumToMatrix}, \link{getMatrixGenePatho}, \link{getMatrixCultivarPatho}, 
+#' \link{getMatrixCroptypePatho}, \link{setInoculum}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' simul_params <- setTime(simul_params, Nyears = 1, nTSpY = 80)
+#' basic_patho_param <- loadPathogen(disease = "rust")
+#' simul_params <- setPathogen(simul_params, patho_params = basic_patho_param)
+#' simul_params <- setLandscape(simul_params, loadLandscape(id = 1))
+#' simul_params <- setDispersalPathogen(simul_params, loadDispersalPathogen(id = 1)[[1]])
+#' gene1 <- loadGene(name = "MG 1", type = "majorGene")
+#' gene2 <- loadGene(name = "MG 2", type = "majorGene")
+#' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
+#' simul_params <- setGenes(simul_params, genes)
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
+#' simul_params <- setCultivars(simul_params, cultivars)
+#' simul_params <- allocateCultivarGenes(simul_params, "Resistant", c("MG 1", "MG 2"))
+#' croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop", "Resistant crop"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop", c("Resistant"))
+#' simul_params <- setCroptypes(simul_params, croptypes)
+#' simul_params <- allocateLandscapeCroptypes(simul_params, rotation_period = 0
+#' , rotation_sequence = croptypes$croptypeID
+#' , prop = c(1/2,1/2), aggreg = 1, graphic = FALSE)
+#' 
+#' #### Definition of the inoculum ####
+#' 
+#' ### Scenario 1. Only the avirulent pathogen on the susceptible cultivar ###
+#' # In this situation, the susceptible cultivar must be entered
+#' # at the first line of the table cultivars
+#' 
+#' ## Global inoculum (i.e. in the whole landscape)
+#' # Option 1: simply use the default parameterisation
+#' simul_params <- setInoculum(simul_params, 5E-4)
+#' 
+#' # Option 2: use loadInoculum()
+#' Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
+#' Nhost <- nrow(simul_params@Cultivars)
+#' pI0 <- loadInoculum(simul_params,
+#'                     pI0_all=5E-4,
+#'                     pI0_host=c(1,rep(0, Nhost-1)),
+#'                     pI0_patho=c(1,rep(0, Npatho-1)))
+#' simul_params <- setInoculum(simul_params, pI0)
+#' inoculumToMatrix(simul_params)
+#' 
+#' ## Local inoculum (i.e. in some random polygons only)
+#' Npatho <- prod(simul_params@Genes$Nlevels_aggressiveness)
+#' Nhost <- nrow(simul_params@Cultivars)
+#' Npoly <- nrow(simul_params@Landscape)
+#' Npoly_inoc <- 5  ## number of inoculated polygons
+#' ## whether the avr pathogen can infect the polygons
+#' compatible_poly <- getMatrixPolyPatho(simul_params)[,1]
+#' ## random polygon picked among compatible ones
+#' id_poly <- sample(grep(1, compatible_poly), Npoly_inoc)
+#' pI0_poly <- as.numeric(1:Npoly %in% id_poly)  
+#' pI0 <- loadInoculum(simul_params,
+#'                     pI0_all=5E-4,
+#'                     pI0_host=c(1,rep(0, Nhost-1)),
+#'                     pI0_patho=c(1,rep(0, Npatho-1)), 
+#' pI0_poly=pI0_poly)
+#' simul_params <- setInoculum(simul_params, pI0)
+#' inoculumToMatrix(simul_params)
+#' 
+#' ### Scenario 2. Diversity of pathogen genotypes in the inoculum ###
+#' # in this example,  Nhost=2 cultivars, Npatho=4
+#' 
+#' ## Global inoculum (i.e. in all polygons of the landscape)
+#' pI0 <- loadInoculum(simul_params, pI0_patho=c(1E-3,1E-4,1E-4,1E-5), pI0_host=c(1,1))
+#' simul_params <- setInoculum(simul_params, pI0)
+#' inoculumToMatrix(simul_params)[,,1:5]
+#' 
+#' ## Local inoculum (i.e. in some polygons only) ##
+#' Npoly <- nrow(simul_params@Landscape)
+#' Npoly_inoc <- 5  ## number of inoculated polygons 
+#' id_poly <- sample(1:Npoly, Npoly_inoc)  ## random polygon 
+#' pI0_poly <- as.numeric(1:Npoly %in% id_poly) 
+#' pI0 <- loadInoculum(simul_params, pI0_patho=c(1E-3,1E-4,1E-4,1E-5),
+#' pI0_host=c(1,1), pI0_poly=pI0_poly)
+#' simul_params <- setInoculum(simul_params, pI0)
+#' inoculumToMatrix(simul_params)
+#' }
+#' @export
+loadInoculum <- function(params, pI0_all=NULL, pI0_host=NULL, pI0_patho=NULL, pI0_poly=NULL
+                         , pI0_mat=NULL){ 
+  Nhost <- nrow(params@Cultivars)
+  Npatho <-prod(params@Genes$Nlevels_aggressiveness)
+  Npoly <- nrow(params@Landscape)
+  mat_croptypes <- params@Croptypes
+  cultivarNames <- params@Cultivars$cultivarName
+  rotation_0 <- params@Landscape$year_1
+  mat_cultivar_patho <- getMatrixCultivarPatho(params)
+
+  ## Security check
+  if (Nhost==0 | Npoly==0) {
+    stop("Please define landscape, cultivars and pathogen first")
+  }
+  if (all(missing(pI0_mat), missing(pI0_all), missing(pI0_patho), missing(pI0_host)
+          , missing(pI0_poly)))
+    stop("Missing argument: The probability of infection must be defined")
+
+  if (!is.null(pI0_mat)){
+    if(any(dim(pI0_mat) != c(Nhost, Npatho, Npoly))){
+      stop("'pI0_mat' must be of dimensions (Nhost, Npatho, Npoly)")
+    }else{
+      if (any(!is.null(pI0_all), !is.null(pI0_patho), !is.null(pI0_host), !is.null(pI0_poly)))
+        warning("'pI0_all', 'pI0_patho', 'pI0_host' and 'pI0_patho' are not accounted if 
+                'pI0_mat' is filled")
+      pI0 <- checkPI0_mat(pI0_mat, params)
+      
+    }
+  } else {
+    
+    if (is.null(pI0_all)){
+      pI0_all <- 1
+    }else{
+      if (length(pI0_all) != 1)
+        stop("'pI0_all' must be of length 1")
+    }
+    if (is.null(pI0_patho)){
+      pI0_patho <- rep(1, Npatho)
+    }else{
+      if (length(pI0_patho) != Npatho)
+        stop("'pI0_patho' must have the same length as the number of pathogen genotypes")
+    }
+    if (is.null(pI0_host)){
+      pI0_host <- rep(1, Nhost)
+    }else{
+      if (length(pI0_host) != Nhost)
+        stop("'pI0_host' must have the same length as the number of cultivars")
+    } 
+    if (is.null(pI0_poly)){
+      pI0_poly <- rep(1, Npoly)
+    }else{
+      if (length(pI0_poly) != Npoly)
+        stop("'pI0_poly' must have the same length as the number of polygons")
+    } 
+    
+    ## Computation of pI0
+    pI0 <- array(data = 0, dim = c(Nhost, Npatho, Npoly))
+    for (host in 1:Nhost){
+      for (patho in 1:Npatho){
+        for (poly in 1:Npoly){
+          id_croptype <- rotation_0[poly]+1  ## +1 because of C code
+          host_present <- as.numeric(mat_croptypes[id_croptype, cultivarNames[host]] > 0)  
+          ## i.e. is the host present in the croptype of poly ?
+          host_compatible <- as.numeric(mat_cultivar_patho[host, patho])  
+          ## i.e. is the patho able to infect the host ?
+          
+          pI0[host, patho, poly] <- host_present * host_compatible * 
+            pI0_all * pI0_host[host] * pI0_patho[patho] * pI0_poly[poly]
+        }
+      }
+    }
+  } ## else pI0_mat is null
+  
+    return(pI0)
+}
+
+
 #' @name setInoculum
 #' @title Set inoculum
-#' @description Updates a LandsepiParams object with the initial probability for the first host 
-#' (whose index is 0) to be infectious (i.e. state I) at the beginning of the simulation.
+#' @description Updates a LandsepiParams object with the initial probability for an individual host 
+#' to be infectious (i.e. state I) at the beginning of the simulation (i.e. t=0). 
 #' @param params a LandsepiParams object.
-#' @param val a numeric value (default = 5e-4). Must be between 0 and 1.
+#' @param val a numeric value (default = 5e-4) indicating the probability for the first cultivar 
+#' to be infected by the first pathogen genotype in all polygons of the landscape 
+#' (must be between 0 and 1). 
+#' The parameter can also be entered as a 3D array of dimensions (1:Nhost,1:Npatho,1:Npoly) 
+#' indicating the initial probability to be infectious, for each cultivar, pathogen genotype and 
+#' polygon (independently from the possible presence of cultivars carrying resistance genes). 
+#' It can be generated manually or, alternatively, via \code{\link{loadInoculum}}.
+#' @details Before setting the inoculum, one can use \code{getMatrixGenePatho()}, 
+#' \code{getMatrixCultivarPatho()}, 
+#' \code{getMatrixCroptypePatho()} and \code{getMatrixPolyPatho()} to acknowledge which 
+#' pathogen genotypes are compatible to which genes, cultivars, croptypes and polygons.\cr
+#' Once \code{setInoculum()} is used, one can call \code{inoculumToMatrix()} to get 
+#' the inoculum as a 3D array (1:Nhost,1:Npatho,1:Npoly)\cr
 #' @return a LandsepiParams object
+#' @seealso \link{inoculumToMatrix}, \link{loadInoculum}
 #' @examples
 #' \dontrun{
 #' simul_params <- createSimulParams()
@@ -2375,13 +2831,397 @@ checkCultivarsGenes <- function(params) {
 #' }
 #' @export
 setInoculum <- function(params, val = 5e-4) {
-  params@PI0 <- val
+  params@PI0 <- as.vector(val)
   checkInoculum(params)
   
   return(params)
 }
 
 
+#' @name inoculumToMatrix
+#' @title Inoculum To Matrix
+#' @description Transform the inoculum pI0 (1D vector of length Nhost*Npatho*Npoly) into 
+#' a 3D array (for visualization purpose)
+#' @details After defining the inoculum with \code{setInoculum()}, this function returns 
+#' the inoculum as a 3D array. 
+#' @param params a LandsepiParams object.
+#' @return a 3D array of structure (1:Nhost,1:Npatho,1:Npoly)
+#' @seealso \link{setInoculum}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' simul_params <- setTime(simul_params, Nyears = 1, nTSpY = 80)
+#' simul_params <- setPathogen(simul_params, loadPathogen(disease = "rust"))
+#' simul_params <- setLandscape(simul_params, loadLandscape(id = 1))
+#' simul_params <- setDispersalPathogen(simul_params, loadDispersalPathogen(id = 1)[[1]])
+#' gene1 <- loadGene(name = "MG 1", type = "majorGene")
+#' gene2 <- loadGene(name = "MG 2", type = "majorGene")
+#' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
+#' simul_params <- setGenes(simul_params, genes)
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
+#' simul_params <- setCultivars(simul_params, cultivars)
+#' simul_params <- allocateCultivarGenes(simul_params, "Resistant", c("MG 1", "MG 2"))
+#' croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop", "Resistant crop"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop", c("Resistant"))
+#' simul_params <- setCroptypes(simul_params, croptypes)
+#' simul_params@Croptypes
+#' simul_params <- allocateLandscapeCroptypes(simul_params, rotation_period = 0
+#' , rotation_sequence = croptypes$croptypeID
+#' , prop = c(1/2,1/2), aggreg = 1, graphic = FALSE)
+#' pI0 <- loadInoculum(simul_params, pI0_patho=c(1E-3,1E-4,1E-4,1E-5), pI0_host=c(1,1))
+#' simul_params <- setInoculum(simul_params, pI0)
+#' inoculumToMatrix(simul_params)[,,1:5]
+#' }
+#' @export
+inoculumToMatrix <- function(params){ 
+  pI0_vect <- params@PI0
+  Nhost <- nrow(params@Cultivars)
+  Npatho <- prod(params@Genes$Nlevels_aggressiveness)
+  Npoly <- nrow(params@Landscape)
+  mat_cultivar_patho <- getMatrixCultivarPatho(params)
+  pI0 <- array(data = 0, dim = c(Nhost, Npatho, Npoly))
+  i=1
+  for(poly in 1:Npoly)  {
+    for(patho in 1:Npatho)    {
+      for(host in 1:Nhost)      {
+        pI0[host, patho, poly] <- pI0_vect[i]
+        i=i+1
+      }
+    }
+    rownames(pI0) <- rownames(mat_cultivar_patho)
+  }
+  return(pI0)
+}
+
+
+#' @name getMatrixGenePatho
+#' @title Get the "resistance gene/pathogen genotype" compatibility matrix.
+#' @description Build the matrix indicating if infection is possible at the beginning of the season 
+#' for every combination of plant resistance gene (rows) and pathogen genotype (columns).
+#' @details For hosts carrying each resistance gene, there is either possibility of infection 
+#' by the pathogen genotype (value of 1), either complete protection (value of 0). 
+#' Complete protection only occurs if the resistance gene targets the infection rate, 
+#' has a complete efficiency, and is expressed from the beginning of the cropping season 
+#' (i.e. this is not an APR).  
+#' @param params a LandsepiParams object.
+#' @return an interaction matrix composed of 0 and 1 values.
+#' @seealso \link{getMatrixCultivarPatho}, \link{getMatrixCroptypePatho}, \link{getMatrixPolyPatho}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' gene1 <- loadGene(name = "MG 1", type = "majorGene")
+#' gene2 <- loadGene(name = "MG 2", type = "majorGene")
+#' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
+#' simul_params <- setGenes(simul_params, genes)
+#' getMatrixGenePatho(simul_params)
+#' }
+#' @export
+getMatrixGenePatho <- function(params){
+  Ngenes <- length(params@Genes$geneName)
+  Nlevels_aggressiveness <- params@Genes$Nlevels_aggressiveness
+  Npatho <- prod(Nlevels_aggressiveness)
+  if(Ngenes==0){
+    message("No genes are set")
+  }
+  mat_gene_patho <- array(data = 0, dim = c(Ngenes, Npatho))
+  for (patho in 1:Npatho) {
+    mat_gene_patho[,patho] <- switch_patho_to_aggr(patho-1, Ngenes, Nlevels_aggressiveness)  
+    ## (function in output.R)
+  }
+  ## Infection is possible for:
+  indices_infection <- which(params@Genes$age_of_activ_mean != 0 | 
+                               ## Adult Plant Resistance (delayed)
+                             params@Genes$efficiency < 1 |   ## Partial resistance
+                             params@Genes$target_trait != "IR")  ## IR is not targeted 
+  mat_gene_patho[indices_infection,] <- 1
+  rownames(mat_gene_patho) <- params@Genes$geneName
+  return(mat_gene_patho)
+}
+
+
+#' @name getMatrixCultivarPatho
+#' @title Get the "cultivar/pathogen genotype" compatibility matrix.
+#' @description Build the matrix indicating if infection is possible at the beginning of the season 
+#' for every combination of cultivar (rows) and pathogen genotype (columns).
+#' @details For each cultivar, there is either possibility of infection by the 
+#' pathogen genotype (value of 1), or complete protection (value of 0).
+#' @param params a LandsepiParams object.
+#' @return an interaction matrix composed of 0 and 1 values.
+#' @seealso \link{getMatrixGenePatho}, \link{getMatrixCroptypePatho}, \link{getMatrixPolyPatho}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' gene1 <- loadGene(name = "MG 1", type = "majorGene")
+#' gene2 <- loadGene(name = "MG 2", type = "majorGene")
+#' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
+#' simul_params <- setGenes(simul_params, genes)
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+#' cultivar2 <- loadCultivar(name = "monoResistant1", type = "growingHost")
+#' cultivar3 <- loadCultivar(name = "monoResistant2", type = "growingHost")
+#' cultivar4 <- loadCultivar(name = "Pyramid", type = "growingHost")
+#' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4)
+#' , stringsAsFactors = FALSE)
+#' simul_params <- setCultivars(simul_params, cultivars)
+#' simul_params <- allocateCultivarGenes(simul_params, "monoResistant1", c("MG 1"))
+#' simul_params <- allocateCultivarGenes(simul_params, "monoResistant2", c("MG 2"))
+#' simul_params <- allocateCultivarGenes(simul_params, "Pyramid", c("MG 1", "MG 2"))
+#' getMatrixCultivarPatho(simul_params)
+#' }
+#' @export
+getMatrixCultivarPatho <- function(params){
+  Nhost <- nrow(params@Cultivars)
+  Npatho <- prod(params@Genes$Nlevels_aggressiveness)
+  Ngenes <- length(params@Genes$geneName)
+  mat_cultivar_patho <- array(data = 0, dim = c(Nhost, Npatho))
+  rownames(mat_cultivar_patho) <- params@Cultivars$cultivarName
+  mat_cultivar_gene <- params@CultivarsGenes
+  
+  if(Nhost==0){
+    stop("No cultivars are set")
+  }else {
+    
+    if(Ngenes==0 | length(mat_cultivar_gene)==0){
+      message("No genes are set, or they are not allocated")
+      mat_cultivar_patho[,] <- 1
+    }else{
+      mat_gene_patho <- getMatrixGenePatho(params)
+      for (host in 1:Nhost){
+        indices_genes <- which(mat_cultivar_gene[host,] == 1)  
+        ## indices of genes carried by the host
+        if (ncol(mat_gene_patho)==1){
+          mat_cultivar_patho[host,] <- prod(mat_gene_patho[indices_genes,])
+        }else if (length(indices_genes)==1){
+          
+          mat_cultivar_patho[host,] <- mat_gene_patho[indices_genes,]
+        }else{  ## (in case length(indices_genes)==0, the result is 1)
+          mat_cultivar_patho[host,] <- apply(mat_gene_patho[indices_genes,], 2, prod)  
+          ## product of the compatibilities for each carried gene
+        }
+      } ## for host
+      
+      indices_nonCrop <- which(params@Cultivars$initial_density == 0)  
+      ## indices of cultivars that are not planted
+      mat_cultivar_patho[indices_nonCrop,] <- 0
+      
+    } ## else Nhost > 0
+    
+    return (mat_cultivar_patho)
+  }
+}
+
+#' @name getMatrixCroptypePatho
+#' @title Get the "croptype/pathogen genotype" compatibility matrix.
+#' @description Build the matrix indicating if infection is possible at the beginning of the season 
+#' for every combination of croptype (rows) and pathogen genotype (columns).
+#' @details For each croptype, there is either possibility of infection by the pathogen genotype 
+#' (value of 1), either complete protection (value of 0) 
+#' @param params a LandsepiParams object.
+#' @return an interaction matrix composed of 0 and 1 values.
+#' @seealso \link{getMatrixGenePatho}, \link{getMatrixCultivarPatho}, \link{getMatrixPolyPatho}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' gene1 <- loadGene(name = "MG 1", type = "majorGene")
+#' gene2 <- loadGene(name = "MG 2", type = "majorGene")
+#' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
+#' simul_params <- setGenes(simul_params, genes)
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar4 <- loadCultivar(name = "Pyramid", type = "growingHost")
+#' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4)
+#' , stringsAsFactors = FALSE)
+#' simul_params <- setCultivars(simul_params, cultivars)
+#' simul_params <- allocateCultivarGenes(simul_params, "Resistant1", c("MG 1"))
+#' simul_params <- allocateCultivarGenes(simul_params, "Resistant2", c("MG 2"))
+#' simul_params <- allocateCultivarGenes(simul_params, "Pyramid", c("MG 1", "MG 2"))
+#' croptypes <- loadCroptypes(simul_params,
+#'                            names = c("Susceptible crop",
+#'                                      "Resistant crop 1",
+#'                                      "Mixture S+R",
+#'                                      "Mixture R1+R2",
+#'                                      "Pyramid crop"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 1", "Resistant1")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Mixture S+R", c("Susceptible", "Resistant1"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Mixture R1+R2", c("Resistant1", "Resistant2"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Pyramid crop", c("Pyramid"))
+#' simul_params <- setCroptypes(simul_params, croptypes)
+#' getMatrixCroptypePatho(simul_params)
+#' }
+#' @export
+getMatrixCroptypePatho <- function(params){
+  Npatho <- prod(params@Genes$Nlevels_aggressiveness)
+  mat_croptypes <- params@Croptypes
+  Ncroptype <- nrow(mat_croptypes)
+  mat_croptype_patho <- array(data = 0, dim = c(Ncroptype, Npatho))
+  rownames(mat_croptype_patho)<- mat_croptypes$croptypeName  
+  
+  if(Ncroptype==0){
+    stop("No croptypes are set")
+  }else{
+    
+    mat_cultivar_patho <- getMatrixCultivarPatho(params)
+    for (crop in 1:Ncroptype){
+      indices_hosts <- which(mat_croptypes[crop, params@Cultivars$cultivarName] > 0)  
+      ## indices of cultivars composing the croptype
+      if (ncol(mat_croptype_patho)==1){
+        mat_croptype_patho[crop,] <- sum(mat_cultivar_patho[indices_hosts,]) > 0  
+        ## infection is possible if any of the cultivars can be infected
+      }else if (length(indices_hosts)==1){
+        mat_croptype_patho[crop,] <- mat_cultivar_patho[indices_hosts,]
+      }else{
+        mat_croptype_patho[crop,] <- apply(mat_cultivar_patho[indices_hosts,], 2
+                                           , function(x) sum(x==1)>0)  
+        ## sum of the compatibilities for each composing cultivar
+        # mat_croptype_patho[crop,] > 0 <- 1
+      }
+    } ## for crop
+    
+    return(mat_croptype_patho)
+  }
+}
+
+
+#' @name getMatrixPolyPatho
+#' @title Get the "polygon/pathogen genotype" compatibility matrix.
+#' @description Build the matrix indicating if infection is possible at the beginning of the season 
+#' for every combination of polygon (rows) and pathogen genotype (columns).
+#' @details For each polygon, there is either possibility of infection by the pathogen genotype 
+#' (value of 1), either complete protection (value of 0) 
+#' @param params a LandsepiParams object.
+#' @return an interaction matrix composed of 0 and 1 values.
+#' @seealso \link{getMatrixGenePatho}, \link{getMatrixCultivarPatho}, \link{getMatrixCroptypePatho}
+#' @examples
+#' \dontrun{
+#' simul_params <- createSimulParams()
+#' simul_params <- setTime(simul_params, Nyears = 1, nTSpY = 80)
+#' simul_params <- setLandscape(simul_params, loadLandscape(id = 1))
+#' gene1 <- loadGene(name = "MG 1", type = "majorGene")
+#' gene2 <- loadGene(name = "MG 2", type = "majorGene")
+#' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
+#' simul_params <- setGenes(simul_params, genes)
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar4 <- loadCultivar(name = "Pyramid", type = "growingHost")
+#' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4)
+#' , stringsAsFactors = FALSE)
+#' simul_params <- setCultivars(simul_params, cultivars)
+#' simul_params <- allocateCultivarGenes(simul_params, "Resistant1", c("MG 1"))
+#' simul_params <- allocateCultivarGenes(simul_params, "Resistant2", c("MG 2"))
+#' simul_params <- allocateCultivarGenes(simul_params, "Pyramid", c("MG 1", "MG 2"))
+#' croptypes <- loadCroptypes(simul_params,
+#'                            names = c("Susceptible crop",
+#'                                      "Resistant crop 1",
+#'                                      "Mixture S+R",
+#'                                      "Mixture R1+R2",
+#'                                      "Pyramid crop"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 1", "Resistant1")
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Mixture S+R", c("Susceptible", "Resistant1"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Mixture R1+R2", c("Resistant1", "Resistant2"))
+#' croptypes <- allocateCroptypeCultivars(croptypes, "Pyramid crop", c("Pyramid"))
+#' simul_params <- setCroptypes(simul_params, croptypes)
+#' simul_params <- allocateLandscapeCroptypes(simul_params, rotation_period = 0,
+#' prop=rep(1/5,5), aggreg=3 , rotation_sequence = croptypes$croptypeID)
+#' getMatrixPolyPatho(simul_params)
+#' }
+#' @export
+getMatrixPolyPatho <- function(params){
+  Npatho <- prod(params@Genes$Nlevels_aggressiveness)
+  Npoly <- nrow(params@Landscape)
+  rotation_0 <- params@Landscape$year_1
+  mat_poly_patho <- array(data = 0, dim = c(Npoly, Npatho))
+  
+  if(Npoly==0){
+    stop("Landscape is not defined")
+  }else{
+    
+    mat_croptype_patho <- getMatrixCroptypePatho(params)
+    for (poly in 1:Npoly){
+      id_croptype <- rotation_0[poly]+1  ## +1 because of C code
+      mat_poly_patho[poly,] <- mat_croptype_patho[id_croptype,]
+    } ## for poly
+    
+    return(mat_poly_patho)
+  }
+}
+
+
+#' @name checkInoculum
+#' @title Check inoculum
+#' @description Checks inoculum validity.
+#' @param params a LandsepiParams object.
+#' @return a boolean, TRUE if OK, FALSE otherwise
+checkInoculum <- function(params) {
+  ret <- TRUE
+  
+  if(length(params@PI0)==0){
+    warning("The inoculum has not been defined")
+  }
+  if (all(params@PI0 == 0)) {
+    warning("The vector PI0 is only filled with 0")
+  }
+  if( any(!is.numeric(params@PI0)) || any(!is.in.01(params@PI0)) ){
+    warning("Invalid inoculum value: must be in [0,1]")
+    ret <- FALSE
+  }
+  if (length(params@PI0) > 1){
+    Nhost <- nrow(params@Cultivars)
+    Npatho <-prod(params@Genes$Nlevels_aggressiveness)
+    Npoly <- nrow(params@Landscape)
+    if (length(params@PI0) != Nhost*Npatho*Npoly){
+      warning("The vector PI0 doesn't have the correct dimensions")
+      ret <- FALSE
+    }
+  }
+  
+  return(ret)
+}
+
+
+#' @name checkPI0_mat
+#' @title Check the array PI0_mat when entered manually in \code{loadInoculum()}.
+#' @description Checks validity of the array.
+#' @param mat a 3D array of dimensions (1:Nhost,1:Npatho,1:Npoly)
+#' @param params a LandsepiParams object.
+#' @return the same array at mat, possibly corrected if incompatibility has been detected
+checkPI0_mat <- function(mat, params){
+  warn = 0
+  rotation_0 <- params@Landscape$year_1
+  mat_croptypes <- params@Croptypes
+  cultivarNames <- params@Cultivars$cultivarName
+  mat_cultivar_patho <- getMatrixCultivarPatho(params)
+  
+  for (host in 1:dim(mat)[1]){
+    for (patho in 1:dim(mat)[2]){
+      for (poly in 1:dim(mat)[3]){
+        id_croptype <- rotation_0[poly]+1  ## +1 because of C code
+        host_present <- as.numeric(mat_croptypes[id_croptype, cultivarNames[host]] > 0)  
+        ## i.e. is the host present in the croptype of poly ?
+        host_compatible <- as.numeric(mat_cultivar_patho[host, patho])  
+        ## i.e. is the patho able to infect the host ?
+        
+        if (host_present*host_compatible == 0 & mat[host, patho, poly] > 0){
+          warn <- 1
+          mat[host, patho, poly] <- host_present * host_compatible * mat[host, patho, poly]
+        }
+      }
+    }
+  }
+  
+  if (warn){
+    warning("Incompatibility between the inoculum and the landscape (cultivar not present or 
+            incapacity of pathogen genotype unable to infect the cultivar)")
+    warning("The inoculum has been corrected to account for the landscape")  
+  }
+  
+  return(mat)
+}
 
 
 #' @name compute_audpc100S
@@ -2402,8 +3242,10 @@ setInoculum <- function(params, val = 5e-4) {
 #' }
 #' @seealso \link{loadOutputs}
 #' @export
-compute_audpc100S <- function(disease="rust", hostType="growingHost", nTSpY=120, area=1E6, seed=12345){
-  message(paste("Computing audpc100S for", disease, "in a single susceptible field of", area, "m^2 during", nTSpY, "time steps"))
+compute_audpc100S <- function(disease="rust", hostType="growingHost"
+                              , nTSpY=120, area=1E6, seed=12345){
+  message(paste("Computing audpc100S for", disease, "in a single susceptible field of"
+                , area, "m^2 during", nTSpY, "time steps"))
   
   res=simul_landsepi(seed=seed
                      , time_param = list(Nyears = 5, nTSpY = nTSpY)
@@ -2417,23 +3259,6 @@ compute_audpc100S <- function(disease="rust", hostType="growingHost", nTSpY=120,
 }
 
 
-#' @name checkInoculum
-#' @title Check inoculum
-#' @description Checks inoculum validity.
-#' @param params a LandsepiParams object.
-#' @return a boolean, TRUE if OK, FALSE otherwise
-checkInoculum <- function(params) {
-  ret <- TRUE
-  
-  if( !is.numeric(params@PI0) ||
-      length(params@PI0) != 1 ||
-      !is.in.01(params@PI0) ) {
-    warning("Invalid inoculum value: must be in [0,1]")
-    ret <- FALSE
-  }
-  return(ret)
-}
-
 #' @name loadOutputs
 #' @title Load outputs
 #' @description Creates an output list
@@ -2442,11 +3267,12 @@ checkInoculum <- function(params) {
 #' (see details):\itemize{
 #' \item "audpc" : Area Under Disease Progress Curve (average number of diseased host individuals
 #' per time step and square meter) 
-#' \item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of diseased host
-#' individuals relative to the total number of existing hosts)
-#' \item "gla" : Green Leaf Area (average number of healthy host individuals per time step and square meter)
-#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals relative to the 
-#' total number of existing hosts)
+#' \item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of 
+#' diseased host individuals relative to the total number of existing hosts)
+#' \item "gla" : Green Leaf Area (average number of healthy host individuals per time step and 
+#' square meter)
+#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals 
+#' relative to the total number of existing hosts)
 #' \item "eco_yield" : total crop yield (in weight or volume units per ha) 
 #' \item "eco_cost" : operational crop costs (in monetary units per ha) 
 #' \item "eco_product" : total crop products (in monetary units per ha) 
@@ -2503,11 +3329,11 @@ loadOutputs <- function(epid_outputs = "all", evol_outputs = "all"){
 #' \itemize{
 #' \item "audpc" : Area Under Disease Progress Curve (average number of diseased host individuals
 #' per time step and square meter) 
-#' \item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of diseased host
-#' individuals relative to the total number of existing hosts)
+#' \item "audpc_rel" : Relative Area Under Disease Progress Curve (average proportion of 
+#' diseased host individuals relative to the total number of existing hosts)
 #' \item "gla" : Green Leaf Area (average number of healthy host individuals per square meter)
-#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals relative to the 
-#' total number of existing hosts)
+#' \item "gla_rel" : Relative Green Leaf Area (average proportion of healthy host individuals 
+#' relative to the total number of existing hosts)
 #' \item "eco_yield" : total crop yield (in weight or volume units per ha) 
 #' \item "eco_cost" : operational crop costs (in monetary units per ha) 
 #' \item "eco_product" : total crop products (in monetary units per ha) 

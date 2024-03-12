@@ -48,11 +48,11 @@ std::string Treatment::to_string() const {
   std::copy(this->treatment_application_threshold.begin(), this->treatment_application_threshold.end(), std::ostream_iterator<double>(oss3, ", "));
    
   std::string str("");
-  str += "  treatment degradation rate:        " + std::to_string(this->treatment_degradation_rate) + "\n";
-  str += "  treatment efficiency:         " + std::to_string(this->treatment_efficiency) + "\n";
-  str += "  treatment timesteps:         " + oss.str() + "\n";
-  str += "  treatment cultivars:         " + oss2.str() + "\n";
-  str += "  treatment cost:    " + std::to_string(this->treatment_cost) + "\n";
-  str += "  treatment application threshold:    " + oss3.str() + "\n";
+  str += "  treatment degradation rate:      " + std::to_string(this->treatment_degradation_rate) + "\n";
+  str += "  treatment efficiency:            " + std::to_string(this->treatment_efficiency) + "\n";
+  str += "  treatment timesteps:             " + oss.str() + "\n";
+  str += "  treatment cultivars:             " + oss2.str() + "\n";
+  str += "  treatment cost:                  " + std::to_string(this->treatment_cost) + "\n";
+  str += "  treatment application threshold: " + oss3.str() + "\n";
   return str;
 }
