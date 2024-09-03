@@ -1015,7 +1015,8 @@ evol_output <- function(types = "all", time_param, Npoly, cultivars_param, genes
       for (g in 1:Ngenes) {
         finalLevel <- nrow(aggr_evol[[g]]) ## last line
         criterion <- ncol(aggr_evol[[g]]) ## last column
-        durability[, g] <- aggr_evol[[g]][finalLevel, criterion]
+        if (finalLevel > 1)  ## To avoid computation of durability when only one pathotype
+          durability[, g] <- aggr_evol[[g]][finalLevel, criterion]
       }
       if (writeTXT & sum(is.element(types, c("durability"))) > 0) {
         write.table(durability, file = paste(path, "/durability", ".txt", sep = ""), sep = ",")

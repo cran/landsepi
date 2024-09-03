@@ -27,9 +27,9 @@
 #' @aliases landsepi-package landsepi
 #'
 #' @author Loup Rimbaud \email{loup.rimbaud@@inrae.fr}
-#' @author Julien Papaix \email{julien.papaix@@inrae.fr}
-#' @author Jean-Francois Rey \email{jean-francois.rey@@inrae.fr}
 #' @author Marta Zaffaroni \email{marta.zaffaroni@@inrae.fr}
+#' @author Jean-Francois Rey \email{jean-francois.rey@@inrae.fr}
+#' @author Julien Papaix \email{julien.papaix@@inrae.fr}
 #' @author Jean-Loup Gaussen \email{jean-loup-thomas.gaussen@@inrae.fr}
 #' @author Manon Couty \email{manon.couty@@insa-lyon.fr}
 #'
@@ -39,8 +39,8 @@
 #' @details \tabular{ll}{
 #'          Package: \tab landsepi\cr
 #'          Type: \tab Package\cr
-#'          Version: \tab 1.4.0\cr
-#'          Date: \tab 2024-02-12\cr
+#'          Version: \tab 1.5.0\cr
+#'          Date: \tab 2024-09-03\cr
 #'          License: \tab GPL (>=2)\cr
 #'          }
 #'
@@ -110,18 +110,19 @@
 #'  \item The spatial unit is a polygon, i.e. a piece of land delimited by boundaries and possibly 
 #'  cultivated with a crop. Such crop may be host or non-host, and the polygon is considered a homogeneous 
 #'  mixture of host individuals (i.e. there is no intra-polygon structuration). 
-#'  A field may be composed of a single or several polygons.
-#'  \item Host individuals are in one of these four categories: H (healthy), E (exposed and latent, 
-#'  i.e. infected but not infectious nor symptomatic), I (infectious and symptomatic), or R 
-#'  (removed, i.e. epidemiologically inactive).
-#'  \item **A host ‘individual’ is an infection unit and may correspond to a given amount of plant tissue 
+#'  An agricultural field may be composed of a single or several polygons.
+#'  \item A host ‘individual’ is an infection unit (i.e. it can be infected by one and only one 
+#'  pathogen propagule, there is no co-infection) and may correspond to **a given amount of plant tissue 
 #'  (where a local infection may develop, e.g. fungal lesion) or a whole plant (e.g. systemic viral infection). 
 #'  In the first case, plant growth increases the amount of available plant tissue 
 #'  (hence the number of individuals) during the cropping season.** Plant growth is deterministic (logistic growth) 
 #'  and **only healthy individuals (state H) contribute to plant growth (castrating pathogen)**.
+#'  \item Host individuals are in one of these four categories: H (healthy), E (exposed and latent, 
+#'  i.e. infected but not infectious nor symptomatic), I (infectious and symptomatic), or R 
+#'  (removed, i.e. epidemiologically inactive).
 #'  \item **The decreasing availability of healthy host tissues (as epidemics spread) makes pathogen 
 #'  infection less likely (i.e. density-dependence due to plant architecture).**
-#'  \item **Host are cultivated (i.e. sown/planted and harvested), thus there is no host reproduction, 
+#'  \item **Hosts are cultivated (i.e. sown/planted and harvested), thus there is no host reproduction, 
 #'  dispersal and natural death.**
 #'  \item Environmental and climate conditions are constant, and host individuals of a given genotype 
 #'  are equally susceptible to disease from the first to the last day of every cropping season.
@@ -143,8 +144,9 @@
 #'  \item Pathogen reproduction can be purely clonal, purely sexual, or mixed (alternation of clonal 
 #'  and sexual reproduction).
 #'  \item If there is sexual reproduction (or gene recombination), it occurs only between parental 
-#'  infections located in the same polygon and the same host genotype. At that scale, the pathogen 
-#'  population is panmictic (i.e. all pairs of parents have the same probability to occur). 
+#'  infections located in the same polygon and the same host genotype (i.e. cultivar). 
+#'  At that scale, the pathogen population is panmictic (i.e. all pairs of parents have the 
+#'  same probability to occur). 
 #'  The propagule production rate of a parental pair is the sum of the propagule production rates of 
 #'  the parents. For a given parental pair, the genotype of each propagule is issued from random loci 
 #'  segregation of parental qualitative resistance genes. For each quantitative resistance gene, the 
@@ -166,8 +168,8 @@
 #'  \item **Pathogen adaptation to a given resistance gene consists in restoring the same aggressiveness 
 #'  component as the one targeted by the resistance gene.**
 #'  \item If a fitness cost penalises pathogen adaptation to a given resistance gene, this cost is paid 
-#'  **on hosts that do not carry this gene, or, alternatively, on all hosts with possibly a relative 
-#'  advantage on hosts carrying the resistance gene**. It consists in a reduction in the same aggressiveness 
+#'  on all hosts with possibly a relative advantage on hosts carrying the resistance gene. 
+#'  It consists in a reduction in the same aggressiveness 
 #'  component as the one targeted by the resistance gene.
 #'  \item When there is a delay for activation of a given resistance gene (APR), the age of activation 
 #'  is the same for all hosts carrying this gene and located in the same polygon.

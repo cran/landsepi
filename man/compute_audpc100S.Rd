@@ -6,7 +6,7 @@
 \usage{
 compute_audpc100S(
   disease = "rust",
-  hostType = "growingHost",
+  hostType = "wheat",
   nTSpY = 120,
   area = 1e+06,
   seed = 12345
@@ -15,7 +15,7 @@ compute_audpc100S(
 \arguments{
 \item{disease}{a disease name, among "rust" (default), "mildew" and "sigatoka"}
 
-\item{hostType}{cultivar type, among: "growingHost" (default), "nongrowingHost", "grapevine".}
+\item{hostType}{cultivar type, among: "wheat" (default), "grapevine", "banana", "pepper".}
 
 \item{nTSpY}{number to time steps per cropping season}
 
@@ -34,7 +34,7 @@ audpc100S is the average AUDPC computed in a non-spatial simulation.
 }
 \examples{
 \dontrun{
-compute_audpc100S("rust", "growingHost", area=1E6)
+compute_audpc100S("rust", "wheat", area=1E6)
 compute_audpc100S("mildew", "grapevine", area=1E6)
 compute_audpc100S("sigatoka", "banana", area=1E6, nTSpY=182)
 }

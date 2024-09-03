@@ -111,13 +111,13 @@ demo_landsepi <- function(seed = 5, strat = "MO", Nyears = 10, nTSpY = 120, vide
 
   
   ## Cultivars
-  cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
+  cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
   if (strat == "PY") { ## 1 susceptible cultivar + 1 resistant cultivar
-    cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+    cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
     cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
   } else { ## 1 susceptible cultivar + 2 resistant cultivars
-    cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-    cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+    cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+    cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
     cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   }
   

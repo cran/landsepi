@@ -1,0 +1,13 @@
+---
+title: "Landsepi - Bibliography"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Landsepi - Bibliography}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+bibliography: landsepi.bib
+nocite: '@*'
+---
+

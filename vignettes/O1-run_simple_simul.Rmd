@@ -133,7 +133,7 @@ simul_params@Pathogen
 
 The landscape (i.e. boundaries of fields) must be in shapefile format. Five built-in landscapes of about 150 
 fields are available using the function `loadLandscape()`:
-```{r}
+```{r, fig.alt="The first Landscape available"}
 landscape <- loadLandscape(id = 1)
 length(landscape)
 plot(landscape, main = "Landscape structure")
@@ -171,17 +171,16 @@ Characteristics of each host genotype (i.e. cultivar) are summarised in a datafr
 contains parameters representing the cultivar as if it was cultivated in a pure crop. 
 **Note that the name of the cultivar cannot accept spaces.**  
 A buit-in parameterisation for classical types of cultivars is available using `loadCultivar()` 
-to generate each line of the dataframe. The only difference between the types "growingHost" and 
-"nongrowingHost" is the absence of growth in the later. Type "nonCrop" allows the simulation of 
+to generate each line of the dataframe. Type "nonCrop" allows the simulation of 
 forest, fallows, etc. i.e. everything that is not planted, does not cost anything and does not 
 yield anything (with regard to the subject of the study).  
 **It is advised to implement a susceptible cultivar at first line of the dataframe to allow 
 pathogen initial inoculation in default parameterisation.**
 ```{r}
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
-cultivar4 <- loadCultivar(name = "Resistant3", type = "nongrowingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+cultivar3 <- loadCultivar(name = "Resistant2", type = "banana")
+cultivar4 <- loadCultivar(name = "Resistant3", type = "pepper")
 cultivar5 <- loadCultivar(name = "Forest", type = "nonCrop")
 cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4, cultivar5)
                         , stringsAsFactors = FALSE)
@@ -576,15 +575,19 @@ $$C_2 = min(1.0, N(t^*)/N(t))$$
 Cultivars to be treated with chemicals and dates of (possible) applications are defined with parameters `treatment_cultivars` and `treatment_timesteps`, and are the same for all polygons cultivated with the cultivars to be treated. 
 However, the chemicals are applied in a polygon only if the disease severity (i.e. $I(t^*) / N(t^*)$) at the application date is higher than a given threshold, defined by `treatment_application_threshold`.
 The cost of a single treatment application (monetary units/ha) is defined by `treatment_cost` and will impact the economic outputs.
-Treatment parameters can be set via the function `setTreatment`:
+Treatment parameters can be loaded via the function `loadTreatment` and next set via the function `setTreatment`:
 
 ```{r}
+## Via function loadTreatment:
+treatment <- loadTreatment(disease="mildew")
+## Direct implementation:
 treatment <- list(treatment_degradation_rate = 0.1,
                   treatment_efficiency = 0.8,
                   treatment_timesteps =  seq(1,120,14) ,
                   treatment_cultivars  = c(0),
                   treatment_cost = 0,
                   treatment_application_threshold = c(0.0))
+## Set the parameters
 simul_params <- setTreatment(simul_params, treatment)
 ```
 
@@ -648,7 +651,7 @@ $freq(I)_{p,t} = \frac{\sum_{i=1}^{J} \sum_{v=1}^{V} I_{i,v,p,t}} {\sum_{p=1}^{P
 With respect to evolutionary outputs, for each pathogen genotype (`evol_patho`) or phenotype (`evol_aggr`, note that different pathogen genotypes may lead to the same phenotype on a resistant host, i.e. level of aggressiveness), several computations are performed:   
 - appearance: time to first appearance (as propagule);  
 - R_infection: time to first true infection of a resistant host;  
-- R_invasion: time to invasion, when the number of infections of resistant hosts reaches \code{thres_breakdown}, above which the genotype or phenotype is unlikely to go extinct.  
+- R_invasion: time to invasion, when the number of infections of resistant hosts reaches `thres_breakdown`, above which the genotype or phenotype is unlikely to go extinct.  
 The value `Nyears + 1 time step` is used if the genotype or phenotype never appeared/infected/invaded.  
 Durability is defined as the time to invasion of completely adapted pathogen individuals.
 
@@ -658,13 +661,13 @@ Durability is defined as the time to invasion of completely adapted pathogen ind
 
 A list of outputs can be generated using `loadOutputs()`:
 ```{r}
-outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")
+outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all", disease="rust")
 outputlist
 ```
 Among the elements of `outputList`, "audpc100S" is the audpc in a fully susceptible landscape (used as reference value for graphics).
 If necessary, the function `compute_audpc100S` helps compute this value in a single 1-km^2 field:
 ```{r}
-audpc100S <- compute_audpc100S("rust", "growingHost", area=1E6)
+audpc100S <- compute_audpc100S("rust", "wheat", area=1E6)
 audpc100S <- compute_audpc100S("mildew", "grapevine", area=1E6)
 audpc100S <- compute_audpc100S("sigatoka", "banana", area=1E6, nTSpY=182)
 ```

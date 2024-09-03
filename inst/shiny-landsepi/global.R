@@ -6,6 +6,7 @@ library(shinyjs)
 #library(slickR)
 library(gridExtra)
 library(png)
+library(tiff)
 library(grid)
 library(future)
 library(promises)
@@ -15,6 +16,7 @@ library(shinyalert)
 ## Video directory
 if(!dir.exists("./www/tmp/")) dir.create("./www/tmp/")
 addResourcePath("video", "./www/tmp/")
+addResourcePath("graphics", "./www/tmp/")
 
 # Active debug level
 # 0 : no print
@@ -28,7 +30,7 @@ data(package = "landsepi")
 
 source("modules/editableDT.R")
 
-VALUEMAX <- 1000
+VALUEMAX <- 10000
 
 
 ## del all file and directory of a path
@@ -48,7 +50,8 @@ setwd(paste0(ROOT_PATH,"/www/tmp/"))
 cleanDir(paste0(ROOT_PATH,"/www/tmp/"))
 
 ## User mode
-advanced_mode <- reactiveVal(FALSE)
+advanced_mode <- reactiveVal(TRUE)
+can_rm_croptypes <- reactiveVal(TRUE)
 
 ## Croptypes proportions in landscape
 croptypes_proportions <- shiny::reactiveVal(c(1))
@@ -68,6 +71,44 @@ simul_pathogen <-  shiny::reactiveVal("rust")
 
 ## Treatment is active
 treatment_is_active <- shiny::reactiveVal(FALSE)
+
+
+################################
+# About Text
+################################
+aboutText <- paste0("<h1>Landsepi: Landscape Epidemiology and Evolution</h1><img src='landsepi-logo.png'  align='right' alt='' width='120'/>
+                          <h3> A stochastic, spatially-explicit, demo-genetic model
+                         simulating the spread and evolution of a plant pathogen in a heterogeneous landscape
+                         to assess resistance deployment strategies. It is based on a spatial geometry for describing
+                         the landscape and allocation of different cultivars, a dispersal kernel for the
+                         dissemination of the pathogen, and a SEIR ('Susceptible-Exposed-Infectious-Removed’)
+                         structure with a discrete time step. It provides a useful tool to assess the performance
+                         of a wide range of deployment options with respect to their epidemiological,
+                         evolutionary and economic outcomes.</h3>
+                          <h3> Authors:</h3> Rimbaud Loup, Zaffaroni Marta, Rey Jean-François, Papaïx Julien
+                          <h3>Package project:</h3><a href='https://CRAN.R-project.org/package=landsepi' target='_blank'> CRAN package</a><br/><a href='https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi' target='_blank'> Source code</a>
+                          <br/><a href='https://csiro-inra.pages.biosp.inrae.fr/landsepi/' target='_blank'> Package Documentation</a>
+                          <br/> License GPL-3
+                          <h3> How to cite the package:</h3> <b>Rimbaud L, Zaffaroni M, Rey J, Papaïx J (",sub("-.*","",utils::packageDate("landsepi")),").</b> landsepi: Landscape Epidemiology and Evolution. R package version ",utils::packageVersion("landsepi"),", &lt;URL: https://cran.r-project.org/package=landsepi&gt;.
+                          <h3> Funding</h3>
+			              This work benefited from ANR project 'ArchiV' (2019–2023, grant n°ANR-18-CE32-0004-01), AFB Ecophyto II-Leviers Territoriaux Project ”Médée” (2020–2023), GRDC grant CSP00192 and the CSIRO/INRA linkage program,
+ANR project 'COMBINE' (2022-2026, grant n°ANR-22-CE32-0004), SPE project 'DYNAMO'(2022-2024), INRA Program ASC (2008-2014)
+                          <div>
+                          <img src='Republique_Francaise_RVB.jpg' alt='RF' style='width:50px; margin-left: 10px;' />
+                          <img src='LogoINRAE_Fr_rvb_web.png' alt='INRAE' style='width:50px; margin-left: 10px;' />
+                          <img src='logoBIOSP.jpeg' alt='BioSP' style='width:50px; margin-left: 10px;'/>
+                          <img src='PATHO_inra_logo.png' alt='Pathologie végétale' style='width:50px; margin-left: 10px;'/>
+                          <img src='2022_LogoSAVE_entier_court_bleu.png' alt='SAVE' style='width:50px; margin-left: 10px;'/>
+                          <img src='CSIRO_Logo.png' alt='CSIRO' style='width:40px; margin-left: 10px;'/>
+                          </div>")
+
+################################
+# List Values
+################################
+listGenes <- c("majorGene", "APR", "QTL" , "immunity")
+listCultivarsType <- c("crop","nonCrop")
+
+
 
 ##################################################################
 # Functions
@@ -94,7 +135,7 @@ showErrorMessage <- function(id="errorMessage", selectorafter = "#", message = "
     ui = tags$div(
       id = id,
       class = "alert alert-danger",
-      paste0(message)
+      shiny::HTML(message)
       )
     )
 }
@@ -213,12 +254,14 @@ checkCultivarsTable <- function(data) {
 # col :
 #  rownames : Cultivars Name
 #  1:ncol : Genes names
+#  ncol : remove button
 # value 0 or 1
 checkCultivarsGenesTable <- function(data){
   isok <- TRUE
-  
+  if( "delete" %in% colnames(data) ) data_tmp <- data[,-ncol(data),drop=FALSE]
+  else data_tmp <- data
   shiny::removeUI(selector = "#cultivarsGenesValueError")
-  if( sum(data != 0) + sum(data != 1) != nrow(data)*ncol(data) ) {
+  if( sum(data_tmp != 0) + sum(data_tmp != 1) != nrow(data_tmp)*ncol(data_tmp) ) {
     showErrorMessage(id = "cultivarsGenesValueError", selectorafter= "#generateLandscape",
                      message = paste0("Values in the 'Cultivars and Genes' table should be either 0 or 1"))
     isok <- FALSE
@@ -311,142 +354,206 @@ checkAllTables <- function(){
 
 #
 # Select cultivar type depending the pathogen name
-cultivarTypeDisease2type <- function(disease="no pathogen", type="growingHost"){
-    if(disease == "no pathogen"){
-        type <- switch( type,
-                       "growingHost" = "growingHost",
-                       "nongrowingHost" = "nongrowingHost",
-                       "nonCrop" = "nonCrop"
-                       )
-        return(type)
-    }
+# cultivarTypeDisease2type <- function(disease="no pathogen", type="growingHost"){
+#     if(disease == "no pathogen"){
+#         type <- switch( type,
+#                        "growingHost" = "growingHost",
+#                        "nongrowingHost" = "nongrowingHost",
+#                        "nonCrop" = "nonCrop"
+#                        )
+#         return(type)
+#     }
+#     
+#     if(disease == "rust"){
+#         type <- switch( type,
+#                 "growingHost" = "wheat",
+#                 "nongrowingHost" = "nongrowingHost",
+#                 "nonCrop" = "nonCrop"
+#         )
+#         return(type)
+#     }
+#     
+#     if(disease == "mildew"){
+#         type <- switch( type,
+#                 "growingHost" = "grapevine",
+#                 "nongrowingHost" = "nongrowingHost",
+#                 "nonCrop" = "nonCrop"
+#         )
+#         return(type)
+#     }
+#   
+#   if(disease == "sigatoka"){
+#     type <- switch( type,
+#                     "growingHost" = "banana",
+#                     "nongrowingHost" = "nongrowingHost",
+#                     "nonCrop" = "nonCrop"
+#     )
+#     return(type)
+#   }
+#     
+#     return("")
+# }
+
+disease2CultivarType <- function(disease="rust", type="crop"){
+  if (type=="crop"){
+    cultivar <- switch(disease,
+                       "rust" = "wheat",  
+                       "mildew" = "grapevine",
+                       "sigatoka" = "banana",
+                       "CMV" = "pepper",
+                       "")
+  }else{ 
+    cultivar <- "nonCrop"
+  }
+
+  return(cultivar)
+}
+
+
+## Get some parameters specific to a pathogen (pathosystem)
+pathosystemParams <- function(disease = "rust") {
+  
+  options = list(
+    nTSpY = 120
+      
+    )
     
-    if(disease == "rust"){
-        type <- switch( type,
-                "growingHost" = "growingHost",
-                "nongrowingHost" = "nongrowingHost",
-                "nonCrop" = "nonCrop"
-        )
-        return(type)
-    }
-    
-    if(disease == "mildew"){
-        type <- switch( type,
-                "growingHost" = "grapevine",
-                "nongrowingHost" = "nongrowingHost",
-                "nonCrop" = "nonCrop"
-        )
-        return(type)
-    }
+  if(disease == "rust"){
+    options$nTSpY = 120
+  }
+  
+  if(disease == "mildew"){
+    options$nTSpY = 120
+  }
   
   if(disease == "sigatoka"){
-    type <- switch( type,
-                    "growingHost" = "banana",
-                    "nongrowingHost" = "nongrowingHost",
-                    "nonCrop" = "nonCrop"
-    )
-    return(type)
+    options$nTSpY = 182
   }
-    
-    return("")
+  
+  printVerbose( paste0("set pathosystem parameters for ",disease), level=3)
+  #print(options)
+  
+  return(options)
+}
+
+## Create inoculum vector for local infection
+inoculumRandomLocal <- function(params, pI0_base=5E-4, nb_poly_inoc=1){
+  
+  Npatho <- prod(params@Genes$Nlevels_aggressiveness)
+  Nhost <- nrow(params@Cultivars)
+  Npoly <- nrow(params@Landscape)
+  Npoly_inoc <- nb_poly_inoc  ## number of inoculated polygons
+   ## whether the avr pathogen can infect the polygons
+  compatible_poly <- getMatrixPolyPatho(params)[,1]
+   ## random polygon picked among compatible ones
+  id_poly <- sample(grep(1, compatible_poly), Npoly_inoc)
+  pI0_poly <- as.numeric(1:Npoly %in% id_poly)  
+  pI0 <- loadInoculum(params,
+                       pI0_all=pI0_base,
+                       pI0_host=c(1,rep(0, Nhost-1)),
+                       pI0_patho=c(1,rep(0, Npatho-1)), 
+                       pI0_poly=pI0_poly)
+  return(pI0)
 }
 
 loadDemoMO <- function(params, disease){
-  gene1 <- loadGene(name="MG 1", type="majorGene")
-  gene2 <- loadGene(name="MG 2", type="majorGene")
+  gene1 <- loadGene(name="majorGene_1", type="majorGene")
+  gene2 <- loadGene(name="majorGene_2", type="majorGene")
     
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
-  cultivar2 <- loadCultivar(name="Resistant1", type=cultivarTypeDisease2type(disease, "growingHost"))
-  cultivar3 <- loadCultivar(name="Resistant2", type=cultivarTypeDisease2type(disease, "growingHost"))
+  
+  susceptibleName <- disease2CultivarType(simul_pathogen())
+  cultivar1 <- loadCultivar(name=susceptibleName, type=disease2CultivarType(disease))
+  cultivar2 <- loadCultivar(name="Resistant1", type=disease2CultivarType(disease))
+  cultivar3 <- loadCultivar(name="Resistant2", type=disease2CultivarType(disease))
   cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
   
-  params <- allocateCultivarGenes(params, "Resistant1", c("MG 1"))
-  params <- allocateCultivarGenes(params, "Resistant2", c("MG 2"))
+  params <- allocateCultivarGenes(params, "Resistant1", c("majorGene_1"))
+  params <- allocateCultivarGenes(params, "Resistant2", c("majorGene_2"))
   
-  croptypes <- loadCroptypes(params, names=c("Susceptible crop", "Resistant crop 1", "Resistant crop 2"))
-  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
-  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 1", "Resistant1")
-  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 2", "Resistant2")
+  croptypes <- loadCroptypes(params, names=c("Susceptible_crop", "Resistant_crop_1", "Resistant_crop_2"))
+  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible_crop", susceptibleName)
+  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant_crop_1", "Resistant1")
+  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant_crop_2", "Resistant2")
   params <- setCroptypes(params, croptypes)
   
   return(params)
 }
 
 loadDemoMI <- function(params,disease){
-  gene1 <- loadGene(name="MG 1", type="majorGene")
-  gene2 <- loadGene(name="MG 2", type="majorGene")
+  gene1 <- loadGene(name="majorGene_1", type="majorGene")
+  gene2 <- loadGene(name="majorGene_2", type="majorGene")
   
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
-  cultivar2 <- loadCultivar(name="Resistant1", type=cultivarTypeDisease2type(disease, "growingHost"))
-  cultivar3 <- loadCultivar(name="Resistant2", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar1 <- loadCultivar(name="Susceptible", type=disease2CultivarType(disease))
+  cultivar2 <- loadCultivar(name="Resistant1", type=disease2CultivarType(disease))
+  cultivar3 <- loadCultivar(name="Resistant2", type=disease2CultivarType(disease))
   cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
   
-  params <- allocateCultivarGenes(params, "Resistant1", c("MG 1"))
-  params <- allocateCultivarGenes(params, "Resistant2", c("MG 2"))
+  params <- allocateCultivarGenes(params, "Resistant1", c("majorGene_1"))
+  params <- allocateCultivarGenes(params, "Resistant2", c("majorGene_2"))
   
-  croptypes <- loadCroptypes(params, names=c("Susceptible crop", "Mixture"))
-  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
-  croptypes <- allocateCroptypeCultivars(croptypes, "Mixture", c("Resistant1","Resistant2"))
+  croptypes <- loadCroptypes(params, names=c("Susceptible_crop", "Mixture_crop"))
+  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible_crop", "Susceptible")
+  croptypes <- allocateCroptypeCultivars(croptypes, "Mixture_crop", c("Resistant1","Resistant2"))
   params <- setCroptypes(params, croptypes)
   
   return(params)
 }
 
 loadDemoRO <- function(params,disease){
-  gene1 <- loadGene(name="MG 1", type="majorGene")
-  gene2 <- loadGene(name="MG 2", type="majorGene")
+  gene1 <- loadGene(name="majorGene_1", type="majorGene")
+  gene2 <- loadGene(name="majorGene_2", type="majorGene")
   
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
-  cultivar2 <- loadCultivar(name="Resistant1", type=cultivarTypeDisease2type(disease, "growingHost"))
-  cultivar3 <- loadCultivar(name="Resistant2", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar1 <- loadCultivar(name="Susceptible", type=disease2CultivarType(disease))
+  cultivar2 <- loadCultivar(name="Resistant1", type=disease2CultivarType(disease))
+  cultivar3 <- loadCultivar(name="Resistant2", type=disease2CultivarType(disease))
   cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
   
-  params <- allocateCultivarGenes(params, "Resistant1", c("MG 1"))
-  params <- allocateCultivarGenes(params, "Resistant2", c("MG 2"))
+  params <- allocateCultivarGenes(params, "Resistant1", c("majorGene_1"))
+  params <- allocateCultivarGenes(params, "Resistant2", c("majorGene_2"))
   
-  croptypes <- loadCroptypes(params, names=c("Susceptible crop", "Resistant crop 1", "Resistant crop 2"))
-  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
-  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 1", "Resistant1")
-  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 2", "Resistant2")
+  croptypes <- loadCroptypes(params, names=c("Susceptible_crop", "Resistant_crop_1", "Resistant_crop_2"))
+  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible_crop", "Susceptible")
+  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant_crop_1", "Resistant1")
+  croptypes <- allocateCroptypeCultivars(croptypes, "Resistant_crop_2", "Resistant2")
   params <- setCroptypes(params, croptypes)
   
   return(params)
 }
 
 loadDemoPY <- function(params, disease){
-  gene1 <- loadGene(name="MG 1", type="majorGene")
-  gene2 <- loadGene(name="MG 2", type="majorGene")
+  gene1 <- loadGene(name="majorGene_1", type="majorGene")
+  gene2 <- loadGene(name="majorGene_2", type="majorGene")
   gene1$mutation_prob <- 1E-4
   gene2$mutation_prob <- 1E-4
   
   genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
   params <- setGenes(params, genes)
   
-  cultivar1 <- loadCultivar(name="Susceptible", type=cultivarTypeDisease2type(disease, "growingHost"))
-  cultivar2 <- loadCultivar(name="Resistant", type=cultivarTypeDisease2type(disease, "growingHost"))
+  cultivar1 <- loadCultivar(name="Susceptible", type=disease2CultivarType(disease))
+  cultivar2 <- loadCultivar(name="Resistant", type=disease2CultivarType(disease))
   cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
   
   params <- setCultivars(params, cultivars)
   
-  params <- allocateCultivarGenes(params, "Resistant", c("MG 1", "MG 2"))
+  params <- allocateCultivarGenes(params, "Resistant", c("majorGene_1", "majorGene_2"))
   
-  croptypes <- loadCroptypes(params, names=c("Susceptible crop", "Pyramid"))
-  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
+  croptypes <- loadCroptypes(params, names=c("Susceptible_crop", "Pyramid"))
+  croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible_crop", "Susceptible")
   croptypes <- allocateCroptypeCultivars(croptypes, "Pyramid", "Resistant")
   params <- setCroptypes(params, croptypes)
   

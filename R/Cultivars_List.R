@@ -43,24 +43,24 @@
 #' }
 # "Cultivars_list"
 Cultivars_list <- list(
-  "growingHost" = list(
+  # "growingHost" = list(
+  #   "cultivarName" = "",
+  #   "initial_density" = 0.1,
+  #   "max_density" = 2.0,
+  #   "growth_rate" = 0.1,
+  #   "reproduction_rate" = 0.0,
+  #   "yield_H" = 2.5,
+  #   "yield_L" = 0.0,
+  #   "yield_I" = 0.0,
+  #   "yield_R" = 0.0,
+  #   "planting_cost" = 225,
+  #   "market_value" = 200
+  # ),
+  "wheat" = list(
     "cultivarName" = "",
     "initial_density" = 0.1,
     "max_density" = 2.0,
     "growth_rate" = 0.1,
-    "reproduction_rate" = 0.0,
-    "yield_H" = 2.5,
-    "yield_L" = 0.0,
-    "yield_I" = 0.0,
-    "yield_R" = 0.0,
-    "planting_cost" = 225,
-    "market_value" = 200
-  ),
-  "nongrowingHost" = list(
-    "cultivarName" = "",
-    "initial_density" = 2.0,
-    "max_density" = 2.0,
-    "growth_rate" = 0.0,
     "reproduction_rate" = 0.0,
     "yield_H" = 2.5,
     "yield_L" = 0.0,
@@ -90,6 +90,19 @@ Cultivars_list <- list(
     "reproduction_rate" = 0.0,
     "yield_H" = 46.8,
     "yield_L" = 46.8,
+    "yield_I" = 0.0,
+    "yield_R" = 0.0,
+    "planting_cost" = 0,
+    "market_value" = 0
+  ),
+  "pepper" = list(
+    "cultivarName" = "Gorria",
+    "initial_density" = 1.75,
+    "max_density" = 1.75,
+    "growth_rate" = 0.0,
+    "reproduction_rate" = 0.0,
+    "yield_H" = 0.5,
+    "yield_L" = 0.5,
     "yield_I" = 0.0,
     "yield_R" = 0.0,
     "planting_cost" = 0,

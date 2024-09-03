@@ -52,7 +52,7 @@ basic_patho_param <- list(infection_rate = 0.4
 simul_params <- setPathogen(simul_params, patho_params = basic_patho_param)
 simul_params@Pathogen
 
-## -----------------------------------------------------------------------------
+## ----fig.alt="The first Landscape available"----------------------------------
 landscape <- loadLandscape(id = 1)
 length(landscape)
 plot(landscape, main = "Landscape structure")
@@ -67,10 +67,10 @@ simul_params <- setLandscape(simul_params, land = landscape)
 simul_params <- setDispersalPathogen(simul_params, disp_patho_clonal)
 
 ## -----------------------------------------------------------------------------
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
-cultivar4 <- loadCultivar(name = "Resistant3", type = "nongrowingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+cultivar3 <- loadCultivar(name = "Resistant2", type = "banana")
+cultivar4 <- loadCultivar(name = "Resistant3", type = "pepper")
 cultivar5 <- loadCultivar(name = "Forest", type = "nonCrop")
 cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4, cultivar5)
                         , stringsAsFactors = FALSE)
@@ -271,20 +271,24 @@ simul_params@Pathogen
 survivalProbToMatrix(simul_params)
 
 ## -----------------------------------------------------------------------------
+## Via function loadTreatment:
+treatment <- loadTreatment(disease="mildew")
+## Direct implementation:
 treatment <- list(treatment_degradation_rate = 0.1,
                   treatment_efficiency = 0.8,
                   treatment_timesteps =  seq(1,120,14) ,
                   treatment_cultivars  = c(0),
                   treatment_cost = 0,
                   treatment_application_threshold = c(0.0))
+## Set the parameters
 simul_params <- setTreatment(simul_params, treatment)
 
 ## -----------------------------------------------------------------------------
-outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")
+outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all", disease="rust")
 outputlist
 
 ## -----------------------------------------------------------------------------
-audpc100S <- compute_audpc100S("rust", "growingHost", area=1E6)
+audpc100S <- compute_audpc100S("rust", "wheat", area=1E6)
 audpc100S <- compute_audpc100S("mildew", "grapevine", area=1E6)
 audpc100S <- compute_audpc100S("sigatoka", "banana", area=1E6, nTSpY=182)
 

@@ -1,14 +1,15 @@
-FROM r-base:4.2.2
+FROM rocker/r-ver:latest
 
 LABEL maintainer "Jean-Francois Rey <jean-francois.rey@inra.fr>"
 
 RUN apt-get update && apt-get install -y \
     sudo \
     gdebi-core \
+    wget \
     pandoc \
     pandoc-citeproc-preamble \
     libcurl4-gnutls-dev \
-    libcairo2-dev/unstable \
+    libcairo2-dev \
     libxt-dev \
     libssl-dev \
     libpq-dev \
@@ -32,7 +33,7 @@ ENV CONTAINER_TIMEZONE Europe/Paris
 
 RUN sudo echo "Europe/Paris" > /etc/timezone
 RUN echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
-  && locale-gen fr_FR.UTF8 \
+  && locale-gen fr_FR.UTF-8 \
   && /usr/sbin/update-locale LANG=fr_FR.UTF-8
 
 ENV LC_ALL fr_FR.UTF-8
@@ -46,7 +47,7 @@ RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION 
   && rm -f version.txt ss-latest.deb \
   && rm -rf /var/lib/apt/lists/*
 
-RUN Rscript -e "install.packages(c('shiny','shinyBS', 'htmltools', 'DT', 'shinyjs', 'Rcpp', 'sp', 'devtools', 'Matrix', 'mvtnorm', 'fields', 'splancs', 'sf', 'RSQLite', 'foreach', 'parallel', 'doParallel', 'gridExtra', 'png', 'grid', 'future', 'promises', 'shinyalert', 'deSolve'), repos='https://cran.biotools.fr/')"
+RUN Rscript -e "install.packages(c('shiny','shinyBS', 'htmltools', 'DT', 'shinyjs', 'Rcpp', 'sp', 'devtools', 'Matrix', 'mvtnorm', 'fields', 'splancs', 'sf', 'RSQLite', 'foreach', 'parallel', 'doParallel', 'gridExtra', 'png', 'tiff', 'grid', 'future', 'promises', 'shinyalert', 'deSolve'), repos='https://cran.biotools.fr/')"
 
 RUN echo 'run_as shiny;\n\
   preserve_logs true;\n\
@@ -77,7 +78,7 @@ RUN R CMD build --no-build-vignettes /landsepi \
 RUN apt-get update && apt-get remove --purge -y \
     gdebi-core \
     libcurl4-gnutls-dev \
-    libcairo2-dev/unstable \
+    libcairo2-dev \
     libxt-dev \
     libssl-dev \
     libpq-dev \

@@ -51,8 +51,8 @@ The data.frame must be defined as follow (example):\tabular{lllllllllll}{
 \examples{
 \dontrun{
 simul_params <- createSimulParams()
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
 cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
 simul_params <- setCultivars(simul_params, cultivars)
 simul_params@Cultivars

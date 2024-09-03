@@ -68,7 +68,7 @@ class Model {
     const std::vector<Gene> genes;         // Array of available genes
     const Basic_patho basic_patho;         // Aggressiveness of a wild-type pathogen on a S cultivar and parameters relative to release of sexual propagules
     const Treatment treatment;             // Effect of chemical treatments on the pathogen
-    const std::vector<Croptype> croptypes; // List of pairs {cultivar, relative proportion} for each croptype
+    const std::map<int,Croptype> croptypes; // List of pairs {cultivar, relative proportion} for each croptype
     const double sigmoid_kappa_host;       // Kappa parameter for the sigmoid invasion function (for host dispersal)
     const double sigmoid_sigma_host;       // Sigma parameter for the sigmoid invasion function (for host dispersal)
     const double sigmoid_plateau_host;     // Plateau parameter for the sigmoid invasion function (for host dispersal)
@@ -80,7 +80,7 @@ class Model {
     Model(const int& Nyears, const int& time_steps_per_year, const int& Npoly, const int& Nhost, const int& Npatho,
           const int& Ngene, const std::vector<double>& area, const Vector2D<int>& rotation,
           const gsl_rng* random_generator, const std::vector<Cultivar>& cultivars, const std::vector<Gene>& genes,
-          const Basic_patho& basic_patho, const Treatment& treatment, const std::vector<Croptype>& croptypes, const double& sigmoid_kappa_host,
+          const Basic_patho& basic_patho, const Treatment& treatment, const std::map<int,Croptype>& croptypes, const double& sigmoid_kappa_host,
           const double& sigmoid_sigma_host, const double& sigmoid_plateau_host, const Vector3D<double>& pI0,
           const Vector2D<double>& disp_patho_clonal, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed);
 

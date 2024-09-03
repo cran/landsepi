@@ -44,26 +44,37 @@ landscapeTab <- {
     shinyBS::bsTooltip("aggregLevel", title = "Level of spatial aggregation of the landscape", placement = "top", trigger = "hover"),
     hr(),
     shiny::fluidRow(
-      tags$div(
+         shiny::checkboxInput("rotationcheck", "Active Rotation strategy", value = FALSE),
+         shinyBS::bsTooltip("rotationcheck", title = "Active Rotation strategy", placement = "top", trigger = "hover"),
+        column(
+            width = 2,
+            IntegerInput(
+                inputId = "rotationPeriod",
+                label = "Rotation period (years)",
+                value = 0,
+                max = VALUEMAX
+            )
+        ),
+        shinyBS::bsTooltip("rotationPeriod", title = ROTATION_PERIOD, placement = "bottom", trigger = "hover"),
+        column(
+            width = 10,
+            align = "left",
+            htmlOutput("rotationText"),
+        )
+    ),
+    #hr(),
+    shiny::fluidRow(
+      shiny::div(
+        #style="margin:auto;display: inline-block;vertical-align:middle;text-align:left",
         lang = "en",
         h3("Croptypes"),
         editableDTUI(id = "croptypes")
-      ),
-      hr(),
-      column(
-        width = 4,
-        IntegerInput(
-          inputId = "rotationPeriod",
-          label = "Rotation period (years)",
-          value = 0,
-          max = VALUEMAX
-        )
-      ),
-      shinyBS::bsTooltip("rotationPeriod", title = ROTATION_PERIOD, placement = "bottom", trigger = "hover"),
-      column(
-        width = 8,
-        align = "left",
-        htmlOutput("rotationText")
+      )),
+    shiny::fluidRow(
+      shiny::div(
+        style="margin:auto;display: inline-block;vertical-align:middle;text-align:left",
+        shiny::actionButton(inputId = "addcrop",label = "Add Croptype"),
+        shinyBS::bsTooltip("addcrop", title = "Add a croptype type", placement = "right", trigger = "hover")
       )
     ),
     hr(),
@@ -107,10 +118,48 @@ cultivarTab <- {
     "Cultivars and Genes",
     h3("Genes"),
     editableDTUI(id = "genes"),
-    h3("Cultivars"),
+    shiny::fluidRow(
+      column(12,
+    shiny::div(
+      style="margin:auto;display: inline-block;vertical-align:middle;text-align:left",
+      shiny::selectInput(
+        inputId = "listgenes",
+        label = "",
+        choices = listGenes,
+        selected = 1,
+        width = "120px",
+      ),
+      shinyBS::bsTooltip("listgenes", title = "Select a gene type", placement = "top", trigger = "hover"),
+    ),
+    shiny::div(
+      style="margin:auto;display: inline-block;vertical-align:middle;text-align:left",
+      shiny::actionButton(inputId = "addgene",label = "Add Gene"),
+      shinyBS::bsTooltip("addgene", title = "Add selected Gene type", placement = "right", trigger = "hover")
+    )
+    )),
+    # h3("Cultivars"),
     editableDTUI(id = "cultivars"),
     h3("Cultivars and Genes"),
     editableDTUI(id = "cultivarsgenes"),
+    shiny::fluidRow(
+      column(12,
+             shiny::div(
+               style="margin:auto;display: inline-block;vertical-align:middle;text-align:left",
+               shiny::selectInput(
+                 inputId = "listcultivarstype",
+                 label = "",
+                 choices = listCultivarsType,
+                 selected = 1,
+                 width = "150px",
+               ),
+               shinyBS::bsTooltip("listcultivarstype", title = "Select a cultivars type", placement = "top", trigger = "hover"),
+             ),
+             shiny::div(
+               style="margin:auto;display: inline-block;vertical-align:middle;text-align:left",
+               shiny::actionButton(inputId = "addcultivar",label = "Add a cultivar"),
+               shinyBS::bsTooltip("addcultivar", title = "Add selected cultivar type", placement = "right", trigger = "hover")
+             )
+      ))
   )
 }
 
@@ -118,31 +167,39 @@ cultivarTab <- {
 pathogenTab <- {
   shiny::tabPanel(
     "Pathogen",
-    shiny::div(
-      shiny::selectInput(
-        inputId = "defaultPathogen",
-        label = "Default Pathogen",
-        choices = list(
-          "Rust of wheat" = "Rust",
-          "Grapevine downy mildew" = "Mildew",
-          "Banana black sigatoka" = "Sigatoka",
-          "No Pathogen" = "No Pathogen"
-        ),
-        width = "25%"
-      ),
-      align = "center",
-      shinyBS::bsTooltip("defaultPathogen", title = "Select a Pathogen <br><b>!!! That will reload all simulation parameters in normal Mode !!!</b>", placement = "top", trigger = "hover"),
-    ),
+    # shiny::div(
+    #   shiny::selectInput(
+    #     inputId = "defaultPathogen",
+    #     label = "Default Pathogen",
+    #     choices = list(
+    #       "Rust of wheat" = "Rust",
+    #       "Grapevine downy mildew" = "Mildew",
+    #       "Banana black sigatoka" = "Sigatoka",
+    #       "No Pathogen" = "No Pathogen"
+    #     ),
+    #     width = "25%"
+    #   ),
+    #   align = "center",
+    #   shinyBS::bsTooltip("defaultPathogen", title = "Select a Pathogen <br><b>!!! That will reload all simulation parameters in normal Mode !!!</b>", placement = "top", trigger = "hover"),
+    # ),
     shiny::fluidRow(
-      shiny::numericInput(
-        inputId = "inoculum",
-        label = "Initial probability of infection for the first susceptible cultivar",
-        value = 0.0005,
-        min = 0.0,
-        max = 1.0,
-        step = 0.0001
+      column(6,
+             shiny::numericInput(
+               inputId = "inoculum",
+               label = "Initial probability of infection for susceptible cultivar",
+               value = 0.0005,
+               min = 0.0,
+               max = 1.0,
+               step = 0.0001
+             ),
+             shinyBS::bsTooltip("inoculum", title = INOCULUM, placement = "bottom", trigger = "hover"),
+             shiny::h5(id="inoculum_message", "(Local initial probability of infection for susceptible cultivar should be upper than 0.01)")
       ),
-      shinyBS::bsTooltip("inoculum", title = INOCULUM, placement = "bottom", trigger = "hover"),
+      shiny::column(
+        width = 6,
+        shiny::radioButtons("inoculumstrategy", "Inoculum localisation", c("Global"=1,"Local"=0)),
+        shinyBS::bsTooltip("inoculumstrategy", title = "Global : all susceptibles cultivars fields are infected | Local : a random susceptible field is infected", placement = "top", trigger = "hover"),
+      ),
     ),
     shiny::fluidRow(
       column(
@@ -193,15 +250,15 @@ pathogenTab <- {
           step = 1
         ),
         shinyBS::bsTooltip("patho_latent_period_mean", title =  LATENT_PERIOD_MEAN, placement = "left", trigger = "hover"),
-        shiny::numericInput(
-          inputId = "patho_latent_period_var",
-          label = "Variance of the latent period duration",
-          value = 9,
-          min = 0.0,
-          max = 100,
-          step = 1
-        ),
-        shinyBS::bsTooltip("patho_latent_period_var", title = LATENT_PERIOD_VAR, placement = "left", trigger = "hover"),
+        # shiny::numericInput(
+        #   inputId = "patho_latent_period_var",
+        #   label = "Variance of the latent period duration",
+        #   value = 9,
+        #   min = 0.0,
+        #   max = 100,
+        #   step = 1
+        # ),
+        # shinyBS::bsTooltip("patho_latent_period_var", title = LATENT_PERIOD_VAR, placement = "left", trigger = "hover"),
         shiny::numericInput(
           inputId = "patho_infectious_period_mean",
           label = "Infectious period duration",
@@ -211,35 +268,35 @@ pathogenTab <- {
           step = 1
         ),
         shinyBS::bsTooltip("patho_infectious_period_mean", title = INFECTIOUS_PERIOD_MEAN, placement = "left", trigger = "hover"),
-        shiny::numericInput(
-          inputId = "patho_infectious_period_var",
-          label = "Variance of the infectious period duration",
-          value = 105,
-          min = 0,
-          step = 1
-        ),
-        shinyBS::bsTooltip("patho_infectious_period_var", title = INFECTIOUS_PERIOD_VAR, placement = "left", trigger = "hover")
+        # shiny::numericInput(
+        #   inputId = "patho_infectious_period_var",
+        #   label = "Variance of the infectious period duration",
+        #   value = 105,
+        #   min = 0,
+        #   step = 1
+        # ),
+        # shinyBS::bsTooltip("patho_infectious_period_var", title = INFECTIOUS_PERIOD_VAR, placement = "left", trigger = "hover")
       ),
-      column(
-        width = 4,
-        shiny::numericInput(
-          inputId = "patho_sigmoid_kappa",
-          label = "Contamination function: Kappa",
-          value = 5.333,
-          min = 0.0001,
-          max = 10,
-          step = 0.01
-        ),
-        shinyBS::bsTooltip("patho_sigmoid_kappa", title = SIGMOID_KAPPA, placement = "left", trigger = "hover"),
-        shiny::numericInput(
-          inputId = "patho_sigmoid_sigma",
-          label = "Contamination function: Sigma",
-          value = 3,
-          min = 0.0,
-          max = 100,
-          step = 1
-        ),
-        shinyBS::bsTooltip("patho_sigmoid_sigma", title = SIGMOID_SIGMA, placement = "left", trigger = "hover"),
+      # column(
+      #   width = 4,
+      #   shiny::numericInput(
+      #     inputId = "patho_sigmoid_kappa",
+      #     label = "Contamination function: Kappa",
+      #     value = 5.333,
+      #     min = 0.0001,
+      #     max = 10,
+      #     step = 0.01
+      #   ),
+      #   shinyBS::bsTooltip("patho_sigmoid_kappa", title = SIGMOID_KAPPA, placement = "left", trigger = "hover"),
+      #   shiny::numericInput(
+      #     inputId = "patho_sigmoid_sigma",
+      #     label = "Contamination function: Sigma",
+      #     value = 3,
+      #     min = 0.0,
+      #     max = 100,
+      #     step = 1
+      #   ),
+      #   shinyBS::bsTooltip("patho_sigmoid_sigma", title = SIGMOID_SIGMA, placement = "left", trigger = "hover"),
         # ,
         # shiny::numericInput(
         #   inputId = "patho_sigmoid_plateau",
@@ -249,37 +306,37 @@ pathogenTab <- {
         #   max = 100,
         #   step = 1
         # )
-      )
+      # )
     ),
-    shiny::fluidRow(
-      shiny::column(
-        width = 4,
-        shiny::checkboxInput("patho_repro_sex_active", "Active Sexual Reproduction", value = FALSE),
-        shinyBS::bsTooltip("patho_repro_sex_active", title = "Active sexual reproduction at the end of the season", placement = "top", trigger = "hover"),
-      ),
-      column(
-        width = 4,
-        shiny::numericInput(
-          inputId = "patho_sex_propagule_release_mean",
-          label = "Average number of seasons before release of sexual propagules",
-          value = 1.0,
-          min = 1.0,
-          step = 1.0
-        ),
-        shinyBS::bsTooltip("patho_sex_propagule_release_mean", title = SEX_PROPAGULE_RELEASE_MEAN, placement = "left", trigger = "hover")
-      ),
-      column(
-        width = 4,
-        shiny::numericInput(
-          inputId = "patho_sex_propagule_viability_limit",
-          label = "Sexual propagule viability limit: nb of seasons (years)",
-          value = 5,
-          min = 1,
-          step = 1
-        ),
-        shinyBS::bsTooltip("patho_sex_propagule_viability_limit", title = SEX_PROPAGULE_VIABILITY_LIMIT, placement = "left", trigger = "hover"),
-      )
-    )
+    # shiny::fluidRow(
+    #   shiny::column(
+    #     width = 4,
+    #     shiny::checkboxInput("patho_repro_sex_active", "Active Sexual Reproduction", value = FALSE),
+    #     shinyBS::bsTooltip("patho_repro_sex_active", title = "Active sexual reproduction at the end of the season", placement = "top", trigger = "hover"),
+    #   ),
+    #   column(
+    #     width = 4,
+    #     shiny::numericInput(
+    #       inputId = "patho_sex_propagule_release_mean",
+    #       label = "Average number of seasons before release of sexual propagules",
+    #       value = 1.0,
+    #       min = 1.0,
+    #       step = 1.0
+    #     ),
+    #     shinyBS::bsTooltip("patho_sex_propagule_release_mean", title = SEX_PROPAGULE_RELEASE_MEAN, placement = "left", trigger = "hover")
+    #   ),
+    #   column(
+    #     width = 4,
+    #     shiny::numericInput(
+    #       inputId = "patho_sex_propagule_viability_limit",
+    #       label = "Sexual propagule viability limit: nb of seasons (years)",
+    #       value = 5,
+    #       min = 1,
+    #       step = 1
+    #     ),
+    #     shinyBS::bsTooltip("patho_sex_propagule_viability_limit", title = SEX_PROPAGULE_VIABILITY_LIMIT, placement = "left", trigger = "hover"),
+    #   )
+    # )
   )
 }
 
@@ -299,14 +356,14 @@ treatmentTab <- {
       column(
         width = 4,
         align = "center",
-        shiny::numericInput(
-          inputId = "treatment_day_start",
-          label = "First Day of treatment",
-          value = 1,
-          min = 1,
-          step = 1
-        ),
-        shinyBS::bsTooltip("treatment_day_start", title = "First day of treatment", placement = "top", trigger = "hover"),
+      #   shiny::numericInput(
+      #     inputId = "treatment_day_start",
+      #     label = "First Day of treatment",
+      #     value = 1,
+      #     min = 1,
+      #     step = 1
+      #   ),
+      #   shinyBS::bsTooltip("treatment_day_start", title = "First day of treatment", placement = "top", trigger = "hover"),
         shiny::numericInput(
           inputId = "treatment_days_interval",
           label = "Days (step) between treatment",
@@ -337,13 +394,13 @@ treatmentTab <- {
       column(
         width = 4,
         align = "center",
-        shiny::numericInput(
-          inputId = "treatment_degradation_rate",
-          label = "Treatment degradation rate",
-          value = 0.1,
-          min = 0.01,
-          step = 0.1
-        ),
+      #   shiny::numericInput(
+      #     inputId = "treatment_degradation_rate",
+      #     label = "Treatment degradation rate",
+      #     value = 0.1,
+      #     min = 0.01,
+      #     step = 0.1
+      #   ),
         shinyBS::bsTooltip("treatment_degradation_rate", title = "Degradation per time step of treatment concentration. 0.10 for protectant fungicides, 0.07 for locally systemic fungicides, and 0.06 to 0.05 for systemic fungicides.", placement = "top", trigger = "hover"),
         shiny::numericInput(
           inputId = "treatment_efficiency",
@@ -364,32 +421,105 @@ inputUi <- {
   shiny::sidebarPanel(
     id = "inputpanel",
     shiny::h3("Input", align = "center"),
-    shiny::div(
-      shiny::selectInput(
-        inputId = "demo",
-        label = "Default Strategies",
-        choices = list(
-          "Mosaic" = "MO",
-          "Mixture" = "MI",
-          "Rotation" = "RO",
-          "Pyramiding" = "PY"
+    shiny::fluidRow(
+      column(12,
+      shiny::div(
+        style="margin:auto;display: inline-block;vertical-align:middle;text-align:center",
+        shiny::selectInput(
+          inputId = "defaultPathogen",
+          label = "Pathosystem",
+          choices = list(
+            "Rust of wheat" = "rust",
+            "Grapevine downy mildew" = "mildew",
+            "Banana black sigatoka" = "sigatoka"
+            #"No Pathogen" = "no Pathogen"
+          ),
+          width = "200px"
         ),
-        width = "25%"
+        #align = "center",
+        shinyBS::bsTooltip("defaultPathogen", title = "Select a Pathosystem <br>", placement = "top", trigger = "hover"),
       ),
-      align = "center"
+      shiny::div(
+          style="margin:auto;display: inline-block;vertical-align:middle;text-align:center",
+          shiny::selectInput(
+              inputId = "demo",
+              label = "Strategy",
+              choices = list(
+                  "Mosaic" = "MO",
+                  "Mixture" = "MI",
+                  "Rotation" = "RO",
+                  "Pyramiding" = "PY"
+              ),
+              width = "130px"
+          ),
+          shinyBS::bsTooltip("demo", title = "Select a strategy", placement = "top", trigger = "hover"),
+      ),
+      shiny::div(
+        style="margin:auto;display: inline-block;vertical-align:middle;text-align:center",
+        actionButton("load", "Load", icon = icon("rotate-right", lib = "font-awesome")),
+        shinyBS::bsTooltip("load", title = "Load the strategy and the pathosystem  | Erase all modifications", placement = "top", trigger = "hover"),
+      ),
+      align="center"
+      )
     ),
-    shinyBS::bsTooltip("demo", title = "Load existing parameters or click Advanced Mode", placement = "top", trigger = "hover"),
-    shiny::tabsetPanel(id = "inputtabpanel", landscapeTab, cultivarTab, pathogenTab, treatmentTab),
+    shiny::tabsetPanel(id = "inputtabpanel", cultivarTab, landscapeTab, treatmentTab, pathogenTab ),
     width = 12,
     align = "center"
   )
 }
 ######################################################################################
+## OUTPUT UI
+
+landscapeTab <- shiny::tabPanel(
+  title = "Landscape",
+  value = "landscapeTab",
+  shiny::br(),
+  shiny::plotOutput(outputId = "landscapeimg", dblclick = "plot_landscapeimg")
+)
+
+## Video Tab
+
+videoTab <- shiny::tabPanel(
+  title = "Video",
+  value = "videoTab",
+  shiny::br(),
+  shiny::uiOutput(outputId = "video")
+  )
+
+## Table and graphics TAB
+
+tableTab <- shiny::tabPanel(
+  title = "Tables and Graphics",
+  value = "tableTab",
+  shiny::br(),
+  fluidRow(
+    column(
+      width=6,
+      shiny::h4("Epidemiological control (disease severity)"),
+      DT::DTOutput("audpctable")
+    ),
+    column(
+      width=6,
+      shiny::h4("Evolutionary control (resistance durability)"),
+      DT::DTOutput("durabilitytable")
+    )
+  ),
+  fluidRow(
+      column(
+          width=10,
+          br(),
+          shiny::h4("Frequency of pathogen genotypes"),
+          shiny::imageOutput(outputId = "freqpathogenotypes", inline = FALSE, width = "50%")
+  ))
+)
+
+## OUTPUT
 outputUi <- {
   shiny::mainPanel(
     shiny::h3("Output"),
-    shiny::plotOutput(outputId = "landscapeimg", dblclick = "plot_landscapeimg"),
-    shiny::uiOutput(outputId = "video"),
+    # shiny::plotOutput(outputId = "landscapeimg", dblclick = "plot_landscapeimg"),
+    # shiny::uiOutput(outputId = "video"),
+    shiny::tabsetPanel(id = "outputtabpanel", landscapeTab, videoTab, tableTab ),
     width = 12,
     align = "center",
     id = "outputpanel"
@@ -420,8 +550,9 @@ ui <- {
     fluidRow(
       titlePanel(div(img(src = "landsepi-logo.png", width = "60"), "Landsepi : Landscape Epidemiology and Evolution")),
       actionButton("About", "About"),
-      actionButton("Mode", "Advanced Mode On/Off", icon = icon("arrow-right-arrow-left", lib = "font-awesome")),
-      shinyBS::bsTooltip("Mode", title = "Edit all input parameters", placement = "top", trigger = "hover"),
+      shinyBS::bsTooltip("About", title = "About Landsepi", placement = "top", trigger = "hover"),
+      #actionButton("Mode", "Advanced Mode On/Off", icon = icon("arrow-right-arrow-left", lib = "font-awesome")),
+      #shinyBS::bsTooltip("Mode", title = "Edit all input parameters", placement = "top", trigger = "hover"),
       align = "center"
     ),
     shiny::br(),
@@ -453,12 +584,12 @@ ui <- {
     )),
     shinyBS::bsTooltip("runSimulation", title = RUN_SIMULATION, placement = "top", trigger = "hover"),
     shinyBS::bsTooltip("stopSimulation", title = STOP_SIMULATION, placement = "top", trigger = "hover"),
-    shiny::br(),
-    shiny::fluidRow(shiny::div(
-      shiny::downloadButton(outputId = "export", label = "Download simulation parameters"),
-      align = "center"
-    )),
-    shinyBS::bsTooltip("export", title = EXPORT_SIMULATION, placement = "top", trigger = "hover"),
-    shiny::br()
+    shiny::br()#,
+    # shiny::fluidRow(shiny::div(
+    #   shiny::downloadButton(outputId = "export", label = "Download simulation parameters"),
+    #   align = "center"
+    # )),
+    # shinyBS::bsTooltip("export", title = EXPORT_SIMULATION, placement = "top", trigger = "hover"),
+    # shiny::br()
   )
 }

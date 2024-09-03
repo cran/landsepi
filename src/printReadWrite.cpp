@@ -104,8 +104,8 @@ void Model::print_param(const int& seed, const std::vector<double>& mutation_pro
     }
     
     param_file << "Croptypes:\n";
-    for(unsigned int i = 0; i < this->croptypes.size(); i++) {
-        param_file << "  croptype " << i + 1 << ": " << this->croptypes[i].to_string() << "\n";
+    for(std::map<int,Croptype>::const_iterator it=this->croptypes.begin(); it!=croptypes.end(); ++it) {
+      param_file << "  croptype " << it->first + 1 << ": " << it->second.to_string() << "\n";
     }
 
     param_file << "\n*****                  Hosts                  *****\n";

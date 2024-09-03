@@ -4,13 +4,12 @@
 \alias{loadCultivar}
 \title{Load a cultivar}
 \usage{
-loadCultivar(name, type = "growingHost")
+loadCultivar(name, type = "wheat")
 }
 \arguments{
 \item{name}{a character string (without space) specifying the cultivar name.}
 
-\item{type}{the cultivar type, among: "growingHost" (default), "nongrowingHost",
-"grapevine", "banana" or "nonCrop".}
+\item{type}{the cultivar type, among: "wheat" (default), "grapevine", "banana", "pepper" or "nonCrop".}
 }
 \value{
 a dataframe of parameters associated with each host genotype
@@ -21,19 +20,19 @@ create a data.frame containing cultivar parameters depending of his type
 }
 \details{
 \itemize{
-\item "growingHost" is adapted to situations where the infection unit is a piece of leaf
+\item "wheat" is adapted to situations where the infection unit is a piece of leaf
 (e.g. where a fungal lesion can develop); the number of available infection units
 increasing during the season due to plant growth (as typified by cereal crops).
-\item "nongrowingHost" corresponds to situations where the infection unit is the whole plant
-(e.g. for viral systemic infection); thus the number of infection units is constant.
 \item "grapevine" corresponds to parameters for grapevine (including host growth).
 \item "banana" corresponds to parameters for banana (including host growth).
+\item "pepper" corresponds to situations where the infection unit is the whole plant
+(e.g. for viral systemic infection); thus the number of infection units is constant.
 \item "nonCrop" is not planted, does not cost anything and does not yield anything
 (e.g. forest, fallow).
 }
 }
 \examples{
-c1 <- loadCultivar("winterWheat", type = "growingHost")
+c1 <- loadCultivar("winterWheat", type = "wheat")
 c1
 c2 <- loadCultivar("forest", type = "nonCrop")
 c2

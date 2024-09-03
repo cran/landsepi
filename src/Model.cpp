@@ -38,7 +38,7 @@
 Model::Model(const int& Nyears, const int& time_steps_per_year, const int& Npoly, const int& Nhost, const int& Npatho,
              const int& Ngene, const std::vector<double>& area, const Vector2D<int>& rotation,
              const gsl_rng* random_generator, const std::vector<Cultivar>& cultivars, const std::vector<Gene>& genes,
-             const Basic_patho& basic_patho, const Treatment& treatment, const std::vector<Croptype>& croptypes, const double& sigmoid_kappa_host,
+             const Basic_patho& basic_patho, const Treatment& treatment, const std::map<int,Croptype>& croptypes, const double& sigmoid_kappa_host,
              const double& sigmoid_sigma_host, const double& sigmoid_plateau_host, const Vector3D<double>& pI0,
              const Vector2D<double>& disp_patho_clonal, const Vector2D<double>& disp_patho_sex, const Vector2D<double>& disp_host, const int& seed)
   : Nyears(Nyears),
@@ -564,9 +564,9 @@ void Model::host_dynamic(const int& poly, const int& year, const int& t, std::ve
   /* H, Hjuv, L, I and R are the number of host in a given poly */
   
   // If there is no rotation (same croptype each year), only take the first year rotation
-  const int id_croptype = (this->rotation[poly].size() == 1) ? this->rotation[poly][0] : this->rotation[poly][year];
+  int id_croptype = (this->rotation[poly].size() == 1) ? this->rotation[poly][0] : this->rotation[poly][year];
   
-  for(std::pair<int, double> cultivar_prop : this->croptypes[id_croptype].cultivar_proportion) {
+  for(std::pair<int, double> cultivar_prop : croptypes.find(id_croptype)->second.cultivar_proportion) {
     const int id_host = cultivar_prop.first;
     const double prop = cultivar_prop.second;
     int L_host = 0, I_host = 0, R_host = 0; 
@@ -701,19 +701,19 @@ Vector2D<int> Model::contamination(const std::vector<int>& H, const std::vector<
   for(int host = 0; host < this->Nhost; host++) {
     // Distribution of the propagules among the different pathotypes
     const std::vector<int> P_host_patho = ran_multinomial(P_host[host], probaP);
-    /* Calculation of the number of contaminable sites */
+    /* Calculation of the number of available sites */
     const double f1patho = (N[host] > 0)
       ? sigmoid(this->basic_patho.sigmoid_plateau, this->basic_patho.sigmoid_kappa,
                 this->basic_patho.sigmoid_sigma, (H[host] / static_cast<double>(N[host])))
         : 0.0;
     
-    // Contaminable site, where a propagule may deposit
-    const int Hcontaminable = ran_binomial(f1patho, H[host]);
-    // Distribution of the contaminable sites among the different pathotypes
-    const std::vector<int> Hcontaminated_tmp = ran_multinomial(Hcontaminable, probaP);
-    /* The true number of contaminated sites is the minimum between sites and propagules */
+    // Available site, where a propagule may deposit
+    const int Havailable = ran_binomial(f1patho, H[host]);
+    // Distribution of the available sites among the different pathotypes
+    const std::vector<int> Hreachable = ran_multinomial(Havailable, probaP);
+    /* The true number of contaminated sites is the minimum between reachable sites and propagules */
     for(int patho = 0; patho < this->Npatho; patho++) {
-      Hcontaminated[patho][host] = std::min(Hcontaminated_tmp[patho], P_host_patho[patho]);
+      Hcontaminated[patho][host] = std::min(Hreachable[patho], P_host_patho[patho]);
     }
   }
   return Hcontaminated;
@@ -1325,10 +1325,8 @@ void model_landsepi(Rcpp::List time_param, Rcpp::NumericVector area_vector, Rcpp
   
   const int Npoly = area.size();
   
-  std::vector<Croptype> croptypes(0);
-  
-  for(int i=0 ; i < croptypes_cultivars_prop.nrow() ; i++) {
-    if( croptypes_cultivars_prop(i,0) >= croptypes.size()) croptypes.push_back(Croptype());
+  std::map<int,Croptype> croptypes;
+  for(int i=0 ; i < croptypes_cultivars_prop.nrow() ; i++) {  
     croptypes[croptypes_cultivars_prop(i,0)].cultivar_proportion.push_back(
         std::pair<int, double>(
             croptypes_cultivars_prop(i,1),

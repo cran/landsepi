@@ -279,7 +279,7 @@ Vector2D<int> Model::intro_H(const int& year) {
         // If there is no rotation (same croptype each year)
         int id_croptype = (this->rotation[poly].size() == 1) ? this->rotation[poly][0] : this->rotation[poly][year];
 
-        for(std::pair<int, double> cultivar_prop : this->croptypes[id_croptype].cultivar_proportion) {
+        for(std::pair<int, double> cultivar_prop : this->croptypes.find(id_croptype)->second.cultivar_proportion) {
             int id_host = cultivar_prop.first;
             double prop = cultivar_prop.second;
             H[poly][id_host] = static_cast<int>(this->area[poly] * this->cultivars[id_host].initial_density * prop);

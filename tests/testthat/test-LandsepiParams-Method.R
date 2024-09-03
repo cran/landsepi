@@ -19,9 +19,9 @@ gene1 <- loadGene(name = "MG1", type = "majorGene")
 gene2 <- loadGene(name = "MG2", type = "majorGene")
 genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 # params <- setCultivarGene(params, "Resistant1", c("MG1"))
 # params <- setCultivarGene(params, "Resistant2", c("MG2"))
@@ -202,7 +202,7 @@ test_that("Cultivars-Check", {
   expect_false(checkCultivars(params_tmp))
 
   # cultivars nb +1
-  params_tmp <- setCultivars(params_tmp, rbind(cultivars, loadCultivar(name = "Resistant3", type = "growingHost")))
+  params_tmp <- setCultivars(params_tmp, rbind(cultivars, loadCultivar(name = "Resistant3", type = "wheat")))
   expect_true(checkCultivars(params_tmp))
 })
 

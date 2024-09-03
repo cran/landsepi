@@ -4,7 +4,7 @@
 \alias{loadOutputs}
 \title{Load outputs}
 \usage{
-loadOutputs(epid_outputs = "all", evol_outputs = "all")
+loadOutputs(epid_outputs = "all", evol_outputs = "all", disease = "rust")
 }
 \arguments{
 \item{epid_outputs}{a character string (or a vector of character strings if several outputs
@@ -38,6 +38,8 @@ outputs are to be computed) specifying the type of evolutionary outputs to gener
 \item "all": compute all these outputs (default)
 \item "": none of these outputs will be generated.
 }}
+
+\item{disease}{a disease name, among "rust" (default), "mildew", "sigatoka" and "no pathogen"}
 }
 \value{
 a list of outputs and parameters for output generation

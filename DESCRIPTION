@@ -2,28 +2,28 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 1.4.0
-Date: 2024-03-12
+Version: 1.5.0
+Date: 2024-09-03
 Authors@R: 
     c(person(given = "Loup",
              family = "Rimbaud",
              role = "aut",
              email = "loup.rimbaud@inrae.fr",
              comment = c(ORCID = "0000-0002-8098-9984")),
-      person(given = "Julien",
-             family = "Papaix",
+      person(given = "Marta",
+             family = "Zaffaroni",
              role = "aut",
-             email = "julien.papaix@inrae.fr"),
+             email = "marta.zaffaroni@inrae.fr",
+             comment = c(ORCID = "0000-0002-2951-8626")),
       person(given = "Jean-François",
              family = "Rey",
              role = c("aut","cre"),
              email = "jean-francois.rey@inrae.fr",
              comment = c(ORCID = "0000-0003-3281-6701")),
-      person(given = "Marta",
-             family = "Zaffaroni",
-             role = "ctb",
-             email = "marta.zaffaroni@inrae.fr",
-             comment = c(ORCID = "0000-0002-2951-8626")),
+      person(given = "Julien",
+             family = "Papaix",
+             role = "aut",
+             email = "julien.papaix@inrae.fr"),
       person(given = "Jean-Loup",
              family = "Gaussen",
              role = "ctb",
@@ -59,17 +59,17 @@ Imports: methods, utils, stats (>= 3.0.2), grDevices (>= 3.0.0),
 Collate: 'Math-Functions.R' 'RcppExports.R' 'graphics.R' 'AgriLand.R'
         'Class-LandsepiParams.R' 'Cultivars_List.R' 'GPKGTools.R'
         'tools.R' 'Methods-LandsepiParams.R' 'demo_landsepi.R'
-        'landsepi.R' 'output.R' 'runShiny.R' 'simul_landsepi.R'
+        'landsepi-package.R' 'output.R' 'runShiny.R' 'simul_landsepi.R'
 LinkingTo: Rcpp, testthat
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Suggests: testthat (>= 3.0.0), shiny, shinyjs, DT, knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2024-03-12 16:13:26 UTC; jfrey
+Packaged: 2024-09-03 09:40:00 UTC; jfrey
 Author: Loup Rimbaud [aut] (<https://orcid.org/0000-0002-8098-9984>),
-  Julien Papaix [aut],
+  Marta Zaffaroni [aut] (<https://orcid.org/0000-0002-2951-8626>),
   Jean-François Rey [aut, cre] (<https://orcid.org/0000-0003-3281-6701>),
-  Marta Zaffaroni [ctb] (<https://orcid.org/0000-0002-2951-8626>),
+  Julien Papaix [aut],
   Jean-Loup Gaussen [ctb],
   Manon Couty [ctb]
 Repository: CRAN
-Date/Publication: 2024-03-12 16:50:02 UTC
+Date/Publication: 2024-09-03 10:20:03 UTC

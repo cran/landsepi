@@ -69,8 +69,9 @@ of deployment strategies.
 }
 \examples{
 \dontrun{
-### Here is an example of simulation of a mosaic of three cultivars (S + R1 + R2). See our 
-## tutorials for more examples.
+### Here is an example of simulation of a mosaic of three cultivars (S + R1 + R2).
+## See our tutorials for more examples.
+
 ## Initialisation
 simul_params <- createSimulParams(outputDir = getwd())
 ## Seed & Time parameters
@@ -87,31 +88,31 @@ gene2 <- loadGene(name = "MG 2", type = "majorGene")
 genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 simul_params <- setGenes(simul_params, genes)
 ## Cultivars
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 simul_params <- setCultivars(simul_params, cultivars)
 ## Allocate genes to cultivars
 simul_params <- allocateCultivarGenes(simul_params, "Resistant1", c("MG 1"))
 simul_params <- allocateCultivarGenes(simul_params, "Resistant2", c("MG 2"))
 ## Allocate cultivars to croptypes
-croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop"
-, "Resistant crop 1"
-, "Resistant crop 2"))
+croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop",
+"Resistant crop 1", "Resistant crop 2"))
 croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
 croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 1", "Resistant1")
 croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 2", "Resistant2")
 simul_params <- setCroptypes(simul_params, croptypes)
 ## Allocate croptypes to landscape        
-rotation_sequence <- croptypes$croptypeID ## No rotation -> 1 rotation_sequence element
+rotation_sequence <- croptypes$croptypeID ## No rotation => 1 rotation_sequence element
 rotation_period <- 0 ## same croptypes every years
 prop <- c(1 / 3, 1 / 3, 1 / 3) ## croptypes proportions
 aggreg <- 10 ## aggregated landscape
-simul_params <- allocateLandscapeCroptypes(simul_params, rotation_period = rotation_period,
+simul_params <- allocateLandscapeCroptypes(simul_params,
+rotation_period = rotation_period,
 rotation_sequence = rotation_sequence,
 rotation_realloc = FALSE, prop = prop, aggreg = aggreg)
-Set the inoculum
+## Set the inoculum
 simul_params <- setInoculum(simul_params, 5e-4)
 ## list of outputs to be generated
 simul_params <- setOutputs(simul_params, loadOutputs())
@@ -122,17 +123,19 @@ simul_params <- saveDeploymentStrategy(simul_params)
 ## Run simulation
 runSimul(simul_params)
 
-### Simulation of rust epidemics in a 1-km^2 patch cultivated with a susceptible wheat cultivar
+### Simulation of rust epidemics in a 1-km^2 patch cultivated
+### with a susceptible wheat cultivar
 seed=10
 Nyears=5
 disease="rust"
-hostType="growingHost"
+hostType="wheat"
 simul_params <- createSimulParams(outputDir = getwd())
 
 ## Seed and time parameters
 simul_params <- setSeed(simul_params, seed)
 simul_params <- setTime(simul_params, Nyears, nTSpY=120)
 
+## Pathogen parameters
 simul_params <- setPathogen(simul_params, loadPathogen(disease))
 myLand <- Polygons(list(Polygon(matrix(c(0,0,1,1,0,1,1,0)*1000, nrow=4))), "ID1")
 myLand <- SpatialPolygons(list(myLand))
@@ -142,11 +145,12 @@ simul_params <- setLandscape(simul_params, myLand)
 simul_params <- setDispersalPathogen(simul_params, c(1))
 
 ## Cultivars
-simul_params <- setCultivars(simul_params, loadCultivar(name = "Susceptible", type = hostType))
+simul_params <- setCultivars(simul_params, loadCultivar(name = "Susceptible",
+ type = hostType))
 
 ## Croptypes
-croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop")
-, Susceptible = 1)
+croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop"),
+Susceptible = 1)
 simul_params <- setCroptypes(simul_params, croptype)
 simul_params <- allocateLandscapeCroptypes(simul_params,
 rotation_period = 0, rotation_sequence = list(c(0)),
@@ -166,7 +170,7 @@ runSimul(simul_params, graphic = TRUE)
 }
 \references{
 Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018).
-Assessing the durability andefficiency of landscape-based strategies to deploy plant
+Assessing the durability and efficiency of landscape-based strategies to deploy plant
 resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 }
 \seealso{

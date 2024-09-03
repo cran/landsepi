@@ -100,9 +100,9 @@ for (i in 1:n){
     simul_params <- setGenes(simul_params, genes)
     
     ## Cultivars
-    cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-    cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-    cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+    cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+    cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+    cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
     cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3)
                             , stringsAsFactors = FALSE)
     cultivars$growth_rate <- myDesign$growth_rate[i]  ## update growth rate

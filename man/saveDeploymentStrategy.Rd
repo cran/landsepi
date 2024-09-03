@@ -44,9 +44,9 @@ gene2 <- loadGene(name = "MG 2", type = "majorGene")
 genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 simul_params <- setGenes(simul_params, genes)
 ## Cultivars
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 simul_params <- setCultivars(simul_params, cultivars)
 ## Allocate genes to cultivars

@@ -28,9 +28,9 @@ If neither croptypeIDs nor names are given, it will automatically generate
 \examples{
 \dontrun{
 simul_params <- createSimulParams()
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 simul_params <- setCultivars(simul_params, cultivars)
 croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop", "Mixture"))

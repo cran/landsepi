@@ -80,9 +80,9 @@ editableDTServer <- function(id, DTdata, disableCol = shiny::reactiveVal(c()), c
         rownames = rownames,
         ## if show rownames cols indice start at 0
         ## otherwise it start at 1
-        editable = { if( rownames ) {
-          if(canRm()) temp = list(target = "cell", disable = list(columns = c(0,(match(disableCol(), names(DTdata()))), ncol(DTdata())+1)))
-          else temp = list(target = "cell", disable = list(columns = c(0,match(disableCol(), names(DTdata())))))
+        editable = { if( rownames ){
+          if(canRm()) temp = list(target = "cell", disable = list(columns = c((match(disableCol(), names(DTdata()))), ncol(DTdata())+1)))
+          else temp = list(target = "cell", disable = list(columns = c(match(disableCol(), names(DTdata())))))
         }
         else {
           if(canRm()) temp = list(target = "cell", disable = list(columns = c((match(disableCol(), names(DTdata()))-1), ncol(DTdata()))))
@@ -90,15 +90,16 @@ editableDTServer <- function(id, DTdata, disableCol = shiny::reactiveVal(c()), c
         }
           #print(temp)
           temp
-          },
-          #editable = list(target = "cell"),
+        },
+        #editable = list(target = "cell"),
         selection = "none",
         escape = FALSE,
         server = TRUE,
         #extensions = list('FixedColumns'=NULL, 'Buttons'=NULL),
         extensions = list( 'FixedColumns'=NULL, 'Buttons'=NULL),
         options = list(
-          dom = if (canRm()) { 'tB'} else "t",
+          #dom = if (canRm()) { 'tB'} else "t",
+          dom = "t",
           scrollX = TRUE,
           fixedColumns = TRUE,
           columnDefs = list(list(visible=FALSE, targets=col.hidden)),
@@ -112,9 +113,22 @@ editableDTServer <- function(id, DTdata, disableCol = shiny::reactiveVal(c()), c
                     header = table.columns().header();
                     for (var i = 0; i < tips.length; i++) {
                     $(header[i]).attr('title', tips[i]);
-                    }"))
+                    }",
+                    "table.on('keydown', function(e){",
+                    "  var keys = [9,13,37,38,39,40];",
+                    "  if(e.target.localName == 'input' && keys.indexOf(e.keyCode) > -1){",
+                    "    $(e.target).trigger('blur');",
+                    "  }",
+                    "});"
+                    
+                    ))
                   }
-        else {JS("")}
+        else {JS("table.on('keydown', function(e){",
+                 "  var keys = [9,13,37,38,39,40];",
+                 "  if(e.target.localName == 'input' && keys.indexOf(e.keyCode) > -1){",
+                 "    $(e.target).trigger('blur');",
+                 "  }",
+                 "});")}
       )
 
     
@@ -123,10 +137,13 @@ editableDTServer <- function(id, DTdata, disableCol = shiny::reactiveVal(c()), c
     
       # Une cellule est édité
       shiny::observeEvent(input$tableEDT_cell_edit, {
-        #message(input$tableEDT_cell_edit)
+        message(input$tableEDT_cell_edit)
     
         thecell <- input$tableEDT_cell_edit
+        thecell$value <- gsub("[^a-zA-Z0-9\\.\\-]", "_", thecell$value,)
 
+        print(thecell$value)
+        
         isolate({
           i <- thecell$row
           if(rownames){
@@ -226,15 +243,17 @@ editableDTServer <- function(id, DTdata, disableCol = shiny::reactiveVal(c()), c
     
       shiny::observeEvent(input$deletePressed, {
         id <- as.integer(sub(".*_([0-9]+)", "\\1", input$deletePressed))
-        shinyalert::shinyalert(
-          paste0("-> Remove line ",id," !"),
-          paste0("Values : ", paste(rv$data[id,-ncol(rv$data)],collapse = " | "), "\n\nAre you sure ?"),
-          type = "warning",
-          closeOnEsc = FALSE,
-          showCancelButton = TRUE,
-          size = "m",
-          callbackR = function(x) {
-            if (x == TRUE) {
+        # shinyalert::shinyalert(
+        #   paste0("-> Remove line ",id," !"),
+        #   #paste0("Values : ", paste(rv$data[id,-ncol(rv$data)],collapse = " | "), "\n\nAre you sure ?"),
+        #   paste0("Values : <b>", paste(rownames(rv$data[id,]),collapse = " | "), "</b>\n\nAre you sure ?"),
+        #   type = "warning",
+        #   closeOnEsc = FALSE,
+        #   showCancelButton = TRUE,
+        #   html = TRUE,
+        #   size = "m",
+        #   callbackR = function(x) {
+        #     if (x == TRUE) {
               rv$row <- id
               rv$value <- rv$data[rv$row, ]
               rv$data <- rv$data[-rv$row, ,drop = FALSE]
@@ -243,9 +262,9 @@ editableDTServer <- function(id, DTdata, disableCol = shiny::reactiveVal(c()), c
               shiny::isolate(rv$data <- cbind(rv$data[,-ncol(rv$data), drop=FALSE], deleteButton(rv$data, "button", ns("deletePressed"))))
               proxy %>%
                 DT::replaceData(data = rv$data, resetPaging = TRUE, rownames=rownames)
-            }
-          }
-        )
+        #     }
+        #   }
+        # )
       })
       
       return(rv)

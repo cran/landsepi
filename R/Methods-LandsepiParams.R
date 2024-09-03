@@ -418,9 +418,9 @@ loadSimulParams <- function(inputGPKG = "") {
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
 #' ## Cultivars
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' ## Allocate genes to cultivars
@@ -549,9 +549,11 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' generated and gives the Treatment Frequency Indicator (expressed as the number of treatment 
 #' applications per polygon).
 #' @seealso \link{demo_landsepi}
-#' @examples \dontrun{
-#' ### Here is an example of simulation of a mosaic of three cultivars (S + R1 + R2). See our 
-#' ## tutorials for more examples.
+#' @examples
+#' \dontrun{
+#' ### Here is an example of simulation of a mosaic of three cultivars (S + R1 + R2).
+#' ## See our tutorials for more examples.
+#' 
 #' ## Initialisation
 #' simul_params <- createSimulParams(outputDir = getwd())
 #' ## Seed & Time parameters
@@ -568,31 +570,31 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
 #' ## Cultivars
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' ## Allocate genes to cultivars
 #' simul_params <- allocateCultivarGenes(simul_params, "Resistant1", c("MG 1"))
 #' simul_params <- allocateCultivarGenes(simul_params, "Resistant2", c("MG 2"))
 #' ## Allocate cultivars to croptypes
-#' croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop"
-#' , "Resistant crop 1"
-#' , "Resistant crop 2"))
+#' croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop",
+#' "Resistant crop 1", "Resistant crop 2"))
 #' croptypes <- allocateCroptypeCultivars(croptypes, "Susceptible crop", "Susceptible")
 #' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 1", "Resistant1")
 #' croptypes <- allocateCroptypeCultivars(croptypes, "Resistant crop 2", "Resistant2")
 #' simul_params <- setCroptypes(simul_params, croptypes)
 #' ## Allocate croptypes to landscape        
-#' rotation_sequence <- croptypes$croptypeID ## No rotation -> 1 rotation_sequence element
+#' rotation_sequence <- croptypes$croptypeID ## No rotation => 1 rotation_sequence element
 #' rotation_period <- 0 ## same croptypes every years
 #' prop <- c(1 / 3, 1 / 3, 1 / 3) ## croptypes proportions
 #' aggreg <- 10 ## aggregated landscape
-#' simul_params <- allocateLandscapeCroptypes(simul_params, rotation_period = rotation_period,
+#' simul_params <- allocateLandscapeCroptypes(simul_params,
+#' rotation_period = rotation_period,
 #' rotation_sequence = rotation_sequence,
 #' rotation_realloc = FALSE, prop = prop, aggreg = aggreg)
-#' Set the inoculum
+#' ## Set the inoculum
 #' simul_params <- setInoculum(simul_params, 5e-4)
 #' ## list of outputs to be generated
 #' simul_params <- setOutputs(simul_params, loadOutputs())
@@ -603,50 +605,52 @@ saveDeploymentStrategy <- function(params, outputGPKG = "landsepi_landscape.gpkg
 #' ## Run simulation
 #' runSimul(simul_params)
 #' 
-#' ### Simulation of rust epidemics in a 1-km^2 patch cultivated with a susceptible wheat cultivar
-#'seed=10
-#'Nyears=5
-#'disease="rust"
-#'hostType="growingHost"
-#'simul_params <- createSimulParams(outputDir = getwd())
+#' ### Simulation of rust epidemics in a 1-km^2 patch cultivated
+#' ### with a susceptible wheat cultivar
+#' seed=10
+#' Nyears=5
+#' disease="rust"
+#' hostType="wheat"
+#' simul_params <- createSimulParams(outputDir = getwd())
 #'
-#'## Seed and time parameters
-#'simul_params <- setSeed(simul_params, seed)
-#'simul_params <- setTime(simul_params, Nyears, nTSpY=120)
+#' ## Seed and time parameters
+#' simul_params <- setSeed(simul_params, seed)
+#' simul_params <- setTime(simul_params, Nyears, nTSpY=120)
 #'
-## Pathogen parameters
-#'simul_params <- setPathogen(simul_params, loadPathogen(disease))
-#'myLand <- Polygons(list(Polygon(matrix(c(0,0,1,1,0,1,1,0)*1000, nrow=4))), "ID1")
-#'myLand <- SpatialPolygons(list(myLand))
-#'simul_params <- setLandscape(simul_params, myLand)
+#' ## Pathogen parameters
+#' simul_params <- setPathogen(simul_params, loadPathogen(disease))
+#' myLand <- Polygons(list(Polygon(matrix(c(0,0,1,1,0,1,1,0)*1000, nrow=4))), "ID1")
+#' myLand <- SpatialPolygons(list(myLand))
+#' simul_params <- setLandscape(simul_params, myLand)
 #'
-#'## Simulation, pathogen, landscape and dispersal parameters
-#'simul_params <- setDispersalPathogen(simul_params, c(1))
+#' ## Simulation, pathogen, landscape and dispersal parameters
+#' simul_params <- setDispersalPathogen(simul_params, c(1))
 #'
-#'## Cultivars
-#'simul_params <- setCultivars(simul_params, loadCultivar(name = "Susceptible", type = hostType))
+#' ## Cultivars
+#' simul_params <- setCultivars(simul_params, loadCultivar(name = "Susceptible",
+#'  type = hostType))
 #'
-#'## Croptypes
-#'croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop")
-#', Susceptible = 1)
-#'simul_params <- setCroptypes(simul_params, croptype)
-#'simul_params <- allocateLandscapeCroptypes(simul_params,
-#'rotation_period = 0, rotation_sequence = list(c(0)),
-#'rotation_realloc = FALSE, prop = 1, aggreg = 1)
+#' ## Croptypes
+#' croptype <- data.frame(croptypeID = 0, croptypeName = c("Fully susceptible crop"),
+#' Susceptible = 1)
+#' simul_params <- setCroptypes(simul_params, croptype)
+#' simul_params <- allocateLandscapeCroptypes(simul_params,
+#' rotation_period = 0, rotation_sequence = list(c(0)),
+#' rotation_realloc = FALSE, prop = 1, aggreg = 1)
 #'
-#'## Inoculum
+#' ## Inoculum
 #' simul_params <- setInoculum(simul_params, 5e-4)
 #' 
-#'## list of outputs to be generated
-#'outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "")
-#'simul_params <- setOutputs(simul_params, outputlist)
+#' ## list of outputs to be generated
+#' outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "")
+#' simul_params <- setOutputs(simul_params, outputlist)
 #'
-#'## Check, save and run simulation
-#'checkSimulParams(simul_params)
-#'runSimul(simul_params, graphic = TRUE)
+#' ## Check, save and run simulation
+#' checkSimulParams(simul_params)
+#' runSimul(simul_params, graphic = TRUE)
 #' }
 #' @references Rimbaud L., Papaïx J., Rey J.-F., Barrett L. G. and Thrall P. H. (2018).
-#' Assessing the durability andefficiency of landscape-based strategies to deploy plant 
+#' Assessing the durability and efficiency of landscape-based strategies to deploy plant 
 #' resistance to pathogens. \emph{PLoS Computational Biology} 14(4):e1006067.
 #' @export
 runSimul <- function(params, graphic=TRUE, writeTXT=TRUE, videoMP4=FALSE, keepRawResults=FALSE) {
@@ -1199,9 +1203,9 @@ checkDispersalHost <- function(params) {
 #' ## Landscape
 #' simul_params <- setLandscape(simul_params, loadLandscape(1))
 #' ## Cultivars
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' ## Allocate cultivars to croptypes
@@ -1293,12 +1297,12 @@ allocateLandscapeCroptypes <- function(params, rotation_period, rotation_sequenc
 #' @export
 loadTreatment <- function(disease="no pathogen") {
   treatment <- switch(disease,
-                      "mildew" = list(treatment_degradation_rate = 0.1,
-                                      treatment_efficiency = 0.0,
-                                      treatment_timesteps = numeric(),
-                                      treatment_cultivars = numeric(),
-                                      treatment_cost = 0,
-                                      treatment_application_threshold = numeric())
+                      "mildew" = list(treatment_degradation_rate = 0.004,
+                                      treatment_efficiency = 1.00,
+                                      treatment_timesteps = seq(1,109,3),
+                                      treatment_cultivars = c(0,1),
+                                      treatment_cost = 67,
+                                      treatment_application_threshold = c(0.05, 0.05))
                       
                       , "sigatoka" = list(treatment_degradation_rate = 0.1,
                                           treatment_efficiency = 1.0,
@@ -1312,7 +1316,7 @@ loadTreatment <- function(disease="no pathogen") {
                              treatment_timesteps = numeric(),
                              treatment_cultivars = numeric(),
                              treatment_cost = 0,
-                             treatment_application_threshold = numeric())
+                             treatment_application_threshold = 0)
   )
   
   if (length(treatment) == 0) {
@@ -1616,8 +1620,8 @@ updateReproSexProb <- function(params, vec) {
 #' simul_params <- setTime(simul_params, Nyears=10, nTSpY=120)
 #' simul_params <- setPathogen(simul_params, loadPathogen("rust"))
 #'
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' 
@@ -1714,8 +1718,8 @@ updateSurvivalProb <- function(params, mat_year=NULL, mat_croptype=NULL, mat=NUL
 #' simul_params <- setTime(simul_params, Nyears=10, nTSpY=120)
 #' simul_params <- setPathogen(simul_params, loadPathogen("rust"))
 #'
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' 
@@ -1874,9 +1878,9 @@ checkPathogen <- function(params) {
 #' @examples
 #' \dontrun{
 #' simul_params <- createSimulParams()
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop", "Mixture"))
@@ -1928,9 +1932,9 @@ loadCroptypes <- function(params, croptypeIDs = NULL, names = NULL) {
 #' @examples
 #' \dontrun{
 #' simul_params <- createSimulParams()
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop", "Mixture"))
@@ -1984,9 +1988,9 @@ allocateCroptypeCultivars <- function(croptypes, croptypeName, cultivarsInCropty
 #' @examples
 #' \dontrun{
 #' simul_params <- createSimulParams()
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' croptypes <- loadCroptypes(simul_params, names = c("Susceptible crop", "Mixture"))
@@ -2103,16 +2107,15 @@ checkCroptypes <- function(params) {
 #' @title Load a cultivar
 #' @description create a data.frame containing cultivar parameters depending of his type
 #' @param name a character string (without space) specifying the cultivar name.
-#' @param type the cultivar type, among: "growingHost" (default), "nongrowingHost", 
-#' "grapevine", "banana" or "nonCrop".
+#' @param type the cultivar type, among: "wheat" (default), "grapevine", "banana", "pepper" or "nonCrop".
 #' @details 
-#' * "growingHost" is adapted to situations where the infection unit is a piece of leaf 
+#' * "wheat" is adapted to situations where the infection unit is a piece of leaf 
 #' (e.g. where a fungal lesion can develop); the number of available infection units 
 #' increasing during the season due to plant growth (as typified by cereal crops). 
-#' * "nongrowingHost" corresponds to situations where the infection unit is the whole plant 
-#' (e.g. for viral systemic infection); thus the number of infection units is constant. 
 #' * "grapevine" corresponds to parameters for grapevine (including host growth).
 #' * "banana" corresponds to parameters for banana (including host growth).
+#' * "pepper" corresponds to situations where the infection unit is the whole plant 
+#' (e.g. for viral systemic infection); thus the number of infection units is constant. 
 #' * "nonCrop" is not planted, does not cost anything and does not yield anything 
 #' (e.g. forest, fallow).
 #' @return a dataframe of parameters associated with each host genotype 
@@ -2120,12 +2123,12 @@ checkCroptypes <- function(params) {
 #' @seealso \link{setCultivars}
 #' @include Cultivars_List.R
 #' @examples
-#' c1 <- loadCultivar("winterWheat", type = "growingHost")
+#' c1 <- loadCultivar("winterWheat", type = "wheat")
 #' c1
 #' c2 <- loadCultivar("forest", type = "nonCrop")
 #' c2
 #' @export
-loadCultivar <- function(name, type = "growingHost") {
+loadCultivar <- function(name, type = "wheat") {
   culti <- Cultivars_list[[type]]
   culti["cultivarName"] <- name
 
@@ -2133,7 +2136,7 @@ loadCultivar <- function(name, type = "growingHost") {
   if (length(culti) <= 1) {
     warning('Unknown type of host: "', type
             , '". Possible types are: 
-            "growingHost", "nongrowingHost", "grapevine", "banana", "nonCrop"')
+            "wheat", "grapevine", "banana", "pepper", "nonCrop"')
   } else {
     # To be sure of the columns names
     colnames(culti) <- .cultivarsColNames
@@ -2185,8 +2188,8 @@ loadCultivar <- function(name, type = "growingHost") {
 #' @examples
 #' \dontrun{
 #' simul_params <- createSimulParams()
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' simul_params@Cultivars
@@ -2549,8 +2552,8 @@ checkGenes <- function(params) {
 #' gene2 <- loadGene(name = "MG 2", type = "majorGene")
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' simul_params <- allocateCultivarGenes(simul_params, "Resistant", c("MG 1", "MG 2"))
@@ -2656,8 +2659,8 @@ checkCultivarsGenes <- function(params) {
 #' gene2 <- loadGene(name = "MG 2", type = "majorGene")
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' simul_params <- allocateCultivarGenes(simul_params, "Resistant", c("MG 1", "MG 2"))
@@ -2858,8 +2861,8 @@ setInoculum <- function(params, val = 5e-4) {
 #' gene2 <- loadGene(name = "MG 2", type = "majorGene")
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2), stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
 #' simul_params <- allocateCultivarGenes(simul_params, "Resistant", c("MG 1", "MG 2"))
@@ -2958,10 +2961,10 @@ getMatrixGenePatho <- function(params){
 #' gene2 <- loadGene(name = "MG 2", type = "majorGene")
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "monoResistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "monoResistant2", type = "growingHost")
-#' cultivar4 <- loadCultivar(name = "Pyramid", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "monoResistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "monoResistant2", type = "wheat")
+#' cultivar4 <- loadCultivar(name = "Pyramid", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4)
 #' , stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
@@ -3028,10 +3031,10 @@ getMatrixCultivarPatho <- function(params){
 #' gene2 <- loadGene(name = "MG 2", type = "majorGene")
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
-#' cultivar4 <- loadCultivar(name = "Pyramid", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
+#' cultivar4 <- loadCultivar(name = "Pyramid", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4)
 #' , stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
@@ -3104,10 +3107,10 @@ getMatrixCroptypePatho <- function(params){
 #' gene2 <- loadGene(name = "MG 2", type = "majorGene")
 #' genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 #' simul_params <- setGenes(simul_params, genes)
-#' cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-#' cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-#' cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
-#' cultivar4 <- loadCultivar(name = "Pyramid", type = "growingHost")
+#' cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+#' cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+#' cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
+#' cultivar4 <- loadCultivar(name = "Pyramid", type = "wheat")
 #' cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3, cultivar4)
 #' , stringsAsFactors = FALSE)
 #' simul_params <- setCultivars(simul_params, cultivars)
@@ -3228,7 +3231,7 @@ checkPI0_mat <- function(mat, params){
 #' @title Compute AUDPC in a single 100% susceptible field
 #' @description Compute AUDPC in a single field cultivated with a susceptible cultivar.
 #' @param disease a disease name, among "rust" (default), "mildew" and "sigatoka"
-#' @param hostType cultivar type, among: "growingHost" (default), "nongrowingHost", "grapevine".
+#' @param hostType cultivar type, among: "wheat" (default), "grapevine", "banana", "pepper".
 #' @param nTSpY number to time steps per cropping season
 #' @param area area of the field (must be in square meters).
 #' @param seed an integer used as seed value (for random number generator).
@@ -3236,13 +3239,13 @@ checkPI0_mat <- function(mat, params){
 #' @return The AUDPC value (numeric)
 #' @examples 
 #' \dontrun{
-#' compute_audpc100S("rust", "growingHost", area=1E6)
+#' compute_audpc100S("rust", "wheat", area=1E6)
 #' compute_audpc100S("mildew", "grapevine", area=1E6)
 #' compute_audpc100S("sigatoka", "banana", area=1E6, nTSpY=182)
 #' }
 #' @seealso \link{loadOutputs}
 #' @export
-compute_audpc100S <- function(disease="rust", hostType="growingHost"
+compute_audpc100S <- function(disease="rust", hostType="wheat"
                               , nTSpY=120, area=1E6, seed=12345){
   message(paste("Computing audpc100S for", disease, "in a single susceptible field of"
                 , area, "m^2 during", nTSpY, "time steps"))
@@ -3292,17 +3295,23 @@ compute_audpc100S <- function(disease="rust", hostType="growingHost"
 #' \item "all": compute all these outputs (default)
 #' \item "": none of these outputs will be generated.
 #' }
+#' @param disease a disease name, among "rust" (default), "mildew", "sigatoka" and "no pathogen"
 #' @return a list of outputs and parameters for output generation
 #' @seealso \link{setOutputs}, \link{compute_audpc100S}
 #' @examples 
 #' outputList <- loadOutputs(epid_outputs = "audpc", evol_outputs = "durability")
 #' outputList
 #' @export
-loadOutputs <- function(epid_outputs = "all", evol_outputs = "all"){
+loadOutputs <- function(epid_outputs = "all", evol_outputs = "all", disease="rust"){
+  audpc100S <- switch(disease,
+                  "rust" = 0.76,  
+                  "mildew" = 8.48,
+                  "sigatoka" = 0.53,
+                  0.76)
   outputList <- list(epid_outputs = epid_outputs
                      , evol_outputs = evol_outputs
                      , thres_breakdown = 50000
-                     , audpc100S = 0.76) ## audpc100S = 8.48 for grapevine mildew
+                     , audpc100S = audpc100S)
   return(outputList)
 }
 

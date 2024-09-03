@@ -80,9 +80,9 @@ genes <- data.frame(rbind(gene1, gene2), stringsAsFactors = FALSE)
 
 ## -----------------------------------------------------------------------------
 # Cultivars
-cultivar1 <- loadCultivar(name = "Susceptible", type = "growingHost")
-cultivar2 <- loadCultivar(name = "Resistant1", type = "growingHost")
-cultivar3 <- loadCultivar(name = "Resistant2", type = "growingHost")
+cultivar1 <- loadCultivar(name = "Susceptible", type = "wheat")
+cultivar2 <- loadCultivar(name = "Resistant1", type = "wheat")
+cultivar3 <- loadCultivar(name = "Resistant2", type = "wheat")
 cultivars <- data.frame(rbind(cultivar1, cultivar2, cultivar3)
                         , stringsAsFactors = FALSE)
 
