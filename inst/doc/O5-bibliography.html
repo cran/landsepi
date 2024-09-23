@@ -14,21 +14,57 @@
 
 <title>Landsepi - Bibliography</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
 
 
 
 
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
 
 <style type="text/css">body {
 background-color: #fff;
@@ -226,36 +262,73 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<div id="refs" class="references">
-<div id="ref-RN1275">
-<p>Papaïx, Julien, K. Adamczyk-Chauvat, A. Bouvier, K. Kiêu, Touzeau S., C. Lannou, and H. Monod. 2014. “Pathogen Population Dynamics in Agricultural Landscapes: The Ddal Modelling Framework.” Journal Article. <em>Infection, Genetics and Evolution</em> 27: 509–20. <a href="https://doi.org/10.1016/j.meegid.2014.01.022">https://doi.org/10.1016/j.meegid.2014.01.022</a>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-RN1275" class="csl-entry">
+Papaïx, Julien, K. Adamczyk-Chauvat, A. Bouvier, K. Kiêu, Touzeau S., C.
+Lannou, and H. Monod. 2014. <span>“Pathogen Population Dynamics in
+Agricultural Landscapes: The Ddal Modelling Framework.”</span> Journal
+Article. <em>Infection, Genetics and Evolution</em> 27: 509–20. <a href="https://doi.org/10.1016/j.meegid.2014.01.022">https://doi.org/10.1016/j.meegid.2014.01.022</a>.
 </div>
-<div id="ref-RN1731">
-<p>Papaïx, Julien, Jeremy J. Burdon, Christian Lannou, and Peter H. Thrall. 2014. “Evolution of Pathogen Specialisation in a Host Metapopulation: Joint Effects of Host and Pathogen Dispersal.” Journal Article. <em>PLoS Computational Biology</em> 10 (5): e1003633. <a href="https://doi.org/10.1371/journal.pcbi.1003633">https://doi.org/10.1371/journal.pcbi.1003633</a>.</p>
+<div id="ref-RN1731" class="csl-entry">
+Papaïx, Julien, Jeremy J. Burdon, Christian Lannou, and Peter H. Thrall.
+2014. <span>“Evolution of Pathogen Specialisation in a Host
+Metapopulation: Joint Effects of Host and Pathogen Dispersal.”</span>
+Journal Article. <em>PLoS Computational Biology</em> 10 (5): e1003633.
+<a href="https://doi.org/10.1371/journal.pcbi.1003633">https://doi.org/10.1371/journal.pcbi.1003633</a>.
 </div>
-<div id="ref-RN1730">
-<p>Papaïx, Julien, Jeremy J. Burdon, Jiasui Zhan, and Peter H. Thrall. 2015. “Crop Pathogen Emergence and Evolution in Agro-Ecological Landscapes.” Journal Article. <em>Evolutionary Applications</em> 8 (4): 385–402. <a href="https://doi.org/10.1111/eva.12251">https://doi.org/10.1111/eva.12251</a>.</p>
+<div id="ref-RN1730" class="csl-entry">
+Papaïx, Julien, Jeremy J. Burdon, Jiasui Zhan, and Peter H. Thrall.
+2015. <span>“Crop Pathogen Emergence and Evolution in Agro-Ecological
+Landscapes.”</span> Journal Article. <em>Evolutionary Applications</em>
+8 (4): 385–402. <a href="https://doi.org/10.1111/eva.12251">https://doi.org/10.1111/eva.12251</a>.
 </div>
-<div id="ref-RN2878">
-<p>Papaïx, Julien, Loup Rimbaud, Jeremy J. Burdon, Jiasui Zhan, and Peter H. Thrall. 2018. “Differential Impact of Landscape-Scale Strategies for Crop Cultivar Deployment on Disease Dynamics, Resistance Durability and Long-Term Evolutionary Control.” Journal Article. <em>Evolutionary Applications</em> 11 (5): 705–17. <a href="https://doi.org/10.1111/eva.12570">https://doi.org/10.1111/eva.12570</a>.</p>
+<div id="ref-RN2878" class="csl-entry">
+Papaïx, Julien, Loup Rimbaud, Jeremy J. Burdon, Jiasui Zhan, and Peter
+H. Thrall. 2018. <span>“Differential Impact of Landscape-Scale
+Strategies for Crop Cultivar Deployment on Disease Dynamics, Resistance
+Durability and Long-Term Evolutionary Control.”</span> Journal Article.
+<em>Evolutionary Applications</em> 11 (5): 705–17. <a href="https://doi.org/10.1111/eva.12570">https://doi.org/10.1111/eva.12570</a>.
 </div>
-<div id="ref-RN1281">
-<p>Papaïx, Julien, S. Touzeau, H. Monod, and C. Lannou. 2014. “Can Epidemic Control Be Achieved by Altering Landscape Connectivity in Agricultural Systems?” Journal Article. <em>Ecological Modelling</em> 284: 35–47. <a href="https://doi.org/10.1016/j.ecolmodel.2014.04.014">https://doi.org/10.1016/j.ecolmodel.2014.04.014</a>.</p>
+<div id="ref-RN1281" class="csl-entry">
+Papaïx, Julien, S. Touzeau, H. Monod, and C. Lannou. 2014. <span>“Can
+Epidemic Control Be Achieved by Altering Landscape Connectivity in
+Agricultural Systems?”</span> Journal Article. <em>Ecological
+Modelling</em> 284: 35–47. <a href="https://doi.org/10.1016/j.ecolmodel.2014.04.014">https://doi.org/10.1016/j.ecolmodel.2014.04.014</a>.
 </div>
-<div id="ref-RN3217">
-<p>Rimbaud, Loup, Frédéric Fabre, Julien Papaïx, Benoît Moury, Christian Lannou, Luke G. Barrett, and Peter H. Thrall. 2021. “Models of Plant Resistance Deployment.” Journal Article. <em>Annual Review of Phytopathology</em> 59 (1): 125–52. <a href="https://doi.org/10.1146/annurev-phyto-020620-122134">https://doi.org/10.1146/annurev-phyto-020620-122134</a>.</p>
+<div id="ref-RN3217" class="csl-entry">
+Rimbaud, Loup, Frédéric Fabre, Julien Papaïx, Benoît Moury, Christian
+Lannou, Luke G. Barrett, and Peter H. Thrall. 2021. <span>“Models of
+Plant Resistance Deployment.”</span> Journal Article. <em>Annual Review
+of Phytopathology</em> 59 (1): 125–52. <a href="https://doi.org/10.1146/annurev-phyto-020620-122134">https://doi.org/10.1146/annurev-phyto-020620-122134</a>.
 </div>
-<div id="ref-RN2985">
-<p>Rimbaud, Loup, Julien Papaïx, Luke G. Barrett, Jeremy J. Burdon, and Peter H. Thrall. 2018. “Mosaics, Mixtures, Rotations or Pyramiding: What Is the Optimal Strategy to Deploy Major Gene Resistance?” Journal Article. <em>Evolutionary Applications</em> 11 (10): 1791–1810. <a href="https://doi.org/10.1111/eva.12681">https://doi.org/10.1111/eva.12681</a>.</p>
+<div id="ref-RN2985" class="csl-entry">
+Rimbaud, Loup, Julien Papaïx, Luke G. Barrett, Jeremy J. Burdon, and
+Peter H. Thrall. 2018. <span>“Mosaics, Mixtures, Rotations or
+Pyramiding: What Is the Optimal Strategy to Deploy Major Gene
+Resistance?”</span> Journal Article. <em>Evolutionary Applications</em>
+11 (10): 1791–1810. <a href="https://doi.org/10.1111/eva.12681">https://doi.org/10.1111/eva.12681</a>.
 </div>
-<div id="ref-RN2926">
-<p>Rimbaud, Loup, Julien Papaïx, Jean-François Rey, Luke G. Barrett, and Peter H. Thrall. 2018. “Assessing the Durability and Efficiency of Landscape-Based Strategies to Deploy Plant Resistance to Pathogens.” Journal Article. <em>PLoS Computational Biology</em> 14 (4): e1006067. <a href="https://doi.org/10.1371/journal.pcbi.1006067">https://doi.org/10.1371/journal.pcbi.1006067</a>.</p>
+<div id="ref-RN2926" class="csl-entry">
+Rimbaud, Loup, Julien Papaïx, Jean-François Rey, Luke G. Barrett, and
+Peter H. Thrall. 2018. <span>“Assessing the Durability and Efficiency of
+Landscape-Based Strategies to Deploy Plant Resistance to
+Pathogens.”</span> Journal Article. <em>PLoS Computational Biology</em>
+14 (4): e1006067. <a href="https://doi.org/10.1371/journal.pcbi.1006067">https://doi.org/10.1371/journal.pcbi.1006067</a>.
 </div>
-<div id="ref-RN3343">
-<p>Rimbaud, Loup, Julien Papaïx, Jean-François Rey, Benoît Moury, Luke G. Barrett, and Peter H. Thrall. 2023. “Durable Resistance or Efficient Disease Control? Adult Plant Resistance (Apr) at the Heart of the Dilemma.” Journal Article. <em>Peer Community Journal</em> 3: e43. <a href="https://doi.org/10.24072/pcjournal.271">https://doi.org/10.24072/pcjournal.271</a>.</p>
+<div id="ref-RN3343" class="csl-entry">
+Rimbaud, Loup, Julien Papaïx, Jean-François Rey, Benoît Moury, Luke G.
+Barrett, and Peter H. Thrall. 2023. <span>“Durable Resistance or
+Efficient Disease Control? Adult Plant Resistance (APR) at the Heart of
+the Dilemma.”</span> Journal Article. <em>Peer Community Journal</em> 3:
+e43. <a href="https://doi.org/10.24072/pcjournal.271">https://doi.org/10.24072/pcjournal.271</a>.
 </div>
-<div id="ref-RN3365">
-<p>Zaffaroni, Marta, Loup Rimbaud, Jean-François Rey, Julien Papaïx, and Frédéric Fabre. 2024. “Effects of Pathogen Reproduction System on the Evolutionary and Epidemiological Control Provided by Deployment Strategies for Two Major Resistance Genes in Agricultural Landscapes.” Journal Article. <em>Evolutionary Applications</em> 17 (1): e13627. <a href="https://doi.org/10.1111/eva.13627">https://doi.org/10.1111/eva.13627</a>.</p>
+<div id="ref-RN3365" class="csl-entry">
+Zaffaroni, Marta, Loup Rimbaud, Jean-François Rey, Julien Papaïx, and
+Frédéric Fabre. 2024. <span>“Effects of Pathogen Reproduction System on
+the Evolutionary and Epidemiological Control Provided by Deployment
+Strategies for Two Major Resistance Genes in Agricultural
+Landscapes.”</span> Journal Article. <em>Evolutionary Applications</em>
+17 (1): e13627. <a href="https://doi.org/10.1111/eva.13627">https://doi.org/10.1111/eva.13627</a>.
 </div>
 </div>
 

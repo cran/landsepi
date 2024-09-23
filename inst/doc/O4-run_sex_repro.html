@@ -14,89 +14,103 @@
 
 <title>4 - Running a simple simulation with a pathogen with mixed reproduction system</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
 
 <style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
 </style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
 div.sourceCode
-  {  }
+{ }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -322,250 +336,308 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">4 - Running a simple simulation with a pathogen with mixed reproduction system</h1>
+<h1 class="title toc-ignore">4 - Running a simple simulation with a
+pathogen with mixed reproduction system</h1>
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(landsepi)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(landsepi)</span></code></pre></div>
 <div id="initialisation-of-simulation-parameters-seed-time-and-landscape-parameters" class="section level2">
-<h2>Initialisation of simulation parameters, seed, time and landscape parameters</h2>
-<p><em>See also the tutorial on <a href="O1-run_simple_simul.html">how to simulate a simple simulation</a> for details on basic parameterisation.</em></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co">## Initialisation of the simulation</span></a>
-<a class="sourceLine" id="cb2-2" title="2">simul_params &lt;-<span class="st"> </span><span class="kw">createSimulParams</span>(<span class="dt">outputDir =</span> <span class="kw">getwd</span>())</a>
-<a class="sourceLine" id="cb2-3" title="3"><span class="co">## Seed</span></a>
-<a class="sourceLine" id="cb2-4" title="4">simul_params<span class="op">@</span>Seed</a>
-<a class="sourceLine" id="cb2-5" title="5">simul_params &lt;-<span class="st"> </span><span class="kw">setSeed</span>(simul_params, <span class="dt">seed =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb2-6" title="6">simul_params<span class="op">@</span>Seed</a>
-<a class="sourceLine" id="cb2-7" title="7"><span class="co">## Time parameters</span></a>
-<a class="sourceLine" id="cb2-8" title="8">Nyears =<span class="st"> </span><span class="dv">6</span> </a>
-<a class="sourceLine" id="cb2-9" title="9">nTSpY =<span class="st"> </span><span class="dv">120</span></a>
-<a class="sourceLine" id="cb2-10" title="10">simul_params &lt;-<span class="st"> </span><span class="kw">setTime</span>(simul_params, <span class="dt">Nyears =</span> Nyears, <span class="dt">nTSpY =</span> nTSpY)</a>
-<a class="sourceLine" id="cb2-11" title="11"></a>
-<a class="sourceLine" id="cb2-12" title="12"><span class="co">## Landscape</span></a>
-<a class="sourceLine" id="cb2-13" title="13">landscape &lt;-<span class="st"> </span><span class="kw">loadLandscape</span>(<span class="dt">id =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb2-14" title="14">simul_params &lt;-<span class="st"> </span><span class="kw">setLandscape</span>(simul_params, <span class="dt">land =</span> landscape)</a></code></pre></div>
-<p><em>See also the tutorial on how to <a href="O3-landscape_dispersal.html">parameterise landscape and dispersal</a> to use your own landscape and compute your own dispersal matrices.</em></p>
+<h2>Initialisation of simulation parameters, seed, time and landscape
+parameters</h2>
+<p><em>See also the tutorial on <a href="O1-run_simple_simul.html">how
+to simulate a simple simulation</a> for details on basic
+parameterisation.</em></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="do">## Initialisation of the simulation</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">createSimulParams</span>(<span class="at">outputDir =</span> <span class="fu">getwd</span>())</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="do">## Seed</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setSeed</span>(simul_params, <span class="at">seed =</span> <span class="dv">1</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">## Time parameters</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>Nyears <span class="ot">=</span> <span class="dv">6</span> </span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>nTSpY <span class="ot">=</span> <span class="dv">120</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setTime</span>(simul_params, <span class="at">Nyears =</span> Nyears, <span class="at">nTSpY =</span> nTSpY)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="do">## Landscape</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>landscape <span class="ot">&lt;-</span> <span class="fu">loadLandscape</span>(<span class="at">id =</span> <span class="dv">1</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setLandscape</span>(simul_params, <span class="at">land =</span> landscape)</span></code></pre></div>
+<p><em>See also the tutorial on how to <a href="O3-landscape_dispersal.html">parameterise landscape and
+dispersal</a> to use your own landscape and compute your own dispersal
+matrices.</em></p>
 </div>
 <div id="setting-the-probability-of-sexual-reproduction" class="section level2">
 <h2>Setting the probability of sexual reproduction</h2>
-<p>A built-in parameterisation different pathogens (e.g. rusts of cereal crops) is available using the function <code>loadPathogen()</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">basic_patho_param &lt;-<span class="st"> </span><span class="kw">loadPathogen</span>(<span class="dt">disease =</span> <span class="st">&quot;rust&quot;</span>)</a></code></pre></div>
-<p>The built-in parameterisation for “rust” simulates a pathogen which reproduces purely clonally (repro_sex_prob = 0). It is also possible to simulate a pathogen which reproduces purely sexually, or both sexually and clonally at every timestep:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">basic_patho_param<span class="op">$</span>repro_sex_prob &lt;-<span class="st"> </span><span class="dv">1</span>  <span class="co">## at every time step all pathogen individuals reproduces sexually</span></a>
-<a class="sourceLine" id="cb4-2" title="2">basic_patho_param<span class="op">$</span>repro_sex_prob &lt;-<span class="st"> </span><span class="dv">0</span>  <span class="co">## at every time step all pathogen individuals reproduces clonally</span></a>
-<a class="sourceLine" id="cb4-3" title="3">basic_patho_param<span class="op">$</span>repro_sex_prob &lt;-<span class="st"> </span><span class="fl">0.5</span> <span class="co">##  at every time step half of the pathogen population</span></a>
-<a class="sourceLine" id="cb4-4" title="4">                                        <span class="co">## reproduce clonally and half sexually</span></a>
-<a class="sourceLine" id="cb4-5" title="5">basic_patho_param</a>
-<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; $name</span></a>
-<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; [1] &quot;rust&quot;</span></a>
-<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt; $survival_prob</span></a>
-<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; [1] 1e-04</span></a>
-<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; $repro_sex_prob</span></a>
-<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; [1] 0.5</span></a>
-<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&gt; $infection_rate</span></a>
-<a class="sourceLine" id="cb4-16" title="16"><span class="co">#&gt; [1] 0.4</span></a>
-<a class="sourceLine" id="cb4-17" title="17"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-18" title="18"><span class="co">#&gt; $propagule_prod_rate</span></a>
-<a class="sourceLine" id="cb4-19" title="19"><span class="co">#&gt; [1] 3.125</span></a>
-<a class="sourceLine" id="cb4-20" title="20"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-21" title="21"><span class="co">#&gt; $latent_period_mean</span></a>
-<a class="sourceLine" id="cb4-22" title="22"><span class="co">#&gt; [1] 10</span></a>
-<a class="sourceLine" id="cb4-23" title="23"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-24" title="24"><span class="co">#&gt; $latent_period_var</span></a>
-<a class="sourceLine" id="cb4-25" title="25"><span class="co">#&gt; [1] 9</span></a>
-<a class="sourceLine" id="cb4-26" title="26"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-27" title="27"><span class="co">#&gt; $infectious_period_mean</span></a>
-<a class="sourceLine" id="cb4-28" title="28"><span class="co">#&gt; [1] 24</span></a>
-<a class="sourceLine" id="cb4-29" title="29"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-30" title="30"><span class="co">#&gt; $infectious_period_var</span></a>
-<a class="sourceLine" id="cb4-31" title="31"><span class="co">#&gt; [1] 105</span></a>
-<a class="sourceLine" id="cb4-32" title="32"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-33" title="33"><span class="co">#&gt; $sigmoid_kappa</span></a>
-<a class="sourceLine" id="cb4-34" title="34"><span class="co">#&gt; [1] 5.333</span></a>
-<a class="sourceLine" id="cb4-35" title="35"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-36" title="36"><span class="co">#&gt; $sigmoid_sigma</span></a>
-<a class="sourceLine" id="cb4-37" title="37"><span class="co">#&gt; [1] 3</span></a>
-<a class="sourceLine" id="cb4-38" title="38"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-39" title="39"><span class="co">#&gt; $sigmoid_plateau</span></a>
-<a class="sourceLine" id="cb4-40" title="40"><span class="co">#&gt; [1] 1</span></a>
-<a class="sourceLine" id="cb4-41" title="41"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-42" title="42"><span class="co">#&gt; $sex_propagule_viability_limit</span></a>
-<a class="sourceLine" id="cb4-43" title="43"><span class="co">#&gt; [1] 1</span></a>
-<a class="sourceLine" id="cb4-44" title="44"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-45" title="45"><span class="co">#&gt; $sex_propagule_release_mean</span></a>
-<a class="sourceLine" id="cb4-46" title="46"><span class="co">#&gt; [1] 1</span></a>
-<a class="sourceLine" id="cb4-47" title="47"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb4-48" title="48"><span class="co">#&gt; $clonal_propagule_gradual_release</span></a>
-<a class="sourceLine" id="cb4-49" title="49"><span class="co">#&gt; [1] 0</span></a></code></pre></div>
-<p>To simulate a pathogen with a mixed reproduction system composed of multiple events of clonal reproduction during the epidemic phase, followed by a single event of sexual reproduction at the end of the cropping season, a vector of probabilities of sexual reproduction (one for each timestep of the cropping season) can be given (i.e. <code>repro_sex_prob = 0</code> during the epidemic period <code>[1:nTSpY]</code>, and <code>repro_sex_prob = 1</code> at the end of the cropping season).</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">repro_sex_probs &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="fl">0.0</span>, nTSpY), <span class="fl">1.0</span>)  </a></code></pre></div>
-<p>The vector containing the probability of sexual reproduction for each timestep is used to fuel the object <code>simul_params</code> via the function <code>updateReproSexProb()</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">simul_params &lt;-<span class="st"> </span><span class="kw">updateReproSexProb</span>(simul_params, repro_sex_probs)</a>
-<a class="sourceLine" id="cb6-2" title="2">simul_params<span class="op">@</span>Pathogen </a>
-<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&gt; $name</span></a>
-<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&gt; [1] &quot;no pathogen&quot;</span></a>
-<a class="sourceLine" id="cb6-5" title="5"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&gt; $survival_prob</span></a>
-<a class="sourceLine" id="cb6-7" title="7"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; $repro_sex_prob</span></a>
-<a class="sourceLine" id="cb6-10" title="10"><span class="co">#&gt;   [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span></a>
-<a class="sourceLine" id="cb6-11" title="11"><span class="co">#&gt;  [38] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span></a>
-<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt;  [75] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span></a>
-<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt; [112] 0 0 0 0 0 0 0 0 0 1</span></a>
-<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&gt; $infection_rate</span></a>
-<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; $propagule_prod_rate</span></a>
-<a class="sourceLine" id="cb6-19" title="19"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-20" title="20"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-21" title="21"><span class="co">#&gt; $latent_period_mean</span></a>
-<a class="sourceLine" id="cb6-22" title="22"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-23" title="23"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-24" title="24"><span class="co">#&gt; $latent_period_var</span></a>
-<a class="sourceLine" id="cb6-25" title="25"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-26" title="26"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-27" title="27"><span class="co">#&gt; $infectious_period_mean</span></a>
-<a class="sourceLine" id="cb6-28" title="28"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-29" title="29"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-30" title="30"><span class="co">#&gt; $infectious_period_var</span></a>
-<a class="sourceLine" id="cb6-31" title="31"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-32" title="32"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-33" title="33"><span class="co">#&gt; $sigmoid_kappa</span></a>
-<a class="sourceLine" id="cb6-34" title="34"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-35" title="35"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-36" title="36"><span class="co">#&gt; $sigmoid_sigma</span></a>
-<a class="sourceLine" id="cb6-37" title="37"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-38" title="38"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-39" title="39"><span class="co">#&gt; $sigmoid_plateau</span></a>
-<a class="sourceLine" id="cb6-40" title="40"><span class="co">#&gt; [1] 1</span></a>
-<a class="sourceLine" id="cb6-41" title="41"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-42" title="42"><span class="co">#&gt; $sex_propagule_viability_limit</span></a>
-<a class="sourceLine" id="cb6-43" title="43"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-44" title="44"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-45" title="45"><span class="co">#&gt; $sex_propagule_release_mean</span></a>
-<a class="sourceLine" id="cb6-46" title="46"><span class="co">#&gt; [1] 0</span></a>
-<a class="sourceLine" id="cb6-47" title="47"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb6-48" title="48"><span class="co">#&gt; $clonal_propagule_gradual_release</span></a>
-<a class="sourceLine" id="cb6-49" title="49"><span class="co">#&gt; [1] 0</span></a></code></pre></div>
+<p>A built-in parameterisation different pathogens (e.g. rusts of cereal
+crops) is available using the function <code>loadPathogen()</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>basic_patho_param <span class="ot">&lt;-</span> <span class="fu">loadPathogen</span>(<span class="at">disease =</span> <span class="st">&quot;rust&quot;</span>)</span></code></pre></div>
+<p>The built-in parameterisation for “rust” simulates a pathogen which
+reproduces purely clonally (repro_sex_prob = 0). It is also possible to
+simulate a pathogen which reproduces purely sexually, or both sexually
+and clonally at every timestep:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>basic_patho_param<span class="sc">$</span>repro_sex_prob <span class="ot">&lt;-</span> <span class="dv">1</span>  <span class="do">## at every time step all pathogen individuals reproduces sexually</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>basic_patho_param<span class="sc">$</span>repro_sex_prob <span class="ot">&lt;-</span> <span class="dv">0</span>  <span class="do">## at every time step all pathogen individuals reproduces clonally</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>basic_patho_param<span class="sc">$</span>repro_sex_prob <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="do">##  at every time step half of the pathogen population</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                                        <span class="do">## reproduce clonally and half sexually</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>basic_patho_param</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; $name</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;rust&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; $survival_prob</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; [1] 1e-04</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; $repro_sex_prob</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; [1] 0.5</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; $infection_rate</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; [1] 0.4</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; $propagule_prod_rate</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; [1] 3.125</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; $latent_period_mean</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; [1] 10</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; $latent_period_var</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; [1] 9</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; $infectious_period_mean</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; [1] 24</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; $infectious_period_var</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt; [1] 105</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="co">#&gt; $sigmoid_kappa</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co">#&gt; [1] 5.333</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a><span class="co">#&gt; $sigmoid_sigma</span></span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a><span class="co">#&gt; $sigmoid_plateau</span></span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_viability_limit</span></span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_release_mean</span></span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="co">#&gt; $clonal_propagule_gradual_release</span></span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+<p>To simulate a pathogen with a mixed reproduction system composed of
+multiple events of clonal reproduction during the epidemic phase,
+followed by a single event of sexual reproduction at the end of the
+cropping season, a vector of probabilities of sexual reproduction (one
+for each timestep of the cropping season) can be given
+(i.e. <code>repro_sex_prob = 0</code> during the epidemic period
+<code>[1:nTSpY]</code>, and <code>repro_sex_prob = 1</code> at the end
+of the cropping season).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>repro_sex_probs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="fl">0.0</span>, nTSpY), <span class="fl">1.0</span>)  </span></code></pre></div>
+<p>The vector containing the probability of sexual reproduction for each
+timestep is used to fuel the object <code>simul_params</code> via the
+function <code>updateReproSexProb()</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">updateReproSexProb</span>(simul_params, repro_sex_probs)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>simul_params<span class="sc">@</span>Pathogen </span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; $name</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;no pathogen&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; $survival_prob</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; $repro_sex_prob</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;   [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;  [38] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;  [75] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; [112] 0 0 0 0 0 0 0 0 0 1</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; $infection_rate</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; $propagule_prod_rate</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; $latent_period_mean</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; $latent_period_var</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; $infectious_period_mean</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt; $infectious_period_var</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; $sigmoid_kappa</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; $sigmoid_sigma</span></span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co">#&gt; $sigmoid_plateau</span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_viability_limit</span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt; $sex_propagule_release_mean</span></span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; $clonal_propagule_gradual_release</span></span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span></code></pre></div>
 </div>
 <div id="setting-the-time-of-release-of-propagules-produced-at-the-end-of-a-cropping-season" class="section level2">
-<h2>Setting the time of release of propagules produced at the end of a cropping season</h2>
+<h2>Setting the time of release of propagules produced at the end of a
+cropping season</h2>
 <div id="sexual-propagules" class="section level3">
 <h3>Sexual propagules</h3>
-<p>Sexual propagules may be released gradually during the following seasons (i.e. years). The following parameters set the average number of cropping seasons after which a sexual propagule is released and the maximum number of cropping seasons up to which a sexual propagule is viable:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">basic_patho_param<span class="op">$</span>sex_propagule_release_mean =<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb7-2" title="2">basic_patho_param<span class="op">$</span>sex_propagule_viability_limit =<span class="st"> </span><span class="dv">5</span></a>
-<a class="sourceLine" id="cb7-3" title="3">simul_params &lt;-<span class="st"> </span><span class="kw">setPathogen</span>(simul_params, basic_patho_param)  </a></code></pre></div>
-<p>Within a cropping season, the day of release of every sexual propagule is sampled from a uniform distribution with parameters {0;nTSpY}.</p>
+<p>Sexual propagules may be released gradually during the following
+seasons (i.e. years). The following parameters set the average number of
+cropping seasons after which a sexual propagule is released and the
+maximum number of cropping seasons up to which a sexual propagule is
+viable:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>basic_patho_param<span class="sc">$</span>sex_propagule_release_mean <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>basic_patho_param<span class="sc">$</span>sex_propagule_viability_limit <span class="ot">=</span> <span class="dv">5</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setPathogen</span>(simul_params, basic_patho_param)  </span></code></pre></div>
+<p>Within a cropping season, the day of release of every sexual
+propagule is sampled from a uniform distribution with parameters
+{0;nTSpY}.</p>
 </div>
 <div id="clonal-propagules" class="section level3">
 <h3>Clonal propagules</h3>
-<p>Clonal propagules produced at the end of a cropping season are released during the following season only, either altogether at the first day of the season (by setting the parameter <code>clonal_propagule_gradual_release = FALSE</code>), or progressively (<code>clonal_propagule_gradual_release = TRUE</code>). In the second case the day of release of each propagule is sampled from a uniform distribution with parameters {0;nTSpY}.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">basic_patho_param<span class="op">$</span>clonal_propagule_gradual_release =<span class="st"> </span><span class="ot">TRUE</span> <span class="co">## clonal propagules are progressively </span></a>
-<a class="sourceLine" id="cb8-2" title="2">                                                          <span class="co">## released during the next cropping season</span></a>
-<a class="sourceLine" id="cb8-3" title="3">basic_patho_param<span class="op">$</span>clonal_propagule_gradual_release =<span class="st"> </span><span class="ot">FALSE</span> <span class="co">## clonal propagules are released at </span></a>
-<a class="sourceLine" id="cb8-4" title="4">                                                          <span class="co">## the first day of the next cropping season</span></a></code></pre></div>
+<p>Clonal propagules produced at the end of a cropping season are
+released during the following season only, either altogether at the
+first day of the season (by setting the parameter
+<code>clonal_propagule_gradual_release = FALSE</code>), or progressively
+(<code>clonal_propagule_gradual_release = TRUE</code>). In the second
+case the day of release of each propagule is sampled from a uniform
+distribution with parameters {0;nTSpY}.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>basic_patho_param<span class="sc">$</span>clonal_propagule_gradual_release <span class="ot">=</span> <span class="cn">TRUE</span> <span class="do">## clonal propagules are progressively </span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                                                          <span class="do">## released during the next cropping season</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>basic_patho_param<span class="sc">$</span>clonal_propagule_gradual_release <span class="ot">=</span> <span class="cn">FALSE</span> <span class="do">## clonal propagules are released at </span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>                                                          <span class="do">## the first day of the next cropping season</span></span></code></pre></div>
 </div>
 </div>
 <div id="setting-pathogen-dispersal-both-for-sexual-and-clonal-propagules" class="section level2">
-<h2>Setting pathogen dispersal (both for sexual and clonal propagules)</h2>
-<p>Dispersal for both sexual and clonal propagules is given by vectorised matrices giving the probability of dispersal from any field of the landscape to any other field. The size of these matrices must be the square of the number of fields in the landscape. It is thus specific to both the pathogen and the landscape. For rusts pathogens, built-in dispersal matrices (for sexual and clonal propagules) are available for each landscape using the function <code>loadDispersalPathogen()</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">disp_patho &lt;-<span class="st"> </span><span class="kw">loadDispersalPathogen</span>(<span class="dt">id =</span> <span class="dv">1</span>)</a></code></pre></div>
-<p>The first element of the list <code>disp_patho</code> contains the vectorized dispersal matrix for clonal propagules, while the second element contains the vectorized dispersal matrix for sexual propagules (by default this is a diagonal matrix, i.e. sexual propagules spread only locally and there is no between-field dispersal of sexual propagules).</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">disp_patho_clonal &lt;-<span class="st"> </span>disp_patho[[<span class="dv">1</span>]]</a>
-<a class="sourceLine" id="cb10-2" title="2">disp_patho_sex &lt;-<span class="st"> </span>disp_patho[[<span class="dv">2</span>]]</a>
-<a class="sourceLine" id="cb10-3" title="3"><span class="kw">head</span>(disp_patho_clonal)</a>
-<a class="sourceLine" id="cb10-4" title="4"><span class="co">#&gt; [1] 8.814254e-01 9.525884e-04 7.079895e-10 1.594379e-10 3.285800e-06</span></a>
-<a class="sourceLine" id="cb10-5" title="5"><span class="co">#&gt; [6] 3.634297e-11</span></a>
-<a class="sourceLine" id="cb10-6" title="6"><span class="kw">head</span>(disp_patho_sex)</a>
-<a class="sourceLine" id="cb10-7" title="7"><span class="co">#&gt; [1] 1 0 0 0 0 0</span></a></code></pre></div>
-<p>Dispersal matrices can be modified, for example, to simulate a pathogen whose sexual propagules have the same dispersal ability as clonal propagules:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">disp_patho_clonal &lt;-<span class="st"> </span>disp_patho[[<span class="dv">1</span>]]</a>
-<a class="sourceLine" id="cb11-2" title="2">disp_patho_sex &lt;-<span class="st"> </span>disp_patho[[<span class="dv">1</span>]]</a>
-<a class="sourceLine" id="cb11-3" title="3"><span class="kw">head</span>(disp_patho_clonal)</a>
-<a class="sourceLine" id="cb11-4" title="4"><span class="co">#&gt; [1] 8.814254e-01 9.525884e-04 7.079895e-10 1.594379e-10 3.285800e-06</span></a>
-<a class="sourceLine" id="cb11-5" title="5"><span class="co">#&gt; [6] 3.634297e-11</span></a>
-<a class="sourceLine" id="cb11-6" title="6"><span class="kw">head</span>(disp_patho_sex)</a>
-<a class="sourceLine" id="cb11-7" title="7"><span class="co">#&gt; [1] 8.814254e-01 9.525884e-04 7.079895e-10 1.594379e-10 3.285800e-06</span></a>
-<a class="sourceLine" id="cb11-8" title="8"><span class="co">#&gt; [6] 3.634297e-11</span></a></code></pre></div>
-<p>Then, the object <code>simul_params</code> is updated with the dispersal matrices via the function <code>setDispersalPathogen()</code>:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">simul_params &lt;-<span class="st"> </span><span class="kw">setDispersalPathogen</span>(simul_params, disp_patho_clonal, disp_patho_sex)</a></code></pre></div>
+<h2>Setting pathogen dispersal (both for sexual and clonal
+propagules)</h2>
+<p>Dispersal for both sexual and clonal propagules is given by
+vectorised matrices giving the probability of dispersal from any field
+of the landscape to any other field. The size of these matrices must be
+the square of the number of fields in the landscape. It is thus specific
+to both the pathogen and the landscape. For rusts pathogens, built-in
+dispersal matrices (for sexual and clonal propagules) are available for
+each landscape using the function
+<code>loadDispersalPathogen()</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>disp_patho <span class="ot">&lt;-</span> <span class="fu">loadDispersalPathogen</span>(<span class="at">id =</span> <span class="dv">1</span>)</span></code></pre></div>
+<p>The first element of the list <code>disp_patho</code> contains the
+vectorized dispersal matrix for clonal propagules, while the second
+element contains the vectorized dispersal matrix for sexual propagules
+(by default this is a diagonal matrix, i.e. sexual propagules spread
+only locally and there is no between-field dispersal of sexual
+propagules).</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>disp_patho_clonal <span class="ot">&lt;-</span> disp_patho[[<span class="dv">1</span>]]</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>disp_patho_sex <span class="ot">&lt;-</span> disp_patho[[<span class="dv">2</span>]]</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">head</span>(disp_patho_clonal)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; [1] 8.814254e-01 9.525884e-04 7.079895e-10 1.594379e-10 3.285800e-06</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; [6] 3.634297e-11</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="fu">head</span>(disp_patho_sex)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; [1] 1 0 0 0 0 0</span></span></code></pre></div>
+<p>Dispersal matrices can be modified, for example, to simulate a
+pathogen whose sexual propagules have the same dispersal ability as
+clonal propagules:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>disp_patho_clonal <span class="ot">&lt;-</span> disp_patho[[<span class="dv">1</span>]]</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>disp_patho_sex <span class="ot">&lt;-</span> disp_patho[[<span class="dv">1</span>]]</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">head</span>(disp_patho_clonal)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; [1] 8.814254e-01 9.525884e-04 7.079895e-10 1.594379e-10 3.285800e-06</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; [6] 3.634297e-11</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="fu">head</span>(disp_patho_sex)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; [1] 8.814254e-01 9.525884e-04 7.079895e-10 1.594379e-10 3.285800e-06</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; [6] 3.634297e-11</span></span></code></pre></div>
+<p>Then, the object <code>simul_params</code> is updated with the
+dispersal matrices via the function
+<code>setDispersalPathogen()</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setDispersalPathogen</span>(simul_params, disp_patho_clonal, disp_patho_sex)</span></code></pre></div>
 </div>
 <div id="setting-recombination-between-resistance-genes" class="section level2">
 <h2>Setting recombination between resistance genes</h2>
-<p>For a given parental pair, the genotype of each propagule is issued from random loci segregation of parental qualitative resistance genes. For each quantitative resistance gene, the value of each propagule trait is issued from a normal distribution around the average of the parental traits, with standard deviation defined by the parameter <code>recombination_sd</code>, following the infinitesimal model (Fisher 1919).</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co"># Resistance genes</span></a>
-<a class="sourceLine" id="cb13-2" title="2">gene1 &lt;-<span class="st"> </span><span class="kw">loadGene</span>(<span class="dt">name =</span> <span class="st">&quot;gene 1&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;majorGene&quot;</span>)</a>
-<a class="sourceLine" id="cb13-3" title="3">gene2 &lt;-<span class="st"> </span><span class="kw">loadGene</span>(<span class="dt">name =</span> <span class="st">&quot;gene 2&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;QTL&quot;</span>)</a>
-<a class="sourceLine" id="cb13-4" title="4"></a>
-<a class="sourceLine" id="cb13-5" title="5"><span class="co">#gene2$recombination_sd &lt;- 0.8</span></a>
-<a class="sourceLine" id="cb13-6" title="6">gene2<span class="op">$</span>Nlevels_aggressiveness &lt;-<span class="st"> </span><span class="dv">3</span></a>
-<a class="sourceLine" id="cb13-7" title="7">genes &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">rbind</span>(gene1, gene2), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<p>For a given parental pair, the genotype of each propagule is issued
+from random loci segregation of parental qualitative resistance genes.
+For each quantitative resistance gene, the value of each propagule trait
+is issued from a normal distribution around the average of the parental
+traits, with standard deviation defined by the parameter
+<code>recombination_sd</code>, following the infinitesimal model (Fisher
+1919).</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Resistance genes</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>gene1 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;gene 1&quot;</span>, <span class="at">type =</span> <span class="st">&quot;majorGene&quot;</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>gene2 <span class="ot">&lt;-</span> <span class="fu">loadGene</span>(<span class="at">name =</span> <span class="st">&quot;gene 2&quot;</span>, <span class="at">type =</span> <span class="st">&quot;QTL&quot;</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#gene2$recombination_sd &lt;- 0.8</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>gene2<span class="sc">$</span>Nlevels_aggressiveness <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">rbind</span>(gene1, gene2), <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 </div>
 <div id="setting-croptypes-cultivars-and-resistance-genes" class="section level2">
 <h2>Setting croptypes, cultivars and resistance genes</h2>
-<p>All the other steps (e.g. setting croptypes, cultivars, resistance genes …) are not impacted by pathogen reproduction system, they are fully described in <a href="O1-run_simple_simul.html">running a simple simulation</a></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="co"># Cultivars</span></a>
-<a class="sourceLine" id="cb14-2" title="2">cultivar1 &lt;-<span class="st"> </span><span class="kw">loadCultivar</span>(<span class="dt">name =</span> <span class="st">&quot;Susceptible&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;wheat&quot;</span>)</a>
-<a class="sourceLine" id="cb14-3" title="3">cultivar2 &lt;-<span class="st"> </span><span class="kw">loadCultivar</span>(<span class="dt">name =</span> <span class="st">&quot;Resistant1&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;wheat&quot;</span>)</a>
-<a class="sourceLine" id="cb14-4" title="4">cultivar3 &lt;-<span class="st"> </span><span class="kw">loadCultivar</span>(<span class="dt">name =</span> <span class="st">&quot;Resistant2&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;wheat&quot;</span>)</a>
-<a class="sourceLine" id="cb14-5" title="5">cultivars &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">rbind</span>(cultivar1, cultivar2, cultivar3)</a>
-<a class="sourceLine" id="cb14-6" title="6">                        , <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb14-7" title="7"></a>
-<a class="sourceLine" id="cb14-8" title="8"><span class="co"># Allocating genes to cultivars</span></a>
-<a class="sourceLine" id="cb14-9" title="9">simul_params &lt;-<span class="st"> </span><span class="kw">setGenes</span>(simul_params, <span class="dt">dfGenes =</span> genes)</a>
-<a class="sourceLine" id="cb14-10" title="10">simul_params &lt;-<span class="st"> </span><span class="kw">setCultivars</span>(simul_params, <span class="dt">dfCultivars =</span> cultivars)</a>
-<a class="sourceLine" id="cb14-11" title="11"></a>
-<a class="sourceLine" id="cb14-12" title="12">simul_params &lt;-<span class="st"> </span><span class="kw">allocateCultivarGenes</span>(simul_params</a>
-<a class="sourceLine" id="cb14-13" title="13">                                      , <span class="dt">cultivarName =</span> <span class="st">&quot;Resistant1&quot;</span></a>
-<a class="sourceLine" id="cb14-14" title="14">                                      , <span class="dt">listGenesNames =</span> <span class="kw">c</span>(<span class="st">&quot;gene 1&quot;</span>))</a>
-<a class="sourceLine" id="cb14-15" title="15">simul_params &lt;-<span class="st"> </span><span class="kw">allocateCultivarGenes</span>(simul_params</a>
-<a class="sourceLine" id="cb14-16" title="16">                                      , <span class="dt">cultivarName =</span> <span class="st">&quot;Resistant2&quot;</span></a>
-<a class="sourceLine" id="cb14-17" title="17">                                      , <span class="dt">listGenesNames =</span> <span class="kw">c</span>(<span class="st">&quot;gene 2&quot;</span>))</a>
-<a class="sourceLine" id="cb14-18" title="18"></a>
-<a class="sourceLine" id="cb14-19" title="19"><span class="co"># Allocating cultivars to croptypes</span></a>
-<a class="sourceLine" id="cb14-20" title="20">croptypes &lt;-<span class="st"> </span><span class="kw">loadCroptypes</span>(simul_params, <span class="dt">names =</span> <span class="kw">c</span>(<span class="st">&quot;Susceptible crop&quot;</span></a>
-<a class="sourceLine" id="cb14-21" title="21">                                                   , <span class="st">&quot;Resistant crop 1&quot;</span></a>
-<a class="sourceLine" id="cb14-22" title="22">                                                   , <span class="st">&quot;Resistant crop 2&quot;</span>))</a>
-<a class="sourceLine" id="cb14-23" title="23">croptypes &lt;-<span class="st"> </span><span class="kw">allocateCroptypeCultivars</span>(croptypes</a>
-<a class="sourceLine" id="cb14-24" title="24">                                       , <span class="dt">croptypeName =</span> <span class="st">&quot;Susceptible crop&quot;</span></a>
-<a class="sourceLine" id="cb14-25" title="25">                                       , <span class="dt">cultivarsInCroptype =</span> <span class="st">&quot;Susceptible&quot;</span>)</a>
-<a class="sourceLine" id="cb14-26" title="26">croptypes &lt;-<span class="st"> </span><span class="kw">allocateCroptypeCultivars</span>(croptypes</a>
-<a class="sourceLine" id="cb14-27" title="27">                                       , <span class="dt">croptypeName =</span> <span class="st">&quot;Resistant crop 1&quot;</span></a>
-<a class="sourceLine" id="cb14-28" title="28">                                       , <span class="dt">cultivarsInCroptype =</span> <span class="st">&quot;Resistant1&quot;</span>)</a>
-<a class="sourceLine" id="cb14-29" title="29">croptypes &lt;-<span class="st"> </span><span class="kw">allocateCroptypeCultivars</span>(croptypes</a>
-<a class="sourceLine" id="cb14-30" title="30">                                       , <span class="dt">croptypeName =</span> <span class="st">&quot;Resistant crop 2&quot;</span></a>
-<a class="sourceLine" id="cb14-31" title="31">                                       , <span class="dt">cultivarsInCroptype =</span> <span class="st">&quot;Resistant2&quot;</span>)</a>
-<a class="sourceLine" id="cb14-32" title="32">simul_params &lt;-<span class="st"> </span><span class="kw">setCroptypes</span>(simul_params, <span class="dt">dfCroptypes =</span> croptypes)</a>
-<a class="sourceLine" id="cb14-33" title="33"></a>
-<a class="sourceLine" id="cb14-34" title="34"><span class="co"># Allocating croptypes to fields of the landscape</span></a>
-<a class="sourceLine" id="cb14-35" title="35">rotation_sequence &lt;-<span class="st"> </span>croptypes<span class="op">$</span>croptypeID <span class="co">## No rotation -&gt; 1 rotation_sequence element</span></a>
-<a class="sourceLine" id="cb14-36" title="36">rotation_period &lt;-<span class="st"> </span><span class="dv">0</span>  <span class="co"># number of years before rotation of the landscape</span></a>
-<a class="sourceLine" id="cb14-37" title="37">prop &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span><span class="op">/</span><span class="dv">3</span>,<span class="dv">1</span><span class="op">/</span><span class="dv">3</span>,<span class="dv">1</span><span class="op">/</span><span class="dv">3</span>)  <span class="co"># proportion (in surface) of each croptype</span></a>
-<a class="sourceLine" id="cb14-38" title="38">aggreg &lt;-<span class="st"> </span><span class="dv">0</span>    <span class="co"># level of spatial aggregation</span></a>
-<a class="sourceLine" id="cb14-39" title="39">simul_params &lt;-<span class="st"> </span><span class="kw">allocateLandscapeCroptypes</span>(simul_params</a>
-<a class="sourceLine" id="cb14-40" title="40">                                           , <span class="dt">rotation_period =</span> rotation_period</a>
-<a class="sourceLine" id="cb14-41" title="41">                                           , <span class="dt">rotation_sequence =</span> rotation_sequence</a>
-<a class="sourceLine" id="cb14-42" title="42">                                           , <span class="dt">prop =</span> prop</a>
-<a class="sourceLine" id="cb14-43" title="43">                                           , <span class="dt">aggreg =</span> aggreg</a>
-<a class="sourceLine" id="cb14-44" title="44">                                           , <span class="dt">graphic =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb14-45" title="45"></a>
-<a class="sourceLine" id="cb14-46" title="46"><span class="co">## Inoculum</span></a>
-<a class="sourceLine" id="cb14-47" title="47">simul_params &lt;-<span class="st"> </span><span class="kw">setInoculum</span>(simul_params, <span class="fl">5e-4</span>) </a>
-<a class="sourceLine" id="cb14-48" title="48"></a>
-<a class="sourceLine" id="cb14-49" title="49"><span class="co"># Choosing output variables</span></a>
-<a class="sourceLine" id="cb14-50" title="50">outputlist &lt;-<span class="st"> </span><span class="kw">loadOutputs</span>(<span class="dt">epid_outputs =</span> <span class="st">&quot;all&quot;</span>, <span class="dt">evol_outputs =</span> <span class="st">&quot;all&quot;</span>)</a>
-<a class="sourceLine" id="cb14-51" title="51">simul_params &lt;-<span class="st"> </span><span class="kw">setOutputs</span>(simul_params, outputlist)</a></code></pre></div>
+<p>All the other steps (e.g. setting croptypes, cultivars, resistance
+genes …) are not impacted by pathogen reproduction system, they are
+fully described in <a href="O1-run_simple_simul.html">running a simple
+simulation</a></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Cultivars</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>cultivar1 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Susceptible&quot;</span>, <span class="at">type =</span> <span class="st">&quot;wheat&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>cultivar2 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Resistant1&quot;</span>, <span class="at">type =</span> <span class="st">&quot;wheat&quot;</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>cultivar3 <span class="ot">&lt;-</span> <span class="fu">loadCultivar</span>(<span class="at">name =</span> <span class="st">&quot;Resistant2&quot;</span>, <span class="at">type =</span> <span class="st">&quot;wheat&quot;</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>cultivars <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">rbind</span>(cultivar1, cultivar2, cultivar3)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>                        , <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co"># Allocating genes to cultivars</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setGenes</span>(simul_params, <span class="at">dfGenes =</span> genes)</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setCultivars</span>(simul_params, <span class="at">dfCultivars =</span> cultivars)</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>                                      , <span class="at">cultivarName =</span> <span class="st">&quot;Resistant1&quot;</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>                                      , <span class="at">listGenesNames =</span> <span class="fu">c</span>(<span class="st">&quot;gene 1&quot;</span>))</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">allocateCultivarGenes</span>(simul_params</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>                                      , <span class="at">cultivarName =</span> <span class="st">&quot;Resistant2&quot;</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>                                      , <span class="at">listGenesNames =</span> <span class="fu">c</span>(<span class="st">&quot;gene 2&quot;</span>))</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co"># Allocating cultivars to croptypes</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>croptypes <span class="ot">&lt;-</span> <span class="fu">loadCroptypes</span>(simul_params, <span class="at">names =</span> <span class="fu">c</span>(<span class="st">&quot;Susceptible crop&quot;</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>                                                   , <span class="st">&quot;Resistant crop 1&quot;</span></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>                                                   , <span class="st">&quot;Resistant crop 2&quot;</span>))</span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes</span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>                                       , <span class="at">croptypeName =</span> <span class="st">&quot;Susceptible crop&quot;</span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>                                       , <span class="at">cultivarsInCroptype =</span> <span class="st">&quot;Susceptible&quot;</span>)</span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes</span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a>                                       , <span class="at">croptypeName =</span> <span class="st">&quot;Resistant crop 1&quot;</span></span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a>                                       , <span class="at">cultivarsInCroptype =</span> <span class="st">&quot;Resistant1&quot;</span>)</span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a>croptypes <span class="ot">&lt;-</span> <span class="fu">allocateCroptypeCultivars</span>(croptypes</span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a>                                       , <span class="at">croptypeName =</span> <span class="st">&quot;Resistant crop 2&quot;</span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a>                                       , <span class="at">cultivarsInCroptype =</span> <span class="st">&quot;Resistant2&quot;</span>)</span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setCroptypes</span>(simul_params, <span class="at">dfCroptypes =</span> croptypes)</span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="co"># Allocating croptypes to fields of the landscape</span></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a>rotation_sequence <span class="ot">&lt;-</span> croptypes<span class="sc">$</span>croptypeID <span class="do">## No rotation -&gt; 1 rotation_sequence element</span></span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a>rotation_period <span class="ot">&lt;-</span> <span class="dv">0</span>  <span class="co"># number of years before rotation of the landscape</span></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a>prop <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>,<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>,<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>)  <span class="co"># proportion (in surface) of each croptype</span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a>aggreg <span class="ot">&lt;-</span> <span class="dv">0</span>    <span class="co"># level of spatial aggregation</span></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">allocateLandscapeCroptypes</span>(simul_params</span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a>                                           , <span class="at">rotation_period =</span> rotation_period</span>
+<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a>                                           , <span class="at">rotation_sequence =</span> rotation_sequence</span>
+<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a>                                           , <span class="at">prop =</span> prop</span>
+<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a>                                           , <span class="at">aggreg =</span> aggreg</span>
+<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a>                                           , <span class="at">graphic =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a></span>
+<span id="cb14-46"><a href="#cb14-46" tabindex="-1"></a><span class="do">## Inoculum</span></span>
+<span id="cb14-47"><a href="#cb14-47" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setInoculum</span>(simul_params, <span class="fl">5e-4</span>) </span>
+<span id="cb14-48"><a href="#cb14-48" tabindex="-1"></a></span>
+<span id="cb14-49"><a href="#cb14-49" tabindex="-1"></a><span class="co"># Choosing output variables</span></span>
+<span id="cb14-50"><a href="#cb14-50" tabindex="-1"></a>outputlist <span class="ot">&lt;-</span> <span class="fu">loadOutputs</span>(<span class="at">epid_outputs =</span> <span class="st">&quot;all&quot;</span>, <span class="at">evol_outputs =</span> <span class="st">&quot;all&quot;</span>)</span>
+<span id="cb14-51"><a href="#cb14-51" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span></code></pre></div>
 </div>
 <div id="running-the-simulation" class="section level2">
 <h2>Running the simulation</h2>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">checkSimulParams</span>(simul_params)</a>
-<a class="sourceLine" id="cb15-2" title="2"><span class="kw">runSimul</span>(simul_params, <span class="dt">graphic =</span> <span class="ot">TRUE</span>, <span class="dt">videoMP4 =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">checkSimulParams</span>(simul_params)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">runSimul</span>(simul_params, <span class="at">graphic =</span> <span class="cn">TRUE</span>, <span class="at">videoMP4 =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 </div>
 
 

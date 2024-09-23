@@ -2,8 +2,8 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 1.5.0
-Date: 2024-09-03
+Version: 1.5.1
+Date: 2024-09-23
 Authors@R: 
     c(person(given = "Loup",
              family = "Rimbaud",
@@ -64,7 +64,7 @@ LinkingTo: Rcpp, testthat
 RoxygenNote: 7.3.2
 Suggests: testthat (>= 3.0.0), shiny, shinyjs, DT, knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2024-09-03 09:40:00 UTC; jfrey
+Packaged: 2024-09-23 11:47:36 UTC; root
 Author: Loup Rimbaud [aut] (<https://orcid.org/0000-0002-8098-9984>),
   Marta Zaffaroni [aut] (<https://orcid.org/0000-0002-2951-8626>),
   Jean-François Rey [aut, cre] (<https://orcid.org/0000-0003-3281-6701>),
@@ -72,4 +72,4 @@ Author: Loup Rimbaud [aut] (<https://orcid.org/0000-0002-8098-9984>),
   Jean-Loup Gaussen [ctb],
   Manon Couty [ctb]
 Repository: CRAN
-Date/Publication: 2024-09-03 10:20:03 UTC
+Date/Publication: 2024-09-23 12:30:06 UTC

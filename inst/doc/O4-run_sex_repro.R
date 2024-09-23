@@ -7,7 +7,7 @@ knitr::opts_chunk$set(
 ## ----results="hide", message=FALSE--------------------------------------------
 library(landsepi)
 
-## ----results="hide", message="FALSE"------------------------------------------
+## ----results="hide", message=FALSE--------------------------------------------
 ## Initialisation of the simulation
 simul_params <- createSimulParams(outputDir = getwd())
 ## Seed

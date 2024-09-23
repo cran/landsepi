@@ -951,7 +951,7 @@ server <- function(input, output, session) {
 
       future_process <<- future({
         res <- landsepi::runSimul(simul_params,
-          graphic = FALSE, videoMP4 = TRUE
+          graphic = TRUE, videoMP4 = TRUE
         )
       }, seed=input$seed)
 
@@ -1593,21 +1593,23 @@ server <- function(input, output, session) {
     shinyjs::hideElement(id = "outputside")
   })
 
-  observeEvent(input[["inputtabpanel"]], {
-    if (input[["inputtabpanel"]] == "Cultivars and Genes") {
-      removeCssClass("inputside", "col-sm-6")
-      removeCssClass("inputside", "col-sm-0")
-      removeCssClass("outputside", "col-sm-12")
-      removeCssClass("outputside", "col-sm-6")
-      addCssClass("outputside", "col-sm-0")
-      addCssClass("inputside", "col-sm-12")
-      shinyjs::showElement(id = "inputside")
-      shinyjs::hideElement(id = "outputside")
-    }
-  })
+#  observeEvent(input[["inputtabpanel"]], {
+#    if (input[["inputtabpanel"]] == "Cultivars and Genes") {
+#      removeCssClass("inputside", "col-sm-6")
+#      removeCssClass("inputside", "col-sm-0")
+#      removeCssClass("outputside", "col-sm-12")
+#      removeCssClass("outputside", "col-sm-6")
+#      addCssClass("outputside", "col-sm-0")
+#      addCssClass("inputside", "col-sm-12")
+#      shinyjs::showElement(id = "inputside")
+#      shinyjs::hideElement(id = "outputside")
+#    }
+#  })
+
   
   ## Load the strategy after loading page
   isolate(update_pathogen())
   isolate(update_demo())
+  shinyjs::click("About")
   
 }

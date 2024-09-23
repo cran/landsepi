@@ -39,8 +39,8 @@
 #' @details \tabular{ll}{
 #'          Package: \tab landsepi\cr
 #'          Type: \tab Package\cr
-#'          Version: \tab 1.5.0\cr
-#'          Date: \tab 2024-09-03\cr
+#'          Version: \tab 1.5.1\cr
+#'          Date: \tab 2024-09-23\cr
 #'          License: \tab GPL (>=2)\cr
 #'          }
 #'

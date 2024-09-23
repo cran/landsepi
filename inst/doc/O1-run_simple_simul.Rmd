@@ -32,7 +32,7 @@ Take a [quick overview](landsepi_poster.pdf) of what landsepi can do.
 
 The function `createSimulParams()` will create a directory to store simulation outputs, 
 and return an object of class `LandsepiParams` that will further contain all simulation parameters. 
-```{r, results="hide", message="FALSE"}
+```{r, results="hide", message=FALSE}
 simul_params <- createSimulParams(outputDir = getwd())
 ```
 

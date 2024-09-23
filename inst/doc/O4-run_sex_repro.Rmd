@@ -28,7 +28,7 @@ library(landsepi)
 *See also the tutorial on [how to simulate a simple simulation](O1-run_simple_simul.html) 
 for details on basic parameterisation.*
 
-```{r, results="hide", message="FALSE"}
+```{r, results="hide", message=FALSE}
 ## Initialisation of the simulation
 simul_params <- createSimulParams(outputDir = getwd())
 ## Seed

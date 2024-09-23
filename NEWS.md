@@ -1,6 +1,10 @@
+## landsepi 1.5.1 (2024-09-23)
+
+* fixed bugs
+
 ## landsepi 1.5.0 (2024-09-02)
 
-* Redisigned shiny app: simplified parameterization, include global/local inoculum, include more outputs (graphics & tables)
+* Redesigned shiny app: simplified parameterization, include global/local inoculum, include more outputs (graphics & tables)
 * Updated webpage
 
 ## landsepi 1.4.0 (2024-03-12)
