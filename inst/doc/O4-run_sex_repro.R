@@ -132,8 +132,8 @@ outputlist <- loadOutputs(epid_outputs = "all", evol_outputs = "all")
 simul_params <- setOutputs(simul_params, outputlist)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  checkSimulParams(simul_params)
-#  runSimul(simul_params, graphic = TRUE, videoMP4 = FALSE)
+# checkSimulParams(simul_params)
+# runSimul(simul_params, graphic = TRUE, videoMP4 = FALSE)
 
 ## ----include=FALSE------------------------------------------------------------
 system(paste("rm -rf ", simul_params@OutputDir))

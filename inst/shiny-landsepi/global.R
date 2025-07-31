@@ -86,8 +86,8 @@ aboutText <- paste0("<h1>Landsepi: Landscape Epidemiology and Evolution</h1><img
                          of a wide range of deployment options with respect to their epidemiological,
                          evolutionary and economic outcomes.</h3>
                           <h3> Authors:</h3> Rimbaud Loup, Zaffaroni Marta, Rey Jean-François, Papaïx Julien
-                          <h3>Package project:</h3><a href='https://CRAN.R-project.org/package=landsepi' target='_blank'> CRAN package</a><br/><a href='https://gitlab.paca.inra.fr/CSIRO-INRA/landsepi' target='_blank'> Source code</a>
-                          <br/><a href='https://csiro-inra.pages.biosp.inrae.fr/landsepi/' target='_blank'> Package Documentation</a>
+                          <h3>Package project:</h3><a href='https://CRAN.R-project.org/package=landsepi' target='_blank'> CRAN package</a><br/><a href='https://forge.inrae.fr/landsepi/landsepi' target='_blank'> Source code</a>
+                          <br/><a href='https://landsepi.pages-forge.inrae.fr/landsepi' target='_blank'> Package Documentation</a>
                           <br/> License GPL-3
                           <h3> How to cite the package:</h3> <b>Rimbaud L, Zaffaroni M, Rey J, Papaïx J (",sub("-.*","",utils::packageDate("landsepi")),").</b> landsepi: Landscape Epidemiology and Evolution. R package version ",utils::packageVersion("landsepi"),", &lt;URL: https://cran.r-project.org/package=landsepi&gt;.
                           <h3> Funding</h3>
