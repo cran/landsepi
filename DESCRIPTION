@@ -2,8 +2,8 @@ Package: landsepi
 Type: Package
 Encoding: UTF-8
 Title: Landscape Epidemiology and Evolution
-Version: 1.5.2
-Date: 2025-07-31
+Version: 1.5.3
+Date: 2026-01-07
 Authors@R: 
     c(person(given = "Loup",
              family = "Rimbaud",
@@ -50,7 +50,7 @@ LazyData: true
 BuildVignettes: true
 NeedsCompilation: yes
 Biarch: true
-SystemRequirements: C++, gsl
+SystemRequirements: C++17, gsl
 Depends: R (>= 4.2.0), sp (>= 1.0-17)
 Imports: methods, utils, stats (>= 3.0.2), grDevices (>= 3.0.0),
         graphics (>= 3.0.0), parallel, Rcpp (>= 0.9.0), Matrix (>=
@@ -61,10 +61,10 @@ Collate: 'Math-Functions.R' 'RcppExports.R' 'graphics.R' 'AgriLand.R'
         'tools.R' 'Methods-LandsepiParams.R' 'demo_landsepi.R'
         'landsepi-package.R' 'output.R' 'runShiny.R' 'simul_landsepi.R'
 LinkingTo: Rcpp, testthat
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: testthat (>= 3.0.0), shiny, shinyjs, DT, knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2025-07-31 12:40:56 UTC; root
+Packaged: 2026-01-07 08:11:15 UTC; root
 Author: Loup Rimbaud [aut] (ORCID: <https://orcid.org/0000-0002-8098-9984>),
   Marta Zaffaroni [aut] (ORCID: <https://orcid.org/0000-0002-2951-8626>),
   Jean-François Rey [aut, cre] (ORCID:
@@ -73,4 +73,4 @@ Author: Loup Rimbaud [aut] (ORCID: <https://orcid.org/0000-0002-8098-9984>),
   Jean-Loup Gaussen [ctb],
   Manon Couty [ctb]
 Repository: CRAN
-Date/Publication: 2025-07-31 13:10:02 UTC
+Date/Publication: 2026-01-07 19:50:07 UTC

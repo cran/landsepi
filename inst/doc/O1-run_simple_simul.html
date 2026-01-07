@@ -395,7 +395,7 @@ optional):<br />
 <code>createSimulParams()</code>. If a specific seed is required, it can
 be set using the function <code>setSeed()</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; [1] 1753965637</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; [1] 1767773455</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setSeed</span>(simul_params, <span class="at">seed =</span> <span class="dv">1</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>simul_params<span class="sc">@</span>Seed</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div>
@@ -1968,7 +1968,7 @@ helps compute this value in a single 1-km^2 field:</p>
 <span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a><span class="co">#&gt; total computational time 0 seconds. </span></span>
 <span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
 <span id="cb37-14"><a href="#cb37-14" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
-<span id="cb37-15"><a href="#cb37-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpC4unBx/Rbuild2431629b408e/landsepi/vignettes&quot;</span></span>
+<span id="cb37-15"><a href="#cb37-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpqBYHcr/Rbuild21e5477a0086/landsepi/vignettes&quot;</span></span>
 <span id="cb37-16"><a href="#cb37-16" tabindex="-1"></a>audpc100S <span class="ot">&lt;-</span> <span class="fu">compute_audpc100S</span>(<span class="st">&quot;mildew&quot;</span>, <span class="st">&quot;grapevine&quot;</span>, <span class="at">area=</span><span class="fl">1E6</span>)</span>
 <span id="cb37-17"><a href="#cb37-17" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for mildew in a single susceptible field of 1e+06 m^2 during 120 time steps</span></span>
 <span id="cb37-18"><a href="#cb37-18" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Run the C++ model&quot;</span></span>
@@ -1983,7 +1983,7 @@ helps compute this value in a single 1-km^2 field:</p>
 <span id="cb37-27"><a href="#cb37-27" tabindex="-1"></a><span class="co">#&gt; total computational time 5 seconds. </span></span>
 <span id="cb37-28"><a href="#cb37-28" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
 <span id="cb37-29"><a href="#cb37-29" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
-<span id="cb37-30"><a href="#cb37-30" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpC4unBx/Rbuild2431629b408e/landsepi/vignettes&quot;</span></span>
+<span id="cb37-30"><a href="#cb37-30" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpqBYHcr/Rbuild21e5477a0086/landsepi/vignettes&quot;</span></span>
 <span id="cb37-31"><a href="#cb37-31" tabindex="-1"></a>audpc100S <span class="ot">&lt;-</span> <span class="fu">compute_audpc100S</span>(<span class="st">&quot;sigatoka&quot;</span>, <span class="st">&quot;banana&quot;</span>, <span class="at">area=</span><span class="fl">1E6</span>, <span class="at">nTSpY=</span><span class="dv">182</span>)</span>
 <span id="cb37-32"><a href="#cb37-32" tabindex="-1"></a><span class="co">#&gt; Computing audpc100S for sigatoka in a single susceptible field of 1e+06 m^2 during 182 time steps</span></span>
 <span id="cb37-33"><a href="#cb37-33" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Run the C++ model&quot;</span></span>
@@ -1998,7 +1998,7 @@ helps compute this value in a single 1-km^2 field:</p>
 <span id="cb37-42"><a href="#cb37-42" tabindex="-1"></a><span class="co">#&gt; total computational time 1 seconds. </span></span>
 <span id="cb37-43"><a href="#cb37-43" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Compute model outputs&quot;</span></span>
 <span id="cb37-44"><a href="#cb37-44" tabindex="-1"></a><span class="co">#&gt; [1] &quot;remove binary files&quot;</span></span>
-<span id="cb37-45"><a href="#cb37-45" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpC4unBx/Rbuild2431629b408e/landsepi/vignettes&quot;</span></span></code></pre></div>
+<span id="cb37-45"><a href="#cb37-45" tabindex="-1"></a><span class="co">#&gt; [1] &quot;model outputs stored in : /tmp/RtmpqBYHcr/Rbuild21e5477a0086/landsepi/vignettes&quot;</span></span></code></pre></div>
 <p>Then <code>simul_params</code> can be updated via
 <code>setOutputs()</code>:</p>
 <div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>simul_params <span class="ot">&lt;-</span> <span class="fu">setOutputs</span>(simul_params, outputlist)</span></code></pre></div>
